@@ -1,10 +1,10 @@
 package main
 
 import (
- "fmt"
+	"fmt"
 )
 
 func main() {
- fmt.Printf(":: zgyt...\n")
- return
+	fmt.Printf(":: zgyt...\n")
+	return
 }
