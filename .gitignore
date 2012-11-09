@@ -1,0 +1,13 @@
+*~
+*.pyc
+__pycache__
+*.root
+/__build__*
+
+# WAF files
+/.lock-waf_linux2_build
+/.lock-waf_darwin_build
+/.unittest-gtest/
+/.waf-*/
+/.waf3-*/
+
