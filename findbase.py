@@ -12,7 +12,7 @@ from waflib.Configure import conf
 ### ---------------------------------------------------------------------------
 def options(ctx):
     ctx.load('platforms', tooldir="hep-waftools")
-    if ctx.is_darwin():
+    if 0 and ctx.is_darwin():
         ctx.add_option(
             '--use-macports',
             default=False,
@@ -98,7 +98,7 @@ def check_with(conf, check, what, *args, **kwargs):
 
 ### ---------------------------------------------------------------------------
 @conf
-def _findbase_setup(ctx, **kwargs):
+def _findbase_setup(ctx, kwargs):
     extra_paths = []
     if ctx.is_linux() or \
            ctx.is_freebsd() or \
@@ -131,6 +131,23 @@ def read_cfg(ctx, fname):
     read_cfg reads a MANIFEST-like file to extract a configuration.
     That configuration file must be in a format that ConfigParser understands.
     """
+    return
+
+### ---------------------------------------------------------------------------
+@conf
+def copy_uselib_defs(ctx, dst, src):
+    for n in ('LIB', 'LIBPATH',
+              'STLIB', 'STLIBPATH',
+              'LINKFLAGS', 'RPATH',
+              'CFLAGS', 'CXXFLAGS',
+              'DFLAGS',
+              'INCLUDES',
+              'CXXDEPS', 'CCDEPS', 'LINKDEPS',
+              'DEFINES',
+              'FRAMEWORK', 'FRAMEWORKPATH',
+              'ARCH'):
+        ctx.env['%s_%s' % (n,dst)] = ctx.env['%s_%s' % (n,src)]
+    ctx.env.append_unique('DEFINES', 'HAVE_%s=1' % dst.upper())
     return
 
 ### ---------------------------------------------------------------------------
