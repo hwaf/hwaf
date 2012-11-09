@@ -2,7 +2,7 @@
 
 # stdlib imports
 import os
-from os.path import exists, join as pjoin
+import os.path as osp
 
 # waf imports ---
 import waflib.Utils
@@ -37,16 +37,16 @@ def configure(ctx):
 ### ---------------------------------------------------------------------------
 @conf
 def find_at(conf, check, what, where, **kwargs):
-    if not exists(where):
+    if not osp.exists(where):
         return False
         
     pkgp = os.getenv("PKG_CONFIG_PATH", "")
     try:
         conf.env.stash()
         conf.env[what + "_HOME"] = where
-        conf.env.append_value('PATH',  pjoin(where, "bin"))
-        conf.env.append_value('RPATH', pjoin(where, "lib"))
-        pkgconf_path = pjoin(where, "lib/pkgconfig")
+        conf.env.append_value('PATH',  osp.join(where, "bin"))
+        conf.env.append_value('RPATH', osp.join(where, "lib"))
+        pkgconf_path = osp.join(where, "lib/pkgconfig")
         conf.env.append_value('PKG_CONFIG_PATH', pkgconf_path)
         conf.to_log("Pkg config path: %s" % conf.env.PKG_CONFIG_PATH)
         
