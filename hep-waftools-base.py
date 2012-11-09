@@ -89,12 +89,11 @@ def check_with(conf, check, what, *args, **kwargs):
     kwargs["use"] = waflib.Utils.to_list(kwargs.get("use", [])) + \
         waflib.Utils.to_list(kwargs["uselib_store"])
 
-    if 1:
-        for path in [abspath(p) for p in paths if p]:
-            conf.to_log("Checking for %s in %s" % (what, path))
-            if conf.find_at(check, WHAT, path, **kwargs):
-                conf.msg("Found %s at" % what, path, color="WHITE")
-                return
+    for path in [abspath(p) for p in paths if p]:
+        conf.to_log("Checking for %s in %s" % (what, path))
+        if conf.find_at(check, WHAT, path, **kwargs):
+            conf.msg("Found %s at" % what, path, color="WHITE")
+            return
 
     check(**kwargs)
     conf.msg("Found %s at" % what, "(local environment)", color="WHITE")

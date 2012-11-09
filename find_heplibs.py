@@ -44,7 +44,7 @@ def options(ctx):
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     for t in _heptools:
-        ctx.load('find_%s' % t, tooldir=_heptooldir)
+        ctx.load('find_%s' % t,  tooldir=_heptooldir)
         pass
     
     return
