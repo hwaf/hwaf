@@ -9,9 +9,11 @@ import waflib.Utils
 import waflib.Logs as msg
 from waflib.Configure import conf
 
+_heptooldir = osp.dirname(osp.abspath(__file__))
+
 ### ---------------------------------------------------------------------------
 def options(ctx):
-    ctx.load('platforms', tooldir="hep-waftools")
+    ctx.load('platforms', tooldir=_heptooldir)
     if 0 and ctx.is_darwin():
         ctx.add_option(
             '--use-macports',
@@ -29,7 +31,7 @@ def options(ctx):
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
-    ctx.load('platforms', tooldir="hep-waftools")
+    ctx.load('platforms', tooldir=_heptooldir)
     return
 
 ### ---------------------------------------------------------------------------
