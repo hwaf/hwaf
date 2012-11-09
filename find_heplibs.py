@@ -12,6 +12,7 @@ from waflib.Configure import conf
 #
 
 _heptools = (
+    'aida',
     'boost',
     'bzip',
     'cernroot',
@@ -24,6 +25,8 @@ _heptools = (
     'lcg_cool',
     'lcg_coral',
     'lcg_pool',
+    'posix',
+    'python',
     'sqlite',
     'tbb',
     'tcmalloc',

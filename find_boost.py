@@ -11,11 +11,12 @@ import waflib.Logs as msg
 from waflib.Configure import conf
 
 #
+_heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
 
     ctx.load('compiler_c compiler_cxx boost')
-    ctx.load('findbase', tooldir="hep-waftools")
+    ctx.load('findbase', tooldir=_heptooldir)
 
     ctx.add_option(
         '--with-boost',
@@ -24,13 +25,13 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('findbase platforms', tooldir="hep-waftools")
+    ctx.load('findbase platforms', tooldir=_heptooldir)
     return
 
 @conf
 def find_boost(ctx, **kwargs):
     
-    ctx.load('findbase platforms', tooldir="hep-waftools")
+    ctx.load('findbase platforms', tooldir=_heptooldir)
 
     if not ctx.env.CXX and not ctx.env.CC:
         msg.fatal('load a C or C++ compiler first')

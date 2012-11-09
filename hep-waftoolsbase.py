@@ -56,7 +56,7 @@ def find_at(conf, check, what, where, **kwargs):
             os.environ["PKG_CONFIG_PATH"] = pkgconf_path
         
         conf.parse_flags("-I%s/include -L%s/lib" % (where, where),
-                         uselib=kwargs["uselib_store"])
+                         uselib_store=kwargs["uselib_store"])
         this_kwargs = kwargs.copy()
         this_kwargs['check_path'] = where
         check(**this_kwargs)
@@ -86,14 +86,16 @@ def check_with(conf, check, what, *args, **kwargs):
     
     WHAT = what.upper()
     kwargs["uselib_store"] = kwargs.get("uselib_store", WHAT)
-    kwargs["use"] = kwargs.get("use", []) + [kwargs["uselib_store"]]
-        
-    for path in [abspath(p) for p in paths if p]:
-        conf.to_log("Checking for %s in %s" % (what, path))
-        if conf.find_at(check, WHAT, path, **kwargs):
-            conf.msg("Found %s at" % what, path, color="WHITE")
-            return
-    
+    kwargs["use"] = waflib.Utils.to_list(kwargs.get("use", [])) + \
+        waflib.Utils.to_list(kwargs["uselib_store"])
+
+    if 1:
+        for path in [abspath(p) for p in paths if p]:
+            conf.to_log("Checking for %s in %s" % (what, path))
+            if conf.find_at(check, WHAT, path, **kwargs):
+                conf.msg("Found %s at" % what, path, color="WHITE")
+                return
+
     check(**kwargs)
     conf.msg("Found %s at" % what, "(local environment)", color="WHITE")
     return
@@ -106,21 +108,21 @@ def _findbase_setup(ctx, kwargs):
            ctx.is_freebsd() or \
            ctx.is_darwin():
         extra_paths.extend([
-            "/usr",
-            "/usr/local",
-            "/opt/root",
+                #"/usr",
+                #"/usr/local",
             ])
 
-    if ctx.is_darwin() and ctx.options.use_macports:
+    # FIXME: should use use_macports...
+    if ctx.is_darwin(): # and ctx.options.use_macports:
         extra_paths.extend([
-            # macports
-            "/opt/local",
+                # macports
+                "/opt/local",
             ])
-        
-    if ctx.is_darwin() and ctx.options.with_fink:
+    # FIXME: should use with_fink
+    if ctx.is_darwin(): # and ctx.options.with_fink:
         extra_paths.extend([
-            # fink
-            "/sw",
+                # fink
+                "/sw",
             ])
 
     kwargs['extra_paths'] = kwargs.get('extra_paths', []) + extra_paths
@@ -177,7 +179,8 @@ def define_uselib(self, name, libpath, libname, incpath, incname):
         ctx.env['INCLUDES_%s'%n] = incpath
         pass
 
-    ctx.env.append_unique('DEFINES', 'HAVE_%s=1' % name.upper())
+    NAME = name.upper().replace('-','_')
+    ctx.env.append_unique('DEFINES', 'HAVE_%s=1' % NAME)
     return
 
 

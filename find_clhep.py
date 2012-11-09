@@ -10,11 +10,12 @@ import waflib.Logs as msg
 from waflib.Configure import conf
 
 #
+_heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(opt):
 
     opt.load('compiler_c compiler_cxx')
-    opt.load('findbase', tooldir="hep-waftools")
+    opt.load('findbase', tooldir=_heptooldir)
 
     opt.add_option(
         '--with-clhep',
@@ -24,7 +25,7 @@ def options(opt):
 
 def configure(conf):
     conf.load('compiler_c compiler_cxx')
-    conf.load('findbase platforms', tooldir="hep-waftools")
+    conf.load('findbase platforms', tooldir=_heptooldir)
     return
 
 @conf
@@ -40,7 +41,9 @@ def find_clhep(ctx, **kwargs):
     # find CLHEP
     clhep_cfg = "clhep-config"
     if ctx.options.with_clhep:
-        clhep_cfg = osp.join(ctx.options.with_clhep, "bin", "clhep-config")
+        clhep_cfg = osp.abspath(
+            osp.join(ctx.options.with_clhep, "bin", "clhep-config")
+            )
         pass
 
     
