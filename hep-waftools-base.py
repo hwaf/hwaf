@@ -13,7 +13,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 ### ---------------------------------------------------------------------------
 def options(ctx):
-    ctx.load('platforms', tooldir=_heptooldir)
+    ctx.load('hep-waftools-system', tooldir=_heptooldir)
     if 0 and ctx.is_darwin():
         ctx.add_option(
             '--use-macports',
@@ -31,7 +31,7 @@ def options(ctx):
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
-    ctx.load('platforms', tooldir=_heptooldir)
+    ctx.load('hep-waftools-system', tooldir=_heptooldir)
     return
 
 ### ---------------------------------------------------------------------------

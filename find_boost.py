@@ -16,7 +16,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 def options(ctx):
 
     ctx.load('compiler_c compiler_cxx boost')
-    ctx.load('findbase', tooldir=_heptooldir)
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     ctx.add_option(
         '--with-boost',
@@ -25,13 +25,13 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('findbase platforms', tooldir=_heptooldir)
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_boost(ctx, **kwargs):
     
-    ctx.load('findbase platforms', tooldir=_heptooldir)
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     if not ctx.env.CXX and not ctx.env.CC:
         msg.fatal('load a C or C++ compiler first')

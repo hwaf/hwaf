@@ -41,7 +41,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 def options(ctx):
 
     ctx.load('compiler_c compiler_cxx')
-    ctx.load('findbase', tooldir=_heptooldir)
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     for t in _heptools:
         ctx.load('find_%s' % t, tooldir=_heptooldir)
@@ -51,7 +51,7 @@ def options(ctx):
 
 def configure(ctx):
     ctx.load('compiler_c compiler_cxx')
-    ctx.load('findbase platforms', tooldir=_heptooldir)
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     for t in _heptools:
         ctx.load('find_%s' % t, tooldir=_heptooldir)

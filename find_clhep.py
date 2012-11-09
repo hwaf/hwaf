@@ -15,7 +15,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 def options(opt):
 
     opt.load('compiler_c compiler_cxx')
-    opt.load('findbase', tooldir=_heptooldir)
+    opt.load('hep-waftools-base', tooldir=_heptooldir)
 
     opt.add_option(
         '--with-clhep',
@@ -25,7 +25,7 @@ def options(opt):
 
 def configure(conf):
     conf.load('compiler_c compiler_cxx')
-    conf.load('findbase platforms', tooldir=_heptooldir)
+    conf.load('hep-waftools-base', tooldir=_heptooldir)
     return
 
 @conf

@@ -13,11 +13,11 @@ from waflib.Configure import conf
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
-    ctx.load('findbase', tooldir=_heptooldir)
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
     return
 
 def configure(ctx):
-    ctx.load('findbase platforms', tooldir=_heptooldir)
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
     return
 
 @conf
@@ -27,7 +27,7 @@ def find_posixlibs(ctx, **kwargs):
         msg.fatal('load a C or C++ compiler first')
         pass
 
-    ctx.load('findbase platforms', tooldir=_heptooldir)
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     kwargs = ctx._findbase_setup(kwargs)
     
