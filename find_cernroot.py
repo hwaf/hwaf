@@ -19,7 +19,6 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
 
-    ctx.load('compiler_c compiler_cxx python')
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     ctx.add_option(
@@ -29,7 +28,6 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('compiler_c compiler_cxx')
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
     return
 
@@ -50,16 +48,12 @@ def find_cernroot(ctx, **kwargs):
         msg.fatal('load a python interpreter first')
         pass
 
-    kwargs = ctx._findbase_setup(kwargs)
-    
     # find root
     root_cfg = "root-config"
     if ctx.options.with_root_sys:
         root_cfg = osp.join(ctx.options.with_root_sys, "bin", "root-config")
         pass
 
-    
-    kwargs['mandatory'] = True
     
     ctx.find_program(
         root_cfg, 

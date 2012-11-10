@@ -14,10 +14,7 @@ from waflib.Configure import conf
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
-
-    ctx.load('compiler_c compiler_cxx python')
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
-
     ctx.add_option(
         '--with-python',
         default=None,
@@ -25,7 +22,6 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('compiler_c compiler_cxx')
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
     return
 

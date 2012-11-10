@@ -13,10 +13,7 @@ from waflib.Configure import conf
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(opt):
-
-    opt.load('compiler_c compiler_cxx')
     opt.load('hep-waftools-base', tooldir=_heptooldir)
-
     opt.add_option(
         '--with-clhep',
         default=None,
@@ -24,7 +21,6 @@ def options(opt):
     return
 
 def configure(conf):
-    conf.load('compiler_c compiler_cxx')
     conf.load('hep-waftools-base', tooldir=_heptooldir)
     return
 
@@ -36,8 +32,6 @@ def find_clhep(ctx, **kwargs):
         pass
 
 
-    kwargs = ctx._findbase_setup(kwargs)
-    
     # find CLHEP
     clhep_cfg = "clhep-config"
     if ctx.options.with_clhep:
@@ -46,8 +40,6 @@ def find_clhep(ctx, **kwargs):
             )
         pass
 
-    
-    kwargs['mandatory'] = True
     
     ctx.find_program(clhep_cfg, var='CLHEP-CONFIG',**kwargs)
     clhep_cfg = ctx.env['CLHEP-CONFIG']

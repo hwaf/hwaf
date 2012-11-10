@@ -34,9 +34,6 @@ def find_aida(ctx, **kwargs):
         pass
 
 
-    kwargs = ctx._findbase_setup(kwargs)
-    
-    kwargs['mandatory'] = True
     ctx.check_with(
         ctx.check,
         "aida",

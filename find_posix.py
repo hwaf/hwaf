@@ -29,10 +29,6 @@ def find_posixlibs(ctx, **kwargs):
 
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
-    kwargs = ctx._findbase_setup(kwargs)
-    
-    kwargs['mandatory'] = True
-    
     # find libm
     ctx.check_with(
         ctx.check,
@@ -75,16 +71,6 @@ def find_posixlibs(ctx, **kwargs):
         )
 
     # find bfd
-    # first find the library
-    ctx.check_with(
-        ctx.check,
-        "bfd",
-        features='cxx cxxprogram',
-        lib='bfd',
-        uselib_store='bfd',
-        **kwargs
-        )
-    # then the header
     ctx.check_with(
         ctx.check,
         "bfd",
@@ -92,7 +78,6 @@ def find_posixlibs(ctx, **kwargs):
         header_name="bfd.h",
         lib='bfd',
         uselib_store='bfd',
-        use='bfd',
         **kwargs
         )
 

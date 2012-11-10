@@ -15,7 +15,6 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
 
-    ctx.load('compiler_c compiler_cxx boost')
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     ctx.add_option(

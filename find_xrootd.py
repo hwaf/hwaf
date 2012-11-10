@@ -13,9 +13,7 @@ from waflib.Configure import conf
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(opt):
-
     opt.load('hep-waftools-base', tooldir=_heptooldir)
-
     opt.add_option(
         '--with-xrootd',
         default=None,
@@ -34,9 +32,6 @@ def find_xrootd(ctx, **kwargs):
         pass
 
 
-    kwargs = ctx._findbase_setup(kwargs)
-    
-    kwargs['mandatory'] = kwargs.get('mandatory', False)
     ctx.check_with(
         ctx.check,
         "xrootd",

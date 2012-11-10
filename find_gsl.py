@@ -34,18 +34,14 @@ def find_gsl(ctx, **kwargs):
         pass
 
 
-    kwargs = ctx._findbase_setup(kwargs)
-    
-    kwargs['mandatory'] = kwargs.get('mandatory', True)
     ctx.check_with(
-        ctx.check,
+        ctx.check_cfg,
         "gsl",
-        features='cxx cxxprogram',
-        header_name="gsl/gsl_version.h",
-        lib="gsl",
-        uselib_store='gsl',
-        **kwargs
-        )
+        package="",
+        path="gsl-config",
+        uselib_store="gsl",
+        args='--cflags --libs --ldflags',
+        **kwargs)
 
     version = ctx.check_cxx(
         msg="Checking GSL version",

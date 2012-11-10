@@ -29,12 +29,10 @@ def find_bzip(ctx, **kwargs):
 
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
-    kwargs = ctx._findbase_setup(kwargs)
-    
-    kwargs['mandatory'] = True
-    
     # find bzip
-    ctx.check(
+    ctx.check_with(
+        ctx.check,
+        "bzip",
         features='cxx cxxprogram',
         header_name="bzlib.h",
         lib='bz2',
