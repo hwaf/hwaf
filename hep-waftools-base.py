@@ -109,12 +109,14 @@ def check_with(conf, check, what, *args, **kwargs):
         conf.to_log("Checking for %s in %s" % (what, path))
         if conf.find_at(check, WHAT, path, **kwargs):
             #print ">> found %s at %s" % (what, path)
-            conf.msg("Found %s at" % what, path, color="WHITE")
             conf.in_msg = 0
+            conf.msg("Found %s at" % what, path, color="WHITE")
             return
         pass
 
+    conf.in_msg = 0
     check(**kwargs)
+    conf.in_msg = 0
     conf.msg("Found %s at" % what, "(local environment)", color="WHITE")
     return
 
