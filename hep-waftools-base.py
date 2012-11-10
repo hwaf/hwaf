@@ -3,6 +3,7 @@
 # stdlib imports
 import os
 import os.path as osp
+import sys
 
 # waf imports ---
 import waflib.Utils
@@ -14,24 +15,38 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 ### ---------------------------------------------------------------------------
 def options(ctx):
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
-    if 0 and ctx.is_darwin():
+    if 'darwin' in sys.platform:
         ctx.add_option(
             '--use-macports',
             default=False,
-            store_action=True,
+            action='store_true',
             help="Enable MacPorts")
         
         ctx.add_option(
             '--use-fink',
             default=False,
-            store_action=True,
+            action='store_true',
             help="Enable Fink")
-        
+    ctx.add_option(
+        '--use-cfg-file',
+        default=None,
+        help="Path to a config file holding version+paths to external s/w",
+        )
+
     return
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
+    if ctx.options.use_cfg_file:
+        fname = osp.abspath(ctx.options.use_cfg_file)
+        ctx.start_msg("Manifest file")
+        ctx.end_msg(fname)
+        ok = ctx.read_cfg(fname)
+        ctx.start_msg("Manifest file processing")
+        ctx.end_msg(ok)
+        pass
+
     return
 
 ### ---------------------------------------------------------------------------
@@ -157,7 +172,28 @@ def read_cfg(ctx, fname):
     read_cfg reads a MANIFEST-like file to extract a configuration.
     That configuration file must be in a format that ConfigParser understands.
     """
-    return
+    fname = osp.abspath(fname)
+    if not osp.exists(fname):
+        return False
+
+    try: from ConfigParser import SafeConfigParser as CfgParser
+    except ImportError: from configparser import ConfigParser as CfgParser
+    cfg = CfgParser()
+    cfg.read([fname])
+    for section in cfg.sections():
+        if not hasattr(ctx.options, 'with_%s' % section):
+            continue
+        v = getattr(ctx.options, 'with_%s' % section)
+        if not (v == None):
+            # user provided a value from command-line
+            continue
+        if not cfg.has_option(section, 'path'):
+            # no useful info
+            continue
+        v = cfg.get(section, 'path')
+        setattr(ctx.options, 'with_%s' % section, v)
+        pass
+    return True
 
 ### ---------------------------------------------------------------------------
 @conf
