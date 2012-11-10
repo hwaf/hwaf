@@ -87,18 +87,25 @@ def find_xrootd(ctx, **kwargs):
         **kwargs)
 
     # -- check everything is kosher...
-    ctx.check_cxx(
-        msg="Checking compilation xrootd",
+    version = ctx.check_cxx(
+        msg="Checking xrootd version",
+        okmsg="ok",
         fragment='''\
         #include "xrootd/XrdVersion.hh"
+        #include <iostream>
 
         int main(int argc, char* argv[]) {
+          std::cout << XrdVERSION << std::flush;
           return 0;
         }
         ''',
         use="xrootd",
+        define_name = "HEPWAF_XROOTD_VERSION",
+        define_ret = True,
         execute  = True,
         )
+    ctx.start_msg("xrootd version")
+    ctx.end_msg(version)
 
     ctx.env.HEPWAF_FOUND_XROOTD = 1
     return

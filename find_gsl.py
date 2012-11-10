@@ -36,7 +36,7 @@ def find_gsl(ctx, **kwargs):
 
     kwargs = ctx._findbase_setup(kwargs)
     
-    kwargs['mandatory'] = kwargs.get('mandatory', False)
+    kwargs['mandatory'] = kwargs.get('mandatory', True)
     ctx.check_with(
         ctx.check,
         "gsl",
@@ -46,7 +46,28 @@ def find_gsl(ctx, **kwargs):
         uselib_store='gsl',
         **kwargs
         )
-    
+
+    version = ctx.check_cxx(
+        msg="Checking GSL version",
+        okmsg="ok",
+        fragment='''\
+        #include <gsl/gsl_version.h>
+        #include <iostream>
+
+        int main(int argc, char* argv[]) {
+          std::cout << GSL_VERSION;
+          return 0;
+        }
+        ''',
+        use="gsl",
+        define_name = "HEPWAF_GSL_VERSION",
+        define_ret = True,
+        execute  = True,
+        mandatory=True,
+        )
+    ctx.start_msg("GSL version")
+    ctx.end_msg(version)
+
     ctx.env.HEPWAF_FOUND_GSL = 1
     return
 

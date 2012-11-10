@@ -56,7 +56,7 @@ def find_clhep(ctx, **kwargs):
         path=clhep_cfg,
         package="",
         uselib_store="CLHEP",
-        args='--cflags --include --libs --ldflags',
+        args='--include --libs --ldflags',
         **kwargs)
 
     clhep_libs = '''\
@@ -77,12 +77,39 @@ def find_clhep(ctx, **kwargs):
         for n in ('INCLUDES',
                   'LIBPATH',
                   'LINKFLAGS'):
-            ctx.env['%s_%s'%(n,libname)] = ctx.env['%s_CLHEP'%n][:]
+            k = '%s_CLHEP'%n
+            ctx.env[k] = [ 
+                # sanitize paths
+                p.replace("'", "").replace('"', '')
+                for p in ctx.env[k] 
+                ]
+            ctx.env['%s_%s'%(n,libname)] = ctx.env[k][:]
         # massage -lCLHEP-$(version)
         # into -lCLHEP-$(sublib)-$(version)
         ctx.env['LIB_%s'%libname] = [l.replace('CLHEP',libname)
                                      for l in ctx.env['LIB_CLHEP']]
         pass
+
+    version = ctx.check_cxx(
+        msg="Checking clhep version",
+        okmsg="ok",
+        fragment='''\
+        #include "CLHEP/ClhepVersion.h"
+        #include <iostream>
+
+        int main(int argc, char* argv[]) {
+          std::cout << CLHEP::Version::String();
+          return 0;
+        }
+        ''',
+        use="CLHEP",
+        define_name = "HEPWAF_CLHEP_VERSION",
+        define_ret = True,
+        execute  = True,
+        mandatory=True,
+        )
+    ctx.start_msg("clhep version")
+    ctx.end_msg(version)
 
     ctx.env.HEPWAF_FOUND_CLHEP = 1
     return

@@ -105,6 +105,27 @@ def find_cernroot(ctx, **kwargs):
         pass
 
     # -- check everything is kosher...
+    version = ctx.check_cxx(
+        msg="Checking ROOT version",
+        okmsg="ok",
+        fragment='''\
+        #include "RVersion.h"
+        #include <iostream>
+
+        int main(int argc, char* argv[]) {
+          std::cout << ROOT_RELEASE;
+          return 0;
+        }
+        ''',
+        use="ROOT",
+        define_name = "HEPWAF_ROOT_VERSION",
+        define_ret = True,
+        execute  = True,
+        mandatory=True,
+        )
+    ctx.start_msg("ROOT version")
+    ctx.end_msg(version)
+
     ctx.check_cxx(
         msg="Checking for ROOT::TH1",
         fragment='''\

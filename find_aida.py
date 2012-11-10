@@ -46,6 +46,27 @@ def find_aida(ctx, **kwargs):
         **kwargs
         )
     
+    # version = ctx.check_cxx(
+    #     msg="Checking AIDA version",
+    #     okmsg="ok",
+    #     fragment='''\
+    #     #include "AIDA/Version.h"
+    #     #include <iostream>
+    #
+    #     int main(int argc, char* argv[]) {
+    #       std::cout << AIDA::Version::String();
+    #       return 0;
+    #     }
+    #     ''',
+    #     use="AIDA",
+    #     define_name = "HEPWAF_AIDA_VERSION",
+    #     define_ret = True,
+    #     execute  = True,
+    #     mandatory=True,
+    #     )
+    # ctx.start_msg("AIDA version")
+    # ctx.end_msg(version)
+
     ctx.env.HEPWAF_FOUND_AIDA = 1
     return
 
