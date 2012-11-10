@@ -34,9 +34,6 @@ def find_gccxml(ctx, **kwargs):
         pass
 
 
-    kwargs = ctx._findbase_setup(kwargs)
-    kwargs['mandatory'] = kwargs.get('mandatory', False)
-
     path_list = []
     if ctx.options.with_gccxml:
         path_list.append(
@@ -50,6 +47,18 @@ def find_gccxml(ctx, **kwargs):
         path_list=path_list,
         **kwargs)
     
+    version="N/A"
+    cmd = [ctx.env.GCCXML, "--version"]
+    lines=ctx.cmd_and_log(cmd).splitlines()
+    for l in lines:
+        l = l.lower()
+        if "version" in l:
+            version=l[l.find("version")+len("version"):].strip()
+            break
+        pass
+    ctx.start_msg("GCCXML version")
+    ctx.end_msg(version)
+
     ctx.env.HEPWAF_FOUND_GCCXML = 1
     return
 
