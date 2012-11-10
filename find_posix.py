@@ -93,6 +93,26 @@ def find_posixlibs(ctx, **kwargs):
             )
         pass
 
+
+    # test bfd
+    ctx.check_cxx(
+        msg="Checking bfd_init",
+        okmsg="ok",
+        fragment='''\
+        #include "bfd.h"
+        #include <iostream>
+
+        int main(int argc, char* argv[]) {
+          bfd_init();
+          bfd_error_type err = bfd_get_error();
+          return (int)err;
+        }
+        ''',
+        use="bfd",
+        execute  = True,
+        mandatory= True,
+        )
+
     ctx.env.HEPWAF_FOUND_POSIXLIBS = 1
     return
 
