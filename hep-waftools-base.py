@@ -44,8 +44,11 @@ def find_at(conf, check, what, where, **kwargs):
     try:
         conf.env.stash()
         conf.env[what + "_HOME"] = where
-        conf.env.append_value('PATH',  osp.join(where, "bin"))
-        conf.env.append_value('RPATH', osp.join(where, "lib"))
+        incdir = osp.join(where, "include")
+        bindir = osp.join(where, "bin")
+        libdir = osp.join(where, "lib")
+        conf.env.append_value('PATH',  bindir)
+        conf.env.append_value('RPATH', libdir)
         pkgconf_path = osp.join(where, "lib/pkgconfig")
         conf.env.append_value('PKG_CONFIG_PATH', pkgconf_path)
         conf.to_log("Pkg config path: %s" % conf.env.PKG_CONFIG_PATH)
@@ -54,11 +57,20 @@ def find_at(conf, check, what, where, **kwargs):
             os.environ["PKG_CONFIG_PATH"] = ":".join((pkgconf_path, pkgp))
         else:
             os.environ["PKG_CONFIG_PATH"] = pkgconf_path
-        
-        conf.parse_flags("-I%s/include -L%s/lib" % (where, where),
-                         uselib_store=kwargs["uselib_store"])
+        if osp.exists(incdir):
+            conf.parse_flags("-I%s" % incdir,
+                             uselib_store=kwargs["uselib_store"])
+        if osp.exists(libdir):
+            conf.parse_flags("-L%s" % libdir,
+                             uselib_store=kwargs["uselib_store"])
         this_kwargs = kwargs.copy()
         this_kwargs['check_path'] = where
+        if check == conf.check_cfg:
+            # check if the special xyz-config binary exists...
+            if not this_kwargs['package'] and \
+                    not osp.exists(bindir):
+                conf.fatal("no such directory [%s]" % bindir)
+                pass
         check(**this_kwargs)
         return True
     except conf.errors.ConfigurationError:
@@ -79,7 +91,10 @@ def check_with(conf, check, what, *args, **kwargs):
     """
     import os
     from os.path import abspath
-    
+
+    # adds 'extra_paths' and other defaults...
+    kwargs = conf._findbase_setup(kwargs)
+
     with_dir = getattr(conf.options, "with_" + what, None)
     env_dir = os.environ.get(what.upper() + "_HOME", None)
     paths = [with_dir, env_dir] + kwargs.pop("extra_paths", [])
@@ -90,10 +105,14 @@ def check_with(conf, check, what, *args, **kwargs):
         waflib.Utils.to_list(kwargs["uselib_store"])
 
     for path in [abspath(p) for p in paths if p]:
+        conf.in_msg = 0
         conf.to_log("Checking for %s in %s" % (what, path))
         if conf.find_at(check, WHAT, path, **kwargs):
+            #print ">> found %s at %s" % (what, path)
             conf.msg("Found %s at" % what, path, color="WHITE")
+            conf.in_msg = 0
             return
+        pass
 
     check(**kwargs)
     conf.msg("Found %s at" % what, "(local environment)", color="WHITE")
@@ -125,6 +144,8 @@ def _findbase_setup(ctx, kwargs):
             ])
 
     kwargs['extra_paths'] = kwargs.get('extra_paths', []) + extra_paths
+    kwargs['_check_mandatory'] = kwargs.get('mandatory', True)
+    kwargs[       'mandatory'] = kwargs.get('mandatory', True)
     return kwargs
 
 ### ---------------------------------------------------------------------------
