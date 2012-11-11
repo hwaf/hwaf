@@ -17,6 +17,7 @@ _heptools = (
     'bzip',
     'cernroot',
     'clhep',
+    'cmake',
     'gccxml',
     'gsl',
     'hepmc',
