@@ -14,6 +14,10 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.add_option(
+        '--with-uuid',
+        default=None,
+        help="Look for UUID at the given path")
     return
 
 def configure(ctx):
@@ -43,13 +47,15 @@ def find_uuid(ctx, **kwargs):
 
     # test uuid
     ctx.check_cxx(
-        msg="Checking uuid_init",
+        msg="Checking uuid_generate",
         okmsg="ok",
         fragment='''\
         #include "uuid/uuid.h"
         #include <iostream>
 
         int main(int argc, char* argv[]) {
+          uuid_t out;
+          uuid_generate(out);
           return 0;
         }
         ''',
