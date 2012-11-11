@@ -14,7 +14,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 ### ---------------------------------------------------------------------------
 def options(ctx):
-    ctx.load('hep-waftools-system', tooldir=_heptooldir)
+    ctx.load('compiler_c compiler_cxx')
     if 'darwin' in sys.platform:
         ctx.add_option(
             '--use-macports',
@@ -32,12 +32,12 @@ def options(ctx):
         default=None,
         help="Path to a config file holding version+paths to external s/w",
         )
+    ctx.load('hep-waftools-system', tooldir=_heptooldir)
 
     return
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
-    ctx.load('hep-waftools-system', tooldir=_heptooldir)
     if ctx.options.use_cfg_file:
         fname = osp.abspath(ctx.options.use_cfg_file)
         ctx.start_msg("Manifest file")
@@ -46,6 +46,7 @@ def configure(ctx):
         ctx.start_msg("Manifest file processing")
         ctx.end_msg(ok)
         pass
+    ctx.load('hep-waftools-system', tooldir=_heptooldir)
 
     return
 
@@ -174,12 +175,28 @@ def read_cfg(ctx, fname):
     """
     fname = osp.abspath(fname)
     if not osp.exists(fname):
+        ctx.fatal("no such file [%s]" % fname)
         return False
 
     try: from ConfigParser import SafeConfigParser as CfgParser
     except ImportError: from configparser import ConfigParser as CfgParser
     cfg = CfgParser()
     cfg.read([fname])
+    # top-level config
+    if cfg.has_section('hepwaf-cfg'):
+        section = 'hepwaf-cfg'
+        if cfg.has_option(section, 'cmtcfg'):
+            if not (None == getattr(ctx.options, 'cmtcfg')):
+                # user provided a value from command-line: that wins.
+                pass
+            else:
+                v = cfg.get(section, 'cmtcfg')
+                setattr(ctx.options, 'cmtcfg', v)
+                pass
+            pass
+        pass
+    
+    # pkg-level config
     for section in cfg.sections():
         if not hasattr(ctx.options, 'with_%s' % section):
             continue
@@ -241,5 +258,75 @@ def define_uselib(self, name, libpath, libname, incpath, incname):
     ctx.env.append_unique('DEFINES', 'HAVE_%s=1' % NAME)
     return
 
+### ------------------------------------------------------------------------
+@conf
+def _get_env_for_subproc(self):
+    import os
+    #env = dict(os.environ)
+    #waf_env = dict(self.env)
+    #for k,v in waf_env.items():
+    env = dict(self.env)
+    for k,v in env.items():
+        v = self.env[k]
+        #print("-- %s %s %r" % (k, type(k), v))
+        if isinstance(v, (list,tuple)):
+            v = list(v)
+            for i,_ in enumerate(v):
+                if hasattr(v[i], 'abspath'):
+                    v[i] = v[i].abspath()
+                else:
+                    v[i] = str(v[i])
+                    pass
+                pass
+            # handle xyzPATH variables (LD_LIBRARY_PATH, PYTHONPATH,...)
+            if k.lower().endswith('path'):
+                #print (">>> %s: %r" % (k,v))
+                env[k] = os.pathsep.join(v)
+            else:
+                env[k] = ' '.join(v)
+        else:
+            env[k] = str(v)
+    bld_area = self.env['BUILD_INSTALL_AREA']
+
+    env['LD_LIBRARY_PATH'] = os.pathsep.join(
+        [os.path.join(bld_area,'lib')]
+        +waflib.Utils.to_list(self.env['LD_LIBRARY_PATH'])
+        +[os.environ.get('LD_LIBRARY_PATH','')])
+
+    env['PATH'] = os.pathsep.join(
+        [os.path.join(bld_area,'bin')]
+        +waflib.Utils.to_list(self.env['PATH'])
+        +[os.environ.get('PATH','')])
+
+    if self.is_darwin():
+        env['DYLD_LIBRARY_PATH'] = os.pathsep.join(
+            [os.path.join(bld_area,'lib')]
+            +waflib.Utils.to_list(self.env['DYLD_LIBRARY_PATH'])
+            +[os.environ.get('DYLD_LIBRARY_PATH','')])
+        pass
+    
+    for k in ('CPPFLAGS',
+              'CFLAGS',
+              'CCFLAGS',
+              'CXXFLAGS',
+              'FCFLAGS',
+
+              'LINKFLAGS',
+              'SHLINKFLAGS',
+
+              'AR',
+              'ARFLAGS',
+
+              'CC',
+              'CXX',
+
+              ):
+        v = self.env.get_flat(k)
+        env[k] = str(v)
+        pass
+
+    env['SHLINKFLAGS'] += ' '+self.env.get_flat('LINKFLAGS_cshlib')
+    env['SHEXT'] = self.dso_ext()[1:]
+    return env
 
 ## EOF ##
