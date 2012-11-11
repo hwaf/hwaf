@@ -74,10 +74,13 @@ def find_at(conf, check, what, where, **kwargs):
         else:
             os.environ["PKG_CONFIG_PATH"] = pkgconf_path
         if osp.exists(incdir):
-            conf.parse_flags("-I%s" % incdir,
+            def _subst(v):
+                v = waflib.Utils.subst_vars(v, conf.env)
+                return v
+            conf.parse_flags(_subst("${CPPPATH_ST}") % incdir,
                              uselib_store=kwargs["uselib_store"])
         if osp.exists(libdir):
-            conf.parse_flags("-L%s" % libdir,
+            conf.parse_flags(_subst("${LIBPATH_ST}") % libdir,
                              uselib_store=kwargs["uselib_store"])
         this_kwargs = kwargs.copy()
         this_kwargs['check_path'] = where
