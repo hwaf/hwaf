@@ -18,13 +18,13 @@ def options(ctx):
     if 'darwin' in sys.platform:
         ctx.add_option(
             '--use-macports',
-            default=False,
+            default=None,
             action='store_true',
             help="Enable MacPorts")
         
         ctx.add_option(
             '--use-fink',
-            default=False,
+            default=None,
             action='store_true',
             help="Enable Fink")
     ctx.add_option(
