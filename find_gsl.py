@@ -64,6 +64,7 @@ def find_gsl(ctx, **kwargs):
     ctx.start_msg("GSL version")
     ctx.end_msg(version)
 
+    ctx.env.GSL_VERSION = version
     ctx.env.HEPWAF_FOUND_GSL = 1
     return
 

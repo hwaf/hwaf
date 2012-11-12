@@ -105,6 +105,7 @@ def find_clhep(ctx, **kwargs):
     ctx.start_msg("clhep version")
     ctx.end_msg(version)
 
+    ctx.env.CLHEP_VERSION = version
     ctx.env.HEPWAF_FOUND_CLHEP = 1
     return
 

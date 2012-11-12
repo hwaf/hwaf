@@ -102,6 +102,7 @@ def find_xrootd(ctx, **kwargs):
     ctx.start_msg("xrootd version")
     ctx.end_msg(version)
 
+    ctx.env.XROOTD_VERSION = version
     ctx.env.HEPWAF_FOUND_XROOTD = 1
     return
 
