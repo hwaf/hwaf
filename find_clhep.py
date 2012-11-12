@@ -44,7 +44,9 @@ def find_clhep(ctx, **kwargs):
     ctx.find_program(clhep_cfg, var='CLHEP-CONFIG',**kwargs)
     clhep_cfg = ctx.env['CLHEP-CONFIG']
     
-    ctx.check_cfg(
+    ctx.check_with(
+        ctx.check_cfg,
+        "clhep",
         path=clhep_cfg,
         package="",
         uselib_store="CLHEP",
