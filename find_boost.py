@@ -57,10 +57,12 @@ def find_boost(ctx, **kwargs):
     kwargs['static'] = kwargs.get('static', False)
     kwargs['use'] = waflib.Utils.to_list(kwargs.get('use', [])) + ['python']
 
-    ctx.check_boost(boost_libs,
-                    uselib_store='boost',
-                    mandatory=True,
-                    **kwargs)
+    ctx.check_with(
+        ctx.check_boost,
+        "boost",
+        lib=boost_libs,
+        uselib_store='boost',
+        **kwargs)
 
     for libname in boost_libs.split():
         libname = libname.strip()
