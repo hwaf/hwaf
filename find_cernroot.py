@@ -134,7 +134,7 @@ def find_cernroot(ctx, **kwargs):
         ''',
         use="ROOT",
         execute  = True,
-        mandatory=True,
+        mandatory= True,
         )
 
     ctx.check_cxx(
@@ -203,6 +203,7 @@ def find_cernroot(ctx, **kwargs):
         mandatory = True,
         )
 
+    ctx.env.ROOT_VERSION = version
     ctx.env.HEPWAF_FOUND_ROOT = 1
     return
 
