@@ -61,7 +61,9 @@ def find_cernroot(ctx, **kwargs):
         **kwargs)
     root_cfg = ctx.env['ROOT-CONFIG']
 
-    ctx.check_cfg(
+    ctx.check_with(
+        ctx.check_cfg,
+        "root",
         path=root_cfg,
         package="",
         uselib_store="ROOT",
