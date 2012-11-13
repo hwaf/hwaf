@@ -3,6 +3,7 @@
 # stdlib imports ---
 import os
 import os.path as osp
+import textwrap
 
 # waf imports ---
 import waflib.Utils
