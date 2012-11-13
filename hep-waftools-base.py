@@ -137,6 +137,8 @@ def check_with(conf, check, what, *args, **kwargs):
     check(**kwargs)
     conf.in_msg = 0
     conf.msg("Found %s at" % what, "(local environment)", color="WHITE")
+    # FIXME: handle windows ?
+    conf.env[WHAT + "_HOME"] = "/usr"
     return
 
 ### ---------------------------------------------------------------------------
@@ -164,7 +166,8 @@ def _findbase_setup(ctx, kwargs):
                 "/sw",
             ])
 
-    kwargs['extra_paths'] = kwargs.get('extra_paths', []) + extra_paths
+    kwargs['extra_paths'] = waflib.Utils.to_list(
+        kwargs.get('extra_paths', [])) + extra_paths
     kwargs['_check_mandatory'] = kwargs.get('mandatory', True)
     kwargs[       'mandatory'] = kwargs.get('mandatory', True)
     return kwargs
