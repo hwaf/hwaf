@@ -3,6 +3,7 @@
 ### imports -------------------------------------------------------------------
 # stdlib imports ---
 import os
+import os.path as osp
 import platform
 import sys
 
@@ -34,7 +35,7 @@ def configure(ctx):
 
     cfg_arch = None
     cfg_os   = None
-    cfg_comp = ctx.env.CC[0]
+    cfg_comp = osp.basename(ctx.env.CC[0])
     cfg_type = None
     
     if not cmtcfg:
