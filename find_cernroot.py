@@ -50,9 +50,15 @@ def find_cernroot(ctx, **kwargs):
 
     # find root
     root_cfg = "root-config"
+    path_list = []
     if ctx.options.with_root_sys:
         root_cfg = osp.join(ctx.options.with_root_sys, "bin", "root-config")
+        path_list.append(
+            osp.join(ctx.options.with_root_sys, "bin")
+            )
         pass
+
+    kwargs['path_list']=path_list
 
     
     ctx.find_program(
