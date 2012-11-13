@@ -75,9 +75,11 @@ def find_posixlibs(ctx, **kwargs):
         ctx.check,
         "bfd",
         features='cxx cxxprogram',
+        defines=['PACKAGE=1','PACKAGE_VERSION=1',],
         header_name="bfd.h",
         lib='bfd',
         uselib_store='bfd',
+        use='dl',
         **kwargs
         )
 
@@ -108,7 +110,8 @@ def find_posixlibs(ctx, **kwargs):
           return (int)err;
         }
         ''',
-        use="bfd",
+        use="bfd dl",
+        #defines=['PACKAGE=1','PACKAGE_VERSION=1',],
         execute  = True,
         mandatory= True,
         )
