@@ -46,7 +46,8 @@ def find_cmake(ctx, **kwargs):
         var="CMAKE",
         path_list=path_list,
         **kwargs)
-    
+
+    kwargs['mandatory'] = False
     ctx.find_program(
         "ccmake",
         var="CCMAKE",

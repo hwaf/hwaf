@@ -75,6 +75,7 @@ def find_xrootd(ctx, **kwargs):
         path_list=bindir,
         **kwargs)
 
+    kwargs['mandatory'] = False
     ctx.find_program(
         "xrootd", 
         var="XROOTD-BIN", 
