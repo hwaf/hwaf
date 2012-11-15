@@ -428,6 +428,7 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         '--debug',
         '--gccxmlopt=--gccxml-cxxflags', '--fail_on_warnings',
         '--gccxmlopt=--gccxml-cxxflags', '-D__STRICT_ANSI__',
+        waflib.Utils.subst_vars('--gccxmlpath=${GCCXML_BINDIR}', o.env),        
         #'--gccxmlpath=',
         ]
     lib_name = "lib%s" % (o.target,) # FIXME !!
