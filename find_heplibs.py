@@ -26,6 +26,7 @@ _heptools = (
     'lcg_cool',
     'lcg_coral',
     'lcg_pool',
+    'libxml2',
     'posix',
     'python',
     'sqlite',
