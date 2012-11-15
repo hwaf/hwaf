@@ -60,6 +60,8 @@ def find_gccxml(ctx, **kwargs):
     ctx.end_msg(version)
 
     ctx.env.GCCXML_VERSION = version
+    ctx.env.GCCXML_BINDIR = osp.dirname(ctx.env.GCCXML)
+
     ctx.env.HEPWAF_FOUND_GCCXML = 1
     return
 
