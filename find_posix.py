@@ -75,13 +75,14 @@ def find_posixlibs(ctx, **kwargs):
         ctx.check,
         "bfd",
         features='cxx cxxprogram',
-        defines=['PACKAGE=1','PACKAGE_VERSION=1',],
+        defines=['PACKAGE="package-name"','PACKAGE_VERSION="package-version"',],
         header_name="bfd.h",
         lib='bfd',
         uselib_store='bfd',
         use='dl',
         **kwargs
         )
+    ctx.env.DEFINES_bfd = []
 
     # find rt
     if not ctx.is_darwin():
@@ -101,6 +102,12 @@ def find_posixlibs(ctx, **kwargs):
         msg="Checking bfd_init",
         okmsg="ok",
         fragment='''\
+        #ifndef PACKAGE
+        # define PACKAGE "package-name"
+        #endif
+        #ifndef PACKAGE_VERSION
+        # define PACKAGE_VERSION 1
+        #endif
         #include "bfd.h"
         #include <iostream>
 
@@ -111,7 +118,6 @@ def find_posixlibs(ctx, **kwargs):
         }
         ''',
         use="bfd dl",
-        #defines=['PACKAGE=1','PACKAGE_VERSION=1',],
         execute  = True,
         mandatory= True,
         )
