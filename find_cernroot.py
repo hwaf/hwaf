@@ -426,8 +426,8 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
     o.env.GCCXML_FLAGS = [
         #'--quiet',
         '--debug',
-        '--gccxmlopt=--gccxml-cxxflags',
-        '--fail_on_warnings',
+        '--gccxmlopt=--gccxml-cxxflags', '--fail_on_warnings',
+        '--gccxmlopt=--gccxml-cxxflags', '-D__STRICT_ANSI__',
         #'--gccxmlpath=',
         ]
     lib_name = "lib%s" % (o.target,) # FIXME !!
