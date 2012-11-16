@@ -191,15 +191,16 @@ def read_cfg(ctx, fname):
     # top-level config
     if cfg.has_section('hepwaf-cfg'):
         section = 'hepwaf-cfg'
-        if cfg.has_option(section, 'cmtcfg'):
-            if not (None == getattr(ctx.options, 'cmtcfg')):
-                # user provided a value from command-line: that wins.
+        for k in ('cmtcfg', 'prefix'):
+            if cfg.has_option(section, k):
+                if not (None == getattr(ctx.options, k)):
+                    # user provided a value from command-line: that wins.
+                    pass
+                else:
+                    v = cfg.get(section, k)
+                    setattr(ctx.options, k, v)
+                    pass
                 pass
-            else:
-                v = cfg.get(section, 'cmtcfg')
-                setattr(ctx.options, 'cmtcfg', v)
-                pass
-            pass
         pass
     
     # pkg-level config
