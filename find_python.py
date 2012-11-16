@@ -3,6 +3,7 @@
 # stdlib imports ---
 import os
 import os.path as osp
+import textwrap
 import subprocess
 try:
     subprocess.check_output
@@ -76,7 +77,31 @@ def find_python(ctx, **kwargs):
     # FIXME: force python2. needed to be done *before* 'ctx.load(python)'
     try:    ctx.find_program('python2', var='PYTHON')
     except: ctx.find_program('python',  var='PYTHON')
-    
+
+    try:
+        # temporary hack for clang and glibc-2.16
+        # see: 
+        # http://sourceware.org/git/?p=glibc.git;a=blobdiff;f=misc/sys/cdefs.h;h=fb6c959d903474b38fd0fcc36e17c5290dcd867c;hp=b94147efe8c5bbba718cb2f9d5911a92414864b6;hb=b7bfe116;hpb=43c4edba7ee8224134132fb38df5f63895cbb326
+        ctx.check_cxx(
+            msg="checking for __extern_always_inline",
+            okmsg="ok",
+            features="cxx cxxshlib",
+            fragment=textwrap.dedent(
+            '''\
+            #define _FORTIFY_SOURCE 2
+            #include <string.h>
+            #include <sys/cdefs.h>
+            int foo() { return 42; }
+            '''),
+            mandatory=True,
+            )
+    except waflib.Errors.ConfigurationError:
+        ctx.env.append_unique(
+            'CPPFLAGS',
+            ['-D__extern_always_inline=inline',
+             ])
+        pass
+
     ctx.load('python')
     ctx.check_python_version(pyversion)
     # we remove the -m32 and -m64 options from these flags as they
@@ -92,7 +117,6 @@ def find_python(ctx, **kwargs):
                     ctx.env.append_unique(n, [v])
 
         pass
-
     ctx.check_python_headers()
 
     # restore these flags:
