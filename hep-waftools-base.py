@@ -55,7 +55,8 @@ def configure(ctx):
 def find_at(conf, check, what, where, **kwargs):
     if not osp.exists(where):
         return False
-        
+
+    os_env = dict(os.environ)
     pkgp = os.getenv("PKG_CONFIG_PATH", "")
     try:
         conf.env.stash()
@@ -65,12 +66,23 @@ def find_at(conf, check, what, where, **kwargs):
         libdir = osp.join(where, "lib")
         conf.env.append_value('PATH',  bindir)
         conf.env.append_value('RPATH', libdir)
+        conf.env.append_value('LD_LIBRARY_PATH', libdir)
+        os_keys = ("PATH", "RPATH", "LD_LIBRARY_PATH")
+        if conf.is_darwin():
+            os_keys += ("DYLD_LIBRARY_PATH",)
+            conf.env.append_value('DYLD_LIBRARY_PATH', libdir)
+            os.environ['DYLD_LIBRARY_PATH'] = os.sep.join(conf.env['DYLD_LIBRARY_PATH'])
+            pass
         pkgconf_path = osp.join(where, "lib/pkgconfig")
         conf.env.append_value('PKG_CONFIG_PATH', pkgconf_path)
         conf.to_log("Pkg config path: %s" % conf.env.PKG_CONFIG_PATH)
-        
+
+        for kk in os_keys:
+            os.environ[kk] = os.pathsep.join(conf.env[kk]+[os.getenv(kk,'')]) 
+            pass
+            
         if pkgp:
-            os.environ["PKG_CONFIG_PATH"] = ":".join((pkgconf_path, pkgp))
+            os.environ["PKG_CONFIG_PATH"] = os.pathsep.join((pkgconf_path,pkgp))
         else:
             os.environ["PKG_CONFIG_PATH"] = pkgconf_path
         if osp.exists(incdir):
@@ -93,6 +105,7 @@ def find_at(conf, check, what, where, **kwargs):
         check(**this_kwargs)
         return True
     except conf.errors.ConfigurationError:
+        os.environ = os_env
         os.environ["PKG_CONFIG_PATH"] = pkgp
         conf.end_msg("failed", color="YELLOW")
         conf.env.revert()
