@@ -22,7 +22,7 @@ def options(ctx):
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     ctx.add_option(
-        '--with-root-sys',
+        '--with-root',
         default=None,
         help="Look for CERN ROOT System at the given path")
     return
@@ -32,7 +32,7 @@ def configure(ctx):
     return
 
 @conf
-def find_cernroot(ctx, **kwargs):
+def find_root(ctx, **kwargs):
     
     ctx.load('hep-waftools-base find_python find_libxml2', tooldir=_heptooldir)
 

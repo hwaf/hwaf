@@ -15,7 +15,7 @@ _heptools = (
     'aida',
     'boost',
     'bzip',
-    'cernroot',
+    'root',
     'clhep',
     'cmake',
     'gccxml',
@@ -27,7 +27,7 @@ _heptools = (
     'lcg_coral',
     'lcg_pool',
     'libxml2',
-    'posix',
+    'posixlibs',
     'python',
     'sqlite',
     'tbb',
@@ -58,7 +58,8 @@ def configure(ctx):
     for t in _heptools:
         ctx.load('find_%s' % t, tooldir=_heptooldir)
         pass
-    
+
+    ctx.env.HEPWAF_HEPTOOLS = _heptools[:]
     return
 
 ## EOF ##
