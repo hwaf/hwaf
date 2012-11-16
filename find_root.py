@@ -54,10 +54,10 @@ def find_root(ctx, **kwargs):
     # find root
     root_cfg = "root-config"
     path_list = []
-    if ctx.options.with_root_sys:
-        root_cfg = osp.join(ctx.options.with_root_sys, "bin", "root-config")
+    if ctx.options.with_root:
+        root_cfg = osp.join(ctx.options.with_root, "bin", "root-config")
         path_list.append(
-            osp.join(ctx.options.with_root_sys, "bin")
+            osp.join(ctx.options.with_root, "bin")
             )
         pass
 
