@@ -162,7 +162,7 @@ def find_root(ctx, **kwargs):
         )
 
     ctx.check_cxx(
-        msg="Checking for pyroot",
+        msg="Checking for pyroot-cxx",
         features='cxx cxxshlib',
         fragment='''\
         #include "Python.h"
@@ -211,6 +211,10 @@ def find_root(ctx, **kwargs):
         execute   = True,
         mandatory = True,
         )
+
+    # check also python environment
+    ctx.check_python_module('ROOT')
+    ctx.check_python_module('PyCintex')
 
     ctx.env.ROOT_VERSION = version
     ctx.env.HEPWAF_FOUND_ROOT = 1
