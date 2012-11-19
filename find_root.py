@@ -216,6 +216,22 @@ def find_root(ctx, **kwargs):
     ctx.check_python_module('ROOT')
     ctx.check_python_module('PyCintex')
 
+    # check for ROOTSYS env. variable.
+    ctx.start_msg('Checking for $ROOTSYS')
+    rootsys = None
+    if not ctx.env.ROOTSYS:
+        rootsys = os.getenv('ROOTSYS', None)
+        if not rootsys:
+            # make up one.
+            rootsys = ctx.env.ROOT_HOME
+            pass
+        pass
+    ctx.end_msg(rootsys)
+    if not rootsys:
+        ctx.fatal("No $ROOTSYS environment variable")
+        pass
+    ctx.env.ROOTSYS = rootsys
+    
     ctx.env.ROOT_VERSION = version
     ctx.env.HEPWAF_FOUND_ROOT = 1
     return
