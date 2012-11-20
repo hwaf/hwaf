@@ -11,6 +11,8 @@ import waflib.Logs as msg
 from waflib.Configure import conf
 
 _heptooldir = osp.dirname(osp.abspath(__file__))
+# add this directory to sys.path to ease the loading of other hepwaf tools
+if not _heptooldir in sys.path: sys.path.append(_heptooldir)
 
 ### ---------------------------------------------------------------------------
 def options(ctx):
