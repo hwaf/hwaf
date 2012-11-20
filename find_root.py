@@ -212,26 +212,35 @@ def find_root(ctx, **kwargs):
         mandatory = True,
         )
 
-    # check also python environment
-    ctx.check_python_module('ROOT')
-    ctx.check_python_module('PyCintex')
-
     # check for ROOTSYS env. variable.
     ctx.start_msg('Checking for $ROOTSYS')
-    rootsys = None
-    if not ctx.env.ROOTSYS:
+    rootsys = ctx.env.ROOTSYS
+    if not rootsys:
         rootsys = os.getenv('ROOTSYS', None)
-        if not rootsys:
-            # make up one.
-            rootsys = ctx.env.ROOT_HOME
-            pass
+        pass
+    if not rootsys:
+        # make up one.
+        rootsys = ctx.env.ROOT_HOME
+        pass
+    if not rootsys:
+        # make up one.
+        rootsys = ctx.options.with_root
         pass
     ctx.end_msg(rootsys)
     if not rootsys:
         ctx.fatal("No $ROOTSYS environment variable")
         pass
     ctx.env.ROOTSYS = rootsys
-    
+    ctx.declare_runtime_env('ROOTSYS')
+
+    pyroot_path = osp.join(ctx.env.ROOTSYS, 'lib')
+    ctx.env.prepend_value('PYTHONPATH', pyroot_path)
+    ctx.env.prepend_value('LD_LIBRARY_PATH', pyroot_path)
+
+    # check also python environment
+    ctx.find_python_module('ROOT')
+    ctx.find_python_module('PyCintex')
+
     ctx.env.ROOT_VERSION = version
     ctx.env.HEPWAF_FOUND_ROOT = 1
     return

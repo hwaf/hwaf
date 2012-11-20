@@ -79,6 +79,8 @@ def find_cmake(ctx, **kwargs):
     ctx.start_msg("CMake version")
     ctx.end_msg(version)
 
+    ctx.declare_runtime_env('CMAKE')
+
     ctx.env.CMAKE_VERSION = version
     ctx.env.HEPWAF_FOUND_CMAKE = 1
     return

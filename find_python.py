@@ -78,6 +78,7 @@ def find_python(ctx, **kwargs):
     try:    ctx.find_program('python2', var='PYTHON')
     except: ctx.find_program('python',  var='PYTHON')
 
+    ctx.declare_runtime_env('PYTHON')
     try:
         # temporary hack for clang and glibc-2.16
         # see: 
@@ -199,4 +200,39 @@ def find_python(ctx, **kwargs):
     ctx.env.HEPWAF_FOUND_PYTHON = 1
     return
 
+@conf
+def find_python_module(ctx, module_name, condition='', **kwargs):
+    
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+
+    if not ctx.env.CXX and not ctx.env.CC:
+        msg.fatal('load a C or C++ compiler first')
+        pass
+
+    if not ctx.env.HEPWAF_FOUND_PYTHON:
+        ctx.find_python()
+        pass
+
+    found = False
+    os_env = dict(os.environ)
+    try:
+        ctx.env.stash()
+        env = ctx._get_env_for_subproc()
+        for k,v in env.iteritems():
+            os.environ[k] = v
+            pass
+        ctx.check_python_module(module_name, condition)
+        found = True
+    except ctx.errors.ConfigurationError:
+        os.environ = os_env
+        ctx.env.revert()
+        found = False
+        pass
+    finally:
+        os.environ = os_env
+        pass
+
+    if not found and kwargs.get('mandatory', True):
+        ctx.fatal("python module %s not found" % module_name)
+    return
 

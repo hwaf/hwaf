@@ -47,38 +47,93 @@ def configure(ctx):
         ctx.end_msg(ok)
         pass
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
+    # register a couple of runtime environment variables
+    ctx.declare_runtime_env('PATH')
+    ctx.declare_runtime_env('RPATH')
+    ctx.declare_runtime_env('LD_LIBRARY_PATH')
+    ctx.declare_runtime_env('PYTHONPATH')
+    if ctx.is_darwin():
+        ctx.declare_runtime_env('DYLD_LIBRARY_PATH')
+        pass
+    ctx.declare_runtime_env('PKG_CONFIG_PATH')
+    ctx.declare_runtime_env('CMTCFG')
 
+    for k in ['CPPFLAGS',
+              'CFLAGS',
+              'CCFLAGS',
+              'CXXFLAGS',
+              'FCFLAGS',
+
+              'LINKFLAGS',
+              'SHLINKFLAGS',
+              'SHLIB_MARKER',
+              
+              'AR',
+              'ARFLAGS',
+
+              'CC',
+              'CXX',
+              'LINK_CC',
+              'LINK_CXX',
+
+              'LIBPATH',
+              'DEFINES',
+
+              'EXTERNAL_AREA',
+              'INSTALL_AREA',
+              'INSTALL_AREA_BINDIR',
+              'PREFIX',
+              'BINDIR',
+              'LIBDIR',
+              
+              'HOME',
+              'EDITOR',
+              'USER',
+              'LANG',
+              'LC_ALL',
+              'TERM',
+              'TERMCAP',
+              'HISTORY',
+              'HISTSIZE',
+              'PS1',
+              'SHELL',
+              'PWD',
+              'OLDPWD',
+              'DISPLAY',
+              ]:
+        ctx.declare_runtime_env(k)
+        pass
     return
 
 ### ---------------------------------------------------------------------------
 @conf
-def find_at(conf, check, what, where, **kwargs):
+def find_at(ctx, check, what, where, **kwargs):
     if not osp.exists(where):
         return False
 
     os_env = dict(os.environ)
     pkgp = os.getenv("PKG_CONFIG_PATH", "")
     try:
-        conf.env.stash()
-        conf.env[what + "_HOME"] = where
+        ctx.env.stash()
+        ctx.env[what + "_HOME"] = where
         incdir = osp.join(where, "include")
         bindir = osp.join(where, "bin")
         libdir = osp.join(where, "lib")
-        conf.env.append_value('PATH',  bindir)
-        conf.env.append_value('RPATH', libdir)
-        conf.env.append_value('LD_LIBRARY_PATH', libdir)
+        ctx.env.append_value('PATH',  bindir)
+        ctx.env.append_value('RPATH', libdir)
+        ctx.env.append_value('LD_LIBRARY_PATH', libdir)
         os_keys = ("PATH", "RPATH", "LD_LIBRARY_PATH")
-        if conf.is_darwin():
+        if ctx.is_darwin():
             os_keys += ("DYLD_LIBRARY_PATH",)
-            conf.env.append_value('DYLD_LIBRARY_PATH', libdir)
-            os.environ['DYLD_LIBRARY_PATH'] = os.sep.join(conf.env['DYLD_LIBRARY_PATH'])
+            ctx.env.append_value('DYLD_LIBRARY_PATH', libdir)
+            os.environ['DYLD_LIBRARY_PATH'] = os.sep.join(ctx.env['DYLD_LIBRARY_PATH'])
             pass
         pkgconf_path = osp.join(where, "lib/pkgconfig")
-        conf.env.append_value('PKG_CONFIG_PATH', pkgconf_path)
-        conf.to_log("Pkg config path: %s" % conf.env.PKG_CONFIG_PATH)
+        ctx.env.append_value('PKG_CONFIG_PATH', pkgconf_path)
+        ctx.to_log("Pkg config path: %s" % ctx.env.PKG_CONFIG_PATH)
 
         for kk in os_keys:
-            os.environ[kk] = os.pathsep.join(conf.env[kk]+[os.getenv(kk,'')]) 
+            os.environ[kk] = os.pathsep.join(ctx.env[kk]+[os.getenv(kk,'')]) 
             pass
             
         if pkgp:
@@ -87,34 +142,33 @@ def find_at(conf, check, what, where, **kwargs):
             os.environ["PKG_CONFIG_PATH"] = pkgconf_path
         if osp.exists(incdir):
             def _subst(v):
-                v = waflib.Utils.subst_vars(v, conf.env)
+                v = waflib.Utils.subst_vars(v, ctx.env)
                 return v
-            conf.parse_flags(_subst("${CPPPATH_ST}") % incdir,
-                             uselib_store=kwargs["uselib_store"])
+            ctx.parse_flags(_subst("${CPPPATH_ST}") % incdir,
+                            uselib_store=kwargs["uselib_store"])
         if osp.exists(libdir):
-            conf.parse_flags(_subst("${LIBPATH_ST}") % libdir,
-                             uselib_store=kwargs["uselib_store"])
+            ctx.parse_flags(_subst("${LIBPATH_ST}") % libdir,
+                            uselib_store=kwargs["uselib_store"])
         this_kwargs = kwargs.copy()
         this_kwargs['check_path'] = where
-        if check == conf.check_cfg:
+        if check == ctx.check_cfg:
             # check if the special xyz-config binary exists...
-            if not this_kwargs['package'] and \
-                    not osp.exists(bindir):
-                conf.fatal("no such directory [%s]" % bindir)
+            if not this_kwargs['package'] and not osp.exists(bindir):
+                ctx.fatal("no such directory [%s]" % bindir)
                 pass
         check(**this_kwargs)
         return True
-    except conf.errors.ConfigurationError:
+    except ctx.errors.ConfigurationError:
         os.environ = os_env
         os.environ["PKG_CONFIG_PATH"] = pkgp
-        conf.end_msg("failed", color="YELLOW")
-        conf.env.revert()
+        ctx.end_msg("failed", color="YELLOW")
+        ctx.env.revert()
         return False
     return False
 
 ### ---------------------------------------------------------------------------
 @conf
-def check_with(conf, check, what, *args, **kwargs):
+def check_with(ctx, check, what, *args, **kwargs):
     """
     Perform `check`, also looking at directories specified by the --with-X 
     commandline option and X_HOME environment variable (X = what.upper())
@@ -125,9 +179,9 @@ def check_with(conf, check, what, *args, **kwargs):
     from os.path import abspath
 
     # adds 'extra_paths' and other defaults...
-    kwargs = conf._findbase_setup(kwargs)
+    kwargs = ctx._findbase_setup(kwargs)
 
-    with_dir = getattr(conf.options, "with_" + what, None)
+    with_dir = getattr(ctx.options, "with_" + what, None)
     env_dir = os.environ.get(what.upper() + "_HOME", None)
     paths = [with_dir, env_dir] + kwargs.pop("extra_paths", [])
     
@@ -137,21 +191,23 @@ def check_with(conf, check, what, *args, **kwargs):
         waflib.Utils.to_list(kwargs["uselib_store"])
 
     for path in [abspath(p) for p in paths if p]:
-        conf.in_msg = 0
-        conf.to_log("Checking for %s in %s" % (what, path))
-        if conf.find_at(check, WHAT, path, **kwargs):
+        ctx.in_msg = 0
+        ctx.to_log("Checking for %s in %s" % (what, path))
+        if ctx.find_at(check, WHAT, path, **kwargs):
             #print ">> found %s at %s" % (what, path)
-            conf.in_msg = 0
-            conf.msg("Found %s at" % what, path, color="WHITE")
+            ctx.in_msg = 0
+            ctx.msg("Found %s at" % what, path, color="WHITE")
+            ctx.declare_runtime_env(WHAT + "_HOME")
             return
         pass
 
-    conf.in_msg = 0
+    ctx.in_msg = 0
     check(**kwargs)
-    conf.in_msg = 0
-    conf.msg("Found %s at" % what, "(local environment)", color="WHITE")
+    ctx.in_msg = 0
+    ctx.msg("Found %s at" % what, "(local environment)", color="WHITE")
     # FIXME: handle windows ?
-    conf.env[WHAT + "_HOME"] = "/usr"
+    ctx.env[WHAT + "_HOME"] = "/usr"
+    ctx.declare_runtime_env(WHAT + "_HOME")
     return
 
 ### ---------------------------------------------------------------------------
@@ -280,13 +336,37 @@ def define_uselib(self, name, libpath, libname, incpath, incname):
 
 ### ------------------------------------------------------------------------
 @conf
-def _get_env_for_subproc(self):
+def declare_runtime_env(self, k):
+    '''
+    declare_runtime_env register a particular key ``k`` as the name of an
+    environment variable the project will need at runtime.
+    '''
+    if not self.env.HEPWAF_RUNTIME_ENVVARS:
+        self.env.HEPWAF_RUNTIME_ENVVARS = []
+        pass
+    if msg.verbose:
+        v = self.env[k]
+        if v and not isinstance(v, str):
+            raise KeyError("env[%s]=%s" % (k,v))
+    self.env.append_unique('HEPWAF_RUNTIME_ENVVARS', k)
+    
+### ------------------------------------------------------------------------
+@conf
+def _get_env_for_subproc(self, os_env_keys=None):
     import os
     #env = dict(os.environ)
     #waf_env = dict(self.env)
     #for k,v in waf_env.items():
-    env = dict(self.env)
-    for k,v in env.items():
+    env = dict(os.environ)
+    #env = dict(self.env)
+    if not os_env_keys:
+        os_env_keys = []
+    os_env_keys += self.env.HEPWAF_RUNTIME_ENVVARS
+    for k,v in dict(self.env).items():
+        if not k in os_env_keys:
+            try:            del env[k]
+            except KeyError:pass
+            continue
         v = self.env[k]
         #print("-- %s %s %r" % (k, type(k), v))
         if isinstance(v, (list,tuple)):
@@ -318,6 +398,11 @@ def _get_env_for_subproc(self):
         +waflib.Utils.to_list(self.env['PATH'])
         +[os.environ.get('PATH','')])
 
+    env['PYTHONPATH'] = os.pathsep.join(
+        [os.path.join(bld_area,'python')]
+        +waflib.Utils.to_list(self.env['PYTHONPATH'])
+        +[os.environ.get('PYTHONPATH','')])
+
     if self.is_darwin():
         env['DYLD_LIBRARY_PATH'] = os.pathsep.join(
             [os.path.join(bld_area,'lib')]
@@ -339,7 +424,8 @@ def _get_env_for_subproc(self):
 
               'CC',
               'CXX',
-
+              'LINK_CC',
+              'LINK_CXX',
               ):
         v = self.env.get_flat(k)
         env[k] = str(v)
@@ -347,6 +433,8 @@ def _get_env_for_subproc(self):
 
     env['SHLINKFLAGS'] += ' '+self.env.get_flat('LINKFLAGS_cshlib')
     env['SHEXT'] = self.dso_ext()[1:]
+    for k,v in env.iteritems():
+        if not isinstance(v, str):
+            raise KeyError("env[%s]=%s" % (k,v))
     return env
-
 ## EOF ##
