@@ -435,7 +435,7 @@ def _get_env_for_subproc(self, os_env_keys=None):
 
     env['SHLINKFLAGS'] += ' '+self.env.get_flat('LINKFLAGS_cshlib')
     env['SHEXT'] = self.dso_ext()[1:]
-    for k,v in env.iteritems():
+    for k,v in env.items():
         if not isinstance(v, str):
             raise KeyError("env[%s]=%s" % (k,v))
     return env

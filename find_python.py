@@ -218,7 +218,7 @@ def find_python_module(ctx, module_name, condition='', **kwargs):
     try:
         ctx.env.stash()
         env = ctx._get_env_for_subproc()
-        for k,v in env.iteritems():
+        for k,v in env.items():
             os.environ[k] = v
             pass
         ctx.check_python_module(module_name, condition)
