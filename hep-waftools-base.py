@@ -35,6 +35,7 @@ def options(ctx):
         help="Path to a config file holding version+paths to external s/w",
         )
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
+    ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
 
     return
 
@@ -49,6 +50,7 @@ def configure(ctx):
         ctx.end_msg(ok)
         pass
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
+    ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
     # register a couple of runtime environment variables
     ctx.declare_runtime_env('PATH')
     ctx.declare_runtime_env('RPATH')
