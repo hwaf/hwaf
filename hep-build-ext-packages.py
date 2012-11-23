@@ -452,8 +452,8 @@ class build_external_pkg(waflib.Task.Task):
             shell=ext_env['shell']
             )
         if sc != 0:
-            self.fatal("failed to %s [%s]\nlook into [%s]" %
-                       (ctx.cmd, name, fout.name))
+            ctx.fatal("failed to %s [%s]\nlook into [%s]" %
+                      (ctx.cmd, name, fout.name))
             pass
         stamp = open(ext_env['stamp'], 'w')
         stamp.write('')
