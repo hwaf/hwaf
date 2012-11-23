@@ -279,28 +279,27 @@ def declare_build_external(
         unpack_stamp.write('')
 
     ## real build...
-    if patch_cmd:
+    if patch_cmd and not os.path.exists(patch_stamp.abspath()):
         cmd = _get_cmd(patch_cmd)
-        if not os.path.exists(patch_stamp.abspath()):
-            cwd=build_dir.abspath()
-            msg.info('[%s] patching...' % name)
-            fout = open(patch_log.abspath(), 'w')
-            fout.write('++ cd %s\n' % cwd)
-            fout.write('++ %s\n' % cmd)
-            fout.flush()
-            sc = subprocess.call(
-                waflib.Utils.to_list(cmd),
-                env=env,
-                stdout=fout,
-                stderr=fout,
-                cwd=cwd
-                )
-            if sc != 0:
-                self.fatal("failed to patch [%s]\nlook into [%s]" %
-                           (name, fout.name))
-            patch_stamp.write('')
+        cwd=build_dir.abspath()
+        msg.info('[%s] patching...' % name)
+        fout = open(patch_log.abspath(), 'w')
+        fout.write('++ cd %s\n' % cwd)
+        fout.write('++ %s\n' % cmd)
+        fout.flush()
+        sc = subprocess.call(
+            waflib.Utils.to_list(cmd),
+            env=env,
+            stdout=fout,
+            stderr=fout,
+            cwd=cwd
+            )
+        if sc != 0:
+            self.fatal("failed to patch [%s]\nlook into [%s]" %
+                       (name, fout.name))
+        patch_stamp.write('')
 
-    if not os.path.exists(configure_stamp.abspath()):
+    if 1:
         msg.info('[%s] configuring...' % name)
         cmd = _get_cmd(configure_cmd)
         cwd=build_dir.abspath()
@@ -400,23 +399,29 @@ def schedule_build_external_pkg(self, *k, **kwd):
     out_node = bld_node.make_node("%s-build-ext" % self.name)
     tmp_node = out_node.make_node("tmp")
     outputs = []
+    log_files = [
+        "003-make.log",
+        ]
     stamp_node = out_node.make_node("%s-stamp"%self.name)
     stamp_files = [
         "003-make.stamp",
         ]
     if self.bld.cmd == 'install':
+        log_files += ["004-make_install.log",]
         stamp_files += ["004-make_install.stamp",]
         pass
+    for o in log_files:
+        o = tmp_node.make_node(o)
+        outputs += [o]
+        pass
+    
     for o in stamp_files:
         o = stamp_node.make_node(o)
-        #o.sig = waflib.Utils.h_file(o.abspath())
         outputs += [o]
-        #try:    os.remove(o.abspath())
-        #except: pass
         pass
     tsk = self.create_task('build_external_pkg', self.source, outputs)
-    #self.source += tsk.outputs
-    #merge_dsomap_hook(self, out_node).set_run_after(tsk)
+    wscript = self.bld.path.find_resource('wscript')
+    tsk.set_inputs(wscript)
     return
 
 class build_external_pkg(waflib.Task.Task):
@@ -432,6 +437,7 @@ class build_external_pkg(waflib.Task.Task):
     run_str = 'hep-waf-bld-ext-pkg ${SRC[0].name} -o ${TGT}'
     ext_in  = ['.extpkg']
     shell = False
+    always = True
     reentrant = False
     #after = ['cxxshlib', 'cxxprogram', 'symlink_tsk']
 
@@ -442,6 +448,11 @@ class build_external_pkg(waflib.Task.Task):
         if ctx.cmd == 'build':
             msg.info('[%s] building...' % tsk_name)
             pass
+
+        try:    os.remove(ext_env['stamp'])
+        except: pass
+        try:    os.remove(ext_env['stdout'])
+        except: pass
         
         cmd = ext_env['cmd']
         env= ctx._get_env_for_subproc()
@@ -477,5 +488,6 @@ class build_external_pkg(waflib.Task.Task):
                 os.stat(out_node.abspath())
             except:
                 return waflib.Task.RUN_ME
+            pass
         return status
     pass
