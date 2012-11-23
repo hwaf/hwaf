@@ -444,7 +444,11 @@ class build_external_pkg(waflib.Task.Task):
     def exec_command(self, cmd, **kw):
         ctx = self.generator.bld
         tsk_name = self.generator.name
-        ext_env = ctx.env['EXT_PKG_BUILD_%s' % tsk_name][ctx.cmd]
+        ext_env = ctx.env['EXT_PKG_BUILD_%s' % tsk_name]
+        if not ext_env:
+            ctx.fatal('no such external package build: %r' % tsk_name)
+            pass
+        ext_env = ext_env[ctx.cmd]
         if ctx.cmd == 'build':
             msg.info('[%s] building...' % tsk_name)
             pass
