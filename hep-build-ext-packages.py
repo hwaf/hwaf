@@ -420,7 +420,14 @@ def schedule_build_external_pkg(self, *k, **kwd):
     return
 
 class build_external_pkg(waflib.Task.Task):
-    vars = ['DEFINES', 'CPPFLAGS', 'INCLUDES', 'PREFIX', 'CC', 'CXX']
+    vars = ['PREFIX', 'DESTDIR',
+            'DEFINES', 'CPPFLAGS', 'INCLUDES',
+            'CC', 'CFLAGS',
+            'CXX', 'CXXFLAGS',
+            'AR', 'ARFLAGS',
+            'LINK_CC', 'LINK_CXX', 'LINKFLAGS', 'SHLINKFLAGS',
+            'FC', 'FCFLAGS',
+            ]
     color= 'BLUE'
     run_str = 'hep-waf-bld-ext-pkg ${SRC[0].name} -o ${TGT}'
     ext_in  = ['.extpkg']
@@ -453,7 +460,7 @@ class build_external_pkg(waflib.Task.Task):
             )
         if sc != 0:
             ctx.fatal("failed to %s [%s]\nlook into [%s]" %
-                      (ctx.cmd, name, fout.name))
+                      (ctx.cmd, tsk_name, fout.name))
             pass
         stamp = open(ext_env['stamp'], 'w')
         stamp.write('')
