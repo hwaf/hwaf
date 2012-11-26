@@ -322,6 +322,10 @@ def declare_build_external(
                        (name, fout.name))
         configure_stamp.write('')
 
+    self.env.append_unique(
+        'EXT_PKG_BUILD',
+        name
+        )
     self.env['EXT_PKG_BUILD_%s' % name] = {
         'build': {
             'cmd': _get_cmd(build_cmd),
