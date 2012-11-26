@@ -9,6 +9,7 @@ import sys
 
 # waf imports ---
 from waflib.Configure import conf
+import waflib.Context
 import waflib.Logs as msg
 import waflib.Utils
 
@@ -18,6 +19,10 @@ def options(ctx):
         '--cmtcfg',
         default=None,
         help="The build type. ex: x86_64-linux-gcc-opt")
+    ctx.add_option(
+        '--cmtpkgs',
+        default=None,
+        help="The directory where pkgs are located")
 
     return
 
@@ -76,10 +81,26 @@ def configure(ctx):
     ctx.env.CFG_COMPILER, \
     ctx.env.CFG_TYPE = ctx.env.CFG_QUADRUPLET
 
+    projname = waflib.Context.g_module.APPNAME
+    if not projname:
+        projname = osp.basename(os.getcwd())
+        waflib.Context.g_module.APPNAME = projname
+        pass
+    ctx.env.PROJNAME = projname
+
+    cmtpkgs = os.environ.get('CMTPKGS', None)
+    if not cmtpkgs and ctx.options.cmtpkgs:
+        cmtpkgs = ctx.options.cmtpkgs
+        pass
+    if not cmtpkgs:
+        cmtpkgs = 'pkg'
+        pass
+    ctx.env.CMTPKGS = cmtpkgs
+    
     msg.info('='*80)
-    #ctx.msg('project',    ctx.env.PROJNAME)
+    ctx.msg('project',    ctx.env.PROJNAME)
     ctx.msg('prefix',     ctx.env.PREFIX)
-    #ctx.msg('pkg dir',    ctx.env.CMTPKGS)
+    ctx.msg('pkg dir',    ctx.env.CMTPKGS)
     ctx.msg('variant',    ctx.env.CMTCFG)
     ctx.msg('arch',       ctx.env.CFG_ARCH)
     ctx.msg('OS',         ctx.env.CFG_OS)
