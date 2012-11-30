@@ -392,30 +392,49 @@ def _get_env_for_subproc(self, os_env_keys=None):
             env[k] = str(v)
             pass
         pass
-    #bld_area = self.env['BUILD_INSTALL_AREA']
+    bld_area = self.env['BUILD_INSTALL_AREA']
 
-    env['LD_LIBRARY_PATH'] = os.pathsep.join(
-        #[os.path.join(bld_area,'lib')]
-        waflib.Utils.to_list(self.env['LD_LIBRARY_PATH'])
-        +[os.environ.get('LD_LIBRARY_PATH','')])
+    if bld_area:
+        env['LD_LIBRARY_PATH'] = os.pathsep.join(
+            [os.path.join(bld_area,'lib')]
+            +waflib.Utils.to_list(self.env['LD_LIBRARY_PATH'])
+            +[os.environ.get('LD_LIBRARY_PATH','')])
 
-    env['PATH'] = os.pathsep.join(
-        #[os.path.join(bld_area,'bin')]
-        waflib.Utils.to_list(self.env['PATH'])
-        +[os.environ.get('PATH','')])
+        env['PATH'] = os.pathsep.join(
+            [os.path.join(bld_area,'bin')]
+            +waflib.Utils.to_list(self.env['PATH'])
+            +[os.environ.get('PATH','')])
 
-    env['PYTHONPATH'] = os.pathsep.join(
-        #[os.path.join(bld_area,'python')]
-        waflib.Utils.to_list(self.env['PYTHONPATH'])
-        +[os.environ.get('PYTHONPATH','')])
+        env['PYTHONPATH'] = os.pathsep.join(
+            [os.path.join(bld_area,'python')]
+            +waflib.Utils.to_list(self.env['PYTHONPATH'])
+            +[os.environ.get('PYTHONPATH','')])
 
-    if self.is_darwin():
-        env['DYLD_LIBRARY_PATH'] = os.pathsep.join(
-            #[os.path.join(bld_area,'lib')]
-            waflib.Utils.to_list(self.env['DYLD_LIBRARY_PATH'])
-            +[os.environ.get('DYLD_LIBRARY_PATH','')])
+        if self.is_darwin():
+            env['DYLD_LIBRARY_PATH'] = os.pathsep.join(
+                [os.path.join(bld_area,'lib')]
+                +waflib.Utils.to_list(self.env['DYLD_LIBRARY_PATH'])
+                +[os.environ.get('DYLD_LIBRARY_PATH','')])
+            pass
+    else:
+        env['LD_LIBRARY_PATH'] = os.pathsep.join(
+            waflib.Utils.to_list(self.env['LD_LIBRARY_PATH'])
+            +[os.environ.get('LD_LIBRARY_PATH','')])
+
+        env['PATH'] = os.pathsep.join(
+            waflib.Utils.to_list(self.env['PATH'])
+            +[os.environ.get('PATH','')])
+
+        env['PYTHONPATH'] = os.pathsep.join(
+            waflib.Utils.to_list(self.env['PYTHONPATH'])
+            +[os.environ.get('PYTHONPATH','')])
+
+        if self.is_darwin():
+            env['DYLD_LIBRARY_PATH'] = os.pathsep.join(
+                waflib.Utils.to_list(self.env['DYLD_LIBRARY_PATH'])
+                +[os.environ.get('DYLD_LIBRARY_PATH','')])
+            pass
         pass
-    
     for k in ('CPPFLAGS',
               'CFLAGS',
               'CCFLAGS',
