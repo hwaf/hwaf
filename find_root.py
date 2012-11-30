@@ -451,6 +451,7 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         #libpath = self.env.LD_LIBRARY_PATH,
         libpath = self.env.LD_LIBRARY_PATH + [self.path.get_bld().abspath()],
         defines=defines,
+        install_path='${INSTALL_AREA}/lib',
         **kw
         )
     o.env.GENREFLEX = self.env['GENREFLEX']
