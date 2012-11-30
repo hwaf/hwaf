@@ -61,7 +61,8 @@ def find_gccxml(ctx, **kwargs):
 
     ctx.env.GCCXML_VERSION = version
     ctx.env.GCCXML_BINDIR = osp.dirname(ctx.env.GCCXML)
-
+    ctx.env.GCCXML_HOME = osp.dirname(ctx.env.GCCXML_BINDIR)
+    
     ctx.declare_runtime_env('GCCXML')
     ctx.declare_runtime_env('GCCXML_BINDIR')
 
