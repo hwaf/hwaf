@@ -43,7 +43,7 @@ def configure(ctx):
     cfg_comp = osp.basename(ctx.env.CC[0])
     cfg_type = None
     
-    if not cmtcfg:
+    if not cmtcfg or cmtcfg == 'default':
         msg.debug('detecting default CMTCFG...')
         cfg_type = 'opt'
         if ctx.is_darwin():    cfg_os = 'darwin'
@@ -62,10 +62,10 @@ def configure(ctx):
     
     o = cmtcfg.split('-')
     if len(o) != 4:
-        msg.fatal(
+        ctx.fatal(
             ("Invalid CMTCFG (%s). Expected ARCH-OS-COMP-OPT. " +
             "ex: x86_64-linux-gcc-opt") %
-            ctx.env.CMTCFG)
+            cmtcfg)
     
     if o[1].startswith('mac'): o[1] = 'darwin'
     if o[1].startswith('slc'): o[1] = 'linux'
