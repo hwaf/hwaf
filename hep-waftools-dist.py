@@ -88,7 +88,7 @@ BuildRoot: %%{_tmppath}/%%{name}-%%{version}-%%{release}-root
 %%install
 rm -rf %%{buildroot}
 mkdir -p  %%{buildroot}
-./waf install
+./waf install --destdir=%%{buildroot}
 
 %%clean
 rm -rf %%{buildroot}
