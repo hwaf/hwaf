@@ -115,6 +115,10 @@ def find_at(ctx, check, what, where, **kwargs):
     if not osp.exists(where):
         return False
 
+    def _subst(v):
+        v = waflib.Utils.subst_vars(v, ctx.env)
+        return v
+    
     os_env = dict(os.environ)
     pkgp = os.getenv("PKG_CONFIG_PATH", "")
     try:
@@ -145,9 +149,6 @@ def find_at(ctx, check, what, where, **kwargs):
         else:
             os.environ["PKG_CONFIG_PATH"] = pkgconf_path
         if osp.exists(incdir):
-            def _subst(v):
-                v = waflib.Utils.subst_vars(v, ctx.env)
-                return v
             ctx.parse_flags(_subst("${CPPPATH_ST}") % incdir,
                             uselib_store=kwargs["uselib_store"])
         if osp.exists(libdir):
