@@ -12,7 +12,6 @@ import waflib.Utils
 import waflib.Logs as msg
 
 _heptooldir = osp.dirname(osp.abspath(__file__))
-g_HEPWAF_PROJECT_INFO = 'project.info'
 
 def options(ctx):
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
@@ -20,12 +19,10 @@ def options(ctx):
 
 def configure(ctx):
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
-    #ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
     return
 
 def build(ctx):
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
-    #ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
     return
 
 ### ---------------------------------------------------------------------------
@@ -44,7 +41,6 @@ def hepwaf_build(ctx):
     ctx.recurse(ctx.hepwaf_pkg_dirs())
 
     ctx._hepwaf_install_project_infos()
-
     return
 
 ## EOF ##
