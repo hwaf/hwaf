@@ -13,6 +13,8 @@ import waflib.Context
 import waflib.Logs as msg
 import waflib.Utils
 
+_heptooldir = osp.dirname(osp.abspath(__file__))
+
 ### ---------------------------------------------------------------------------
 def options(ctx):
     ctx.add_option(
@@ -24,6 +26,7 @@ def options(ctx):
         default=None,
         help="The directory where pkgs are located")
 
+    ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
     return
 
 ### ---------------------------------------------------------------------------
@@ -86,7 +89,7 @@ def configure(ctx):
         projname = osp.basename(os.getcwd())
         waflib.Context.g_module.APPNAME = projname
         pass
-    ctx.env.PROJNAME = projname
+    ctx.env.HEPWAF_PROJECT_NAME = projname
 
     cmtpkgs = os.environ.get('CMTPKGS', None)
     if not cmtpkgs and ctx.options.cmtpkgs:
@@ -96,9 +99,18 @@ def configure(ctx):
         cmtpkgs = 'pkg'
         pass
     ctx.env.CMTPKGS = cmtpkgs
+
+    if ctx.options.destdir:
+        ctx.env.DESTDIR = ctx.options.destdir
+        pass
     
+    # take INSTALL_AREA from PREFIX
+    ctx.env.INSTALL_AREA = ctx.env.PREFIX
+    if ctx.env.DESTDIR:
+        pass
+
     msg.info('='*80)
-    ctx.msg('project',    ctx.env.PROJNAME)
+    ctx.msg('project',    ctx.env.HEPWAF_PROJECT_NAME)
     ctx.msg('prefix',     ctx.env.PREFIX)
     ctx.msg('pkg dir',    ctx.env.CMTPKGS)
     ctx.msg('variant',    ctx.env.CMTCFG)

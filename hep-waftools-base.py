@@ -36,6 +36,7 @@ def options(ctx):
         )
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
     ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
+    ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
 
     return
 
@@ -51,6 +52,8 @@ def configure(ctx):
         pass
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
     ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
+    ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
+
     # register a couple of runtime environment variables
     ctx.declare_runtime_env('PATH')
     ctx.declare_runtime_env('RPATH')
@@ -87,6 +90,7 @@ def configure(ctx):
               'INSTALL_AREA',
               'INSTALL_AREA_BINDIR',
               'PREFIX',
+              'DESTDIR',
               'BINDIR',
               'LIBDIR',
               
@@ -107,7 +111,26 @@ def configure(ctx):
               ]:
         ctx.declare_runtime_env(k)
         pass
+
+    # configure project
+    ctx._hepwaf_configure_project()
     return
+
+### ---------------------------------------------------------------------------
+@conf
+def hepwaf_find_subpackages(self, directory='.'):
+    srcs = []
+    root_node = self.path.find_dir(directory)
+    dirs = root_node.ant_glob('**/*', src=False, dir=True)
+    for d in dirs:
+        #msg.debug ("##> %s (type: %s)" % (d.abspath(), type(d)))
+        node = d
+        if node and node.ant_glob('wscript'):
+            #msg.debug ("##> %s" % d.srcpath())
+            srcs.append(d)
+            pass
+        pass
+    return srcs
 
 ### ---------------------------------------------------------------------------
 @conf
