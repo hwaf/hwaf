@@ -114,6 +114,26 @@ def configure(ctx):
 
     # configure project
     ctx._hepwaf_configure_project()
+
+    # display project infos...
+    msg.info('='*80)
+    ctx.msg('project',    ctx.env.HEPWAF_PROJECT_NAME)
+    ctx.msg('prefix',     ctx.env.PREFIX)
+    if ctx.env.DESTDIR:
+        ctx.msg('destdir',     ctx.env.DESTDIR)
+        pass
+    ctx.msg('pkg dir',    ctx.env.CMTPKGS)
+    ctx.msg('variant',    ctx.env.CMTCFG)
+    ctx.msg('arch',       ctx.env.CFG_ARCH)
+    ctx.msg('OS',         ctx.env.CFG_OS)
+    ctx.msg('compiler',   ctx.env.CFG_COMPILER)
+    ctx.msg('build-type', ctx.env.CFG_TYPE)
+    deps = ctx.hepwaf_project_deps()
+    if deps: deps = ','.join(deps)
+    else:    deps = 'None'
+    ctx.msg('projects deps', deps)
+    msg.info('='*80)
+    
     return
 
 ### ---------------------------------------------------------------------------

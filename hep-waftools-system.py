@@ -109,17 +109,6 @@ def configure(ctx):
     if ctx.env.DESTDIR:
         pass
 
-    msg.info('='*80)
-    ctx.msg('project',    ctx.env.HEPWAF_PROJECT_NAME)
-    ctx.msg('prefix',     ctx.env.PREFIX)
-    ctx.msg('pkg dir',    ctx.env.CMTPKGS)
-    ctx.msg('variant',    ctx.env.CMTCFG)
-    ctx.msg('arch',       ctx.env.CFG_ARCH)
-    ctx.msg('OS',         ctx.env.CFG_OS)
-    ctx.msg('compiler',   ctx.env.CFG_COMPILER)
-    ctx.msg('build-type', ctx.env.CFG_TYPE)
-    msg.info('='*80)
-    
     return
 
 ### ---------------------------------------------------------------------------

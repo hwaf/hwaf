@@ -52,8 +52,8 @@ def _hepwaf_configure_project(ctx):
     cmtpkgs = osp.abspath(ctx.env.CMTPKGS)
     install_area = ctx.env.INSTALL_AREA
     
-    ctx.msg("cmtpkgs", cmtpkgs)
-    ctx.msg("install-area", install_area)
+    #ctx.msg("cmtpkgs", cmtpkgs)
+    #ctx.msg("install-area", install_area)
     
     ctx.env.INSTALL_AREA_INCDIR = os.path.join(install_area,'include')
     ctx.env.INSTALL_AREA_BINDIR = os.path.join(install_area,'bin')
@@ -65,7 +65,7 @@ def _hepwaf_configure_project(ctx):
     ctx.env.BUILD_INSTALL_AREA_BINDIR = os.path.join(binstall_area,'bin')
     ctx.env.BUILD_INSTALL_AREA_LIBDIR = os.path.join(binstall_area,'lib')
 
-    ctx.msg("bld-install", binstall_area)
+    #ctx.msg("bld-install", binstall_area)
 
     ## init project tree structure
     ctx.env.HEPWAF_PROJECT_ROOT = osp.abspath(os.getcwd())
@@ -82,8 +82,8 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
     if projpath is None: projpath = ctx.hepwaf_project_root()
 
     all_good = True
-    msg.info("projname: %s" % projname)
-    msg.info("projpath: %s" % projpath)
+    #msg.info("projname: %s" % projname)
+    #msg.info("projpath: %s" % projpath)
     ctx.hepwaf_add_project(projname)
     ctx.hepwaf_set_project_path(projname, projpath)
 
@@ -151,7 +151,6 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             _proj_prefix = osp.abspath(_proj_destdir) + _proj_prefix
             pass
 
-        msg.info(">>>>>>>>> %s" % _proj_prefix)
         def _un_massage(v):
             if isinstance(v, type("")):
                 return v.replace('@@HEPWAF_PREFIX@@', _proj_prefix)
@@ -393,12 +392,12 @@ def _hepwaf_build_pkg_deps(ctx, pkgdir=None):
     if not pkgdir:
         ctx.msg("pkg-dir", "<N/A>")
         return
-    ctx.msg("pkg-dir", pkgdir.abspath())
+    #ctx.msg("pkg-dir", pkgdir.abspath())
 
     pkgs = ctx.hepwaf_find_subpackages(pkgdir.name)
-    ctx.msg("local packages", str(len(pkgs)))
+    #ctx.msg("local packages", str(len(pkgs)))
     for pkg in pkgs:
-        msg.info(" %s" % pkg.path_from(pkgdir))
+        #msg.info(" %s" % pkg.path_from(pkgdir))
         pkgname = pkg.path_from(pkgdir)
         ctx.hepwaf_add_pkg(pkgname)
         ctx.env['HEPWAF_PKGDEPS_%s' % pkgname] = []
