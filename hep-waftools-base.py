@@ -89,6 +89,7 @@ def configure(ctx):
               'EXTERNAL_AREA',
               'INSTALL_AREA',
               'INSTALL_AREA_BINDIR',
+              'INSTALL_AREA_LIBDIR',
               'PREFIX',
               'DESTDIR',
               'BINDIR',
