@@ -69,8 +69,17 @@ def _hepwaf_configure_project(ctx):
 
     ## init project tree structure
     ctx.env.HEPWAF_PROJECT_ROOT = osp.abspath(os.getcwd())
+    ctx.env.HEPWAF_PROJECT_INFOS = {
+        'name': ctx.env.HEPWAF_PROJECT_NAME,
+        'root': ctx.env.HEPWAF_PROJECT_ROOT,
+        'deps': [],
+        'pkgs': [],
+        }
     ctx._hepwaf_configure_projects_tree()
 
+    ## FIXME:
+    ctx.env.PROJNAME = ctx.env.HEPWAF_PROJECT_NAME
+    
     ## configure packages
     ctx._hepwaf_configure_packages()
     
@@ -290,6 +299,12 @@ def _hepwaf_install_project_infos(ctx):
             return type(v)(vv)
         elif isinstance(v, (int, float)):
             return v
+        elif isinstance(v ,(dict,)):
+            vv = {}
+            for kk in v.keys():
+                vv[kk] = _massage(v[kk])
+                pass
+            return vv
         else:
             ctx.fatal('unhandled type %s' % type(v))
             pass
@@ -319,6 +334,11 @@ def hepwaf_project_names(self):
 @waflib.Configure.conf
 def hepwaf_add_project(self, projname):
     self.env.append_unique('HEPWAF_PROJECT_NAMES', projname)
+
+@waflib.Configure.conf
+def hepwaf_project_infos(self):
+    '''return the setup-dict for the current project'''
+    return self.env['HEPWAF_PROJECT_INFOS']
 
 @waflib.Configure.conf
 def hepwaf_project(self):
