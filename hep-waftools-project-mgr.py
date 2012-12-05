@@ -168,6 +168,12 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                 return type(v)(vv)
             elif isinstance(v, (int, float)):
                 return v
+            elif isinstance(v ,(dict,)):
+                vv = {}
+                for kk in v.keys():
+                    vv[kk] = _un_massage(v[kk])
+                    pass
+                return vv
             else:
                 ctx.fatal('unhandled type %s' % type(v))
                 pass
@@ -207,7 +213,11 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                      'CMTPKGS',
                      ):
                 continue
-            if k.startswith('HEPWAF_') or k.endswith('_PATTERN'):
+            # if k.startswith('HEPWAF_') or k.endswith('_PATTERN'):
+            #     continue
+            if k.endswith('_PATTERN'):
+                continue
+            if k.startswith('HEPWAF_') and not k.startswith('HEPWAF_FOUND_'):
                 continue
             # print "-- import [%s] from [%s] %r" % (k, ppname, denv[k])
             v = _un_massage(denv[k])
