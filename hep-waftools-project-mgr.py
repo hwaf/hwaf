@@ -77,9 +77,6 @@ def _hepwaf_configure_project(ctx):
         }
     ctx._hepwaf_configure_projects_tree()
 
-    ## FIXME:
-    ctx.env.PROJNAME = ctx.env.HEPWAF_PROJECT_NAME
-    
     ## configure packages
     ctx._hepwaf_configure_packages()
     

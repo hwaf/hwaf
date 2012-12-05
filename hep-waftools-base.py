@@ -133,6 +133,7 @@ def configure(ctx):
     if deps: deps = ','.join(deps)
     else:    deps = 'None'
     ctx.msg('projects deps', deps)
+    ctx.msg('install-area', ctx.env.INSTALL_AREA)
     msg.info('='*80)
     
     return
