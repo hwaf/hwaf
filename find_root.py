@@ -20,6 +20,8 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 def options(ctx):
 
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('find_libxml2',      tooldir=_heptooldir)
+    ctx.load('find_python',       tooldir=_heptooldir)
 
     ctx.add_option(
         '--with-root',
