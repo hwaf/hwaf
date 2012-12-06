@@ -35,7 +35,7 @@ def configure(ctx):
     ctx.load('c_config')
     ctx.load('compiler_cc')
     ctx.load('compiler_cxx')
-        
+
     cmtcfg = os.environ.get('CMTCFG', None)
     if not cmtcfg and ctx.options.cmtcfg:
         cmtcfg = ctx.options.cmtcfg
@@ -103,6 +103,8 @@ def configure(ctx):
     if ctx.options.destdir:
         ctx.env.DESTDIR = ctx.options.destdir
         pass
+
+    ctx.env.PREFIX = ctx.options.prefix or "/usr"
     
     # take INSTALL_AREA from PREFIX
     ctx.env.INSTALL_AREA = ctx.env.PREFIX
