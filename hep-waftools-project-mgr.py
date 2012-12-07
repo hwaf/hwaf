@@ -111,6 +111,8 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         if not projpath:
             continue
         #msg.info(">>>>>>>>> %s" % projpath)
+        projpath = osp.expanduser(osp.expandvars(projpath))
+        projpath = osp.abspath(projpath)
         proj_dir = ctx.root.find_dir(projpath)
         # try from destdir, before bailing out
         if not proj_dir and ctx.env.DESTDIR:
