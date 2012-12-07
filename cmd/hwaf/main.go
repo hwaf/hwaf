@@ -44,6 +44,7 @@ func init() {
 		Name: os.Args[0],
 		Commands: []*commander.Command{
 			hwaf_make_cmd_init(),
+			hwaf_make_cmd_setup(),
 		},
 		Flag: flag.NewFlagSet("hwaf", flag.ExitOnError),
 	}
