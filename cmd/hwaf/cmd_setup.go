@@ -95,7 +95,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	}
 
 	lcfg := gocfg.NewDefault()
-	section := "hwaf"
+	section := "hwaf-cfg"
 	if !lcfg.AddSection(section) {
 		err = fmt.Errorf("%s: could not create section [%s] in file [%s]", 
 			n, section, lcfg_fname)
@@ -103,7 +103,8 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	}
 	
 	for k, v := range map[string]string{
-		"project": projdir,
+		"projects": projdir,
+		"cmtpkgs": "pkg",
 	} {
 		if !lcfg.AddOption(section, k, v) {
 			err := fmt.Errorf("%s: could not add option [%s] to section [%s]", 
