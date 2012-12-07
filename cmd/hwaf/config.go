@@ -15,9 +15,7 @@ func init() {
 	cfgdir := filepath.Dir(CfgFname)
 	if !path_exists(cfgdir) {
 		err := os.MkdirAll(cfgdir, 0700)
-		if err != nil {
-			panic(err.Error())
-		}
+		handle_err(err)
 	}
 
 	fname := CfgFname
@@ -26,17 +24,13 @@ func init() {
 		section := "hwaf"
 		if !Cfg.AddSection(section) {
 			err := fmt.Errorf("hwaf: could not create section [%s] in file [%s]", section, fname)
-			panic(err.Error())
+			handle_err(err)
 		}
 		err := Cfg.WriteFile(CfgFname, 0600, "")
-		if err != nil {
-			panic(err.Error())
-		}
+		handle_err(err)
 	} else {
 		cfg, err := gocfg.ReadDefault(fname)
-		if err != nil {
-			panic(err.Error())
-		}
+		handle_err(err)
 		Cfg = cfg
 	}
 }
