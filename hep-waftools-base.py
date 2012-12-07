@@ -30,11 +30,6 @@ def options(ctx):
             action='store_true',
             help="Enable Fink")
     ctx.add_option(
-        '--use-cfg-file',
-        default=None,
-        help="Path to a config file holding version+paths to external s/w",
-        )
-    ctx.add_option(
         '--local-cfg',
         default=None,
         help="Path to the local config file listing all type of configuration infos")
@@ -47,8 +42,8 @@ def options(ctx):
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
-    if ctx.options.use_cfg_file:
-        fname = osp.abspath(ctx.options.use_cfg_file)
+    if ctx.options.local_cfg:
+        fname = osp.abspath(ctx.options.local_cfg)
         ctx.start_msg("Manifest file")
         ctx.end_msg(fname)
         ok = ctx.read_cfg(fname)
@@ -313,16 +308,18 @@ def read_cfg(ctx, fname):
     cfg = CfgParser()
     cfg.read([fname])
     # top-level config
-    if cfg.has_section('hepwaf-cfg'):
-        section = 'hepwaf-cfg'
-        for k in ('cmtcfg', 'prefix'):
+    if cfg.has_section('hwaf-cfg'):
+        section = 'hwaf-cfg'
+        for k in ('cmtcfg', 'prefix', 'projects'):
             if cfg.has_option(section, k):
+                #msg.info("....[%s]..." % k)
                 if not (None == getattr(ctx.options, k)):
                     # user provided a value from command-line: that wins.
                     pass
                 else:
                     v = cfg.get(section, k)
                     setattr(ctx.options, k, v)
+                    #ctx.msg(k, v)
                     pass
                 pass
         pass
