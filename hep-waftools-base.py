@@ -310,7 +310,7 @@ def read_cfg(ctx, fname):
     # top-level config
     if cfg.has_section('hwaf-cfg'):
         section = 'hwaf-cfg'
-        for k in ('cmtcfg', 'prefix', 'projects'):
+        for k in ('cmtcfg', 'prefix', 'projects', 'cmtpkgs'):
             if cfg.has_option(section, k):
                 #msg.info("....[%s]..." % k)
                 if not (None == getattr(ctx.options, k)):
