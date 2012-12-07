@@ -135,6 +135,12 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	err = git.Run()
 	handle_err(err)
 
+	// create 'pkg' directory
+	if !path_exists("pkg") {
+		err = os.MkdirAll("pkg", 0700)
+		handle_err(err)
+	}
+	
 	// commit
 	if !quiet {
 		fmt.Printf("%s: commit workarea...\n", n)
