@@ -17,14 +17,14 @@ func hwaf_make_cmd_init() *commander.Command {
 		UsageLine: "init [options] <workarea>",
 		Short:     "initialize a new workarea",
 		Long: `
-init initialize a new workarea.
+init initializes a new workarea.
 
 ex:
  $ hwaf init
  $ hwaf init .
  $ hwaf init my-work-area
 `,
-		Flag: *flag.NewFlagSet("hwaf-ini", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-init", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("quiet", false, "only print error and warning messages, all other output will be suppressed")
 
