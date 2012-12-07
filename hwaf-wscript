@@ -31,6 +31,12 @@ def go(ctx):
 
 def options(ctx):
     ctx.load('hwaf', tooldir='.hwaf/tools')
+
+    ctx.add_option(
+        '--prefix',
+        default=PREFIX,
+        help="installation prefix [default: '%(default)s']")
+
     ctx.add_option(
         '--local-cfg',
         default=".hwaf/local.cfg",
