@@ -31,7 +31,10 @@ def go(ctx):
 
 def options(ctx):
     ctx.load('hwaf', tooldir='.hwaf/tools')
-    
+    ctx.add_option(
+        '--local-cfg',
+        default=".hwaf/local.cfg",
+        help="Path to the local config file listing all type of configuration infos")
     return
 
 def configure(ctx):

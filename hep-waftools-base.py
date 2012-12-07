@@ -34,6 +34,11 @@ def options(ctx):
         default=None,
         help="Path to a config file holding version+paths to external s/w",
         )
+    ctx.add_option(
+        '--local-cfg',
+        default=None,
+        help="Path to the local config file listing all type of configuration infos")
+
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
     ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
     ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
