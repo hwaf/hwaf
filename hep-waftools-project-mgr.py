@@ -69,14 +69,15 @@ def _hepwaf_configure_project(ctx):
 
     ## init project tree structure
     ctx.env.HEPWAF_PROJECT_ROOT = osp.abspath(os.getcwd())
-    ctx.env.HEPWAF_PROJECT_INFOS = {
-        'name': ctx.env.HEPWAF_PROJECT_NAME,
-        'root': ctx.env.HEPWAF_PROJECT_ROOT,
-        'deps': [],
-        'pkgs': {},
-        'dirs': [],
+    ctx.env.HEPWAF_PROJECTS = {
+        ctx.env.HEPWAF_PROJECT_NAME : {
+            'name': ctx.env.HEPWAF_PROJECT_NAME,
+            'root': ctx.env.HEPWAF_PROJECT_ROOT,
+            'deps': [],
+            'pkgs': {},
+            'dirs': [],
+            },
         }
-    ctx.env.HEPWAF_PROJECTS = []
     ctx._hepwaf_configure_projects_tree()
 
     ## configure packages
@@ -86,13 +87,12 @@ def _hepwaf_configure_project(ctx):
 
 @waflib.Configure.conf
 def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
-    if projname is None: projname = ctx.hepwaf_project()
+    if projname is None: projname = ctx.hepwaf_project_name()
     if projpath is None: projpath = ctx.hepwaf_project_root()
 
     all_good = True
     #msg.info("projname: %s" % projname)
     #msg.info("projpath: %s" % projpath)
-    ctx.hepwaf_add_project(ctx.env.HEPWAF_PROJECT_INFOS)
     ctx.hepwaf_set_project_path(projname, projpath)
 
     projdeps = ctx.options.projects
@@ -110,6 +110,7 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
     for projpath in projpaths:
         if not projpath:
             continue
+        #msg.info(">>>>>>>>> %s" % projpath)
         proj_dir = ctx.root.find_dir(projpath)
         # try from destdir, before bailing out
         if not proj_dir and ctx.env.DESTDIR:
@@ -124,7 +125,9 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             proj_infos = proj_dir.ant_glob('**/%s' % g_HEPWAF_PROJECT_INFO)
         except:
             all_good = False
+            msg.warn("could not locate project at [%s]" % projpath)
             continue
+
         if not proj_infos:
             msg.error("could not locate %s file at [%s]"
                       % (g_HEPWAF_PROJECT_INFO, proj_dir.abspath()))
@@ -141,12 +144,14 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         
         denv = waflib.ConfigSet.ConfigSet()
         denv.load(proj_node.abspath())
-        proj_dict = dict(denv['HEPWAF_PROJECT_INFOS'])
-        ppname = proj_dict['name']
+        proj_dicts = dict(denv['HEPWAF_PROJECTS'])
+        ppname = denv['HEPWAF_PROJECT_NAME']
+        proj_dict = proj_dicts[ppname]
         envvars = denv['HEPWAF_RUNTIME_ENVVARS'][:]
         projdeps += [ppname]
-        ctx.hepwaf_add_project(proj_dict)
+        ctx.hepwaf_import_projects(proj_dicts)
         ctx.hepwaf_set_project_path(ppname, projpath)
+        ctx.hepwaf_project_deps(projname).append(ppname)
 
         # add packages from this project...
         for pkg in proj_dict['pkgs'].keys():
@@ -235,7 +240,8 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             #     continue
             if k.endswith('_PATTERN'):
                 continue
-            if k.startswith('HEPWAF_') and not k.startswith('HEPWAF_FOUND_'):
+            if k.startswith('HEPWAF_') and \
+                   not k.startswith(('HEPWAF_FOUND_',)):
                 continue
             # print "-- import [%s] from [%s] %r" % (k, ppname, denv[k])
             v = _un_massage(denv[k])
@@ -245,6 +251,7 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             else:
                 #ctx.fatal('invalid type (%s) for [%s]' % (type(v),k))
                 env[k] = v
+            pass
         pass # loop over proj-paths
     if not all_good:
         ctx.fatal("error(s) while configuring project dependency tree")
@@ -299,7 +306,7 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                 ctx.env[k] = v
             pass
         pass
-    ctx.hepwaf_project_deps(projname).extend(projdeps)
+    #ctx.hepwaf_project_deps(projname).extend(projdeps)
     #ctx.env['HEPWAF_PROJECT_DEPS_%s' % projname] = projdeps
     if ctx.env.PATH:
         ctx.env.PATH = os.pathsep.join(ctx.env.PATH)
@@ -355,11 +362,7 @@ def _hepwaf_configure_packages(ctx):
 ### API for project queries
 @waflib.Configure.conf
 def hepwaf_project_names(self):
-    names = []
-    for proj in self.env['HEPWAF_PROJECTS']:
-        names.append(proj['name'])
-        pass
-    return names
+    return list(self.hepwaf_projects().keys())
 
 @waflib.Configure.conf
 def hepwaf_add_project(self, projdict):
@@ -368,17 +371,18 @@ def hepwaf_add_project(self, projdict):
             "hepwaf_add_project takes a dict as argument (got %r)"
             % type(projdict)
             )
-    self.env['HEPWAF_PROJECTS'].append(projdict)
+    projname = projdict['name']
+    if projname in self.env['HEPWAF_PROJECTS'].keys():
+        raise RuntimeError("project with name [%s] already in project-db !" %
+                           projname)
+    self.env['HEPWAF_PROJECTS'][projname] = projdict
 
 @waflib.Configure.conf
-def hepwaf_project_infos(self):
-    '''return the setup-dict for the current project'''
-    return self.env['HEPWAF_PROJECT_INFOS']
-
-@waflib.Configure.conf
-def hepwaf_project(self):
-    '''return the name of the current project'''
-    return self.env['HEPWAF_PROJECT_INFOS']['name']
+def hepwaf_import_projects(self, projdicts):
+    for projname,projdict in projdicts.items():
+        self.hepwaf_add_project(projdict)
+        pass
+    return
 
 @waflib.Configure.conf
 def hepwaf_projects(self):
@@ -386,9 +390,19 @@ def hepwaf_projects(self):
     return self.env['HEPWAF_PROJECTS']
 
 @waflib.Configure.conf
+def hepwaf_project(self):
+    '''return the setup-dict for the current project'''
+    return self._hepwaf_get_project(self.env['HEPWAF_PROJECT_NAME'])
+
+@waflib.Configure.conf
+def hepwaf_project_name(self):
+    '''return the name of the current project'''
+    return self.hepwaf_project()['name']
+
+@waflib.Configure.conf
 def hepwaf_project_root(self):
     '''return the root path of the current project'''
-    return self.env['HEPWAF_PROJECT_INFOS']['root']
+    return self.hepwaf_project()['root']
 
 @waflib.Configure.conf
 def _hepwaf_get_project_idx(self, projname):
@@ -401,13 +415,15 @@ def _hepwaf_get_project_idx(self, projname):
 @waflib.Configure.conf
 def _hepwaf_get_project(self, projname=None):
     if projname is None:
-        projname = self.hepwaf_project()
+        projname = self.hepwaf_project_name()
         pass
-    idx = self._hepwaf_get_project_idx(projname)
-    if idx is None:
-        raise KeyError('no such project [%s] (values=%s)'%
-                       (projname,self.hepwaf_project_names()))
-    return self.env['HEPWAF_PROJECTS'][idx]
+    try:
+        return self.env['HEPWAF_PROJECTS'][projname]
+    except:
+        raise KeyError(
+            'no such project [%s] (values=%s)'%
+            (projname,self.hepwaf_project_names())
+            )
     
 @waflib.Configure.conf
 def hepwaf_set_project_path(self, projname, projpath):
@@ -427,13 +443,19 @@ def hepwaf_project_deps(self, projname=None):
 def hepwaf_itr_projects(self, projname=None):
     '''return an iterator over projects, following project deps'''
     def _itr_proj(projname):
-        proj = self._hepwaf_get_project(projname)
-        yield proj
-        for pproj in proj['deps']:
-            yield self._hepwaf_get_project(pproj)
+        p = self._hepwaf_get_project(projname)
+        yield p
+        for pp in p['deps']:
+            for ppp in _itr_proj(pp):
+                yield ppp
+                pass
+            pass
         return
     for proj in _itr_proj(projname):
+        #msg.info("::itr:: %s..." % proj['name'])
         yield proj
+        pass
+    return
 
 # @waflib.Configure.conf
 # def hepwaf_find_project_for_pkg(self, pkgname, projname=None):
@@ -496,11 +518,15 @@ def hepwaf_find_pkg(self, pkgname, projname=None):
         #msg.info("??? proj [%s]..." % proj['name'])
         pkgs = proj['pkgs']
         try:
-            return pkgs[pkgname]
+            pkg = pkgs[pkgname]
+            #msg.info("??? proj [%s]... YEAAAAAAH!" % proj['name'])
+            return pkg
         except KeyError:
             pass
-    raise KeyError('no such package [%s] in any of the projects\n%s' %
-                   (pkgname, self.hepwaf_projects()))
+    errmsg = "no such package [%s] in any of the projects\n%s" % \
+             (pkgname, self.hepwaf_projects())
+    msg.error(errmsg)
+    raise KeyError(errmsg)
 
 @waflib.Configure.conf
 def hepwaf_pkg_dirs(self, projname=None):
@@ -661,16 +687,16 @@ class ShowProjects(waflib.Build.BuildContext):
     cmd = 'show-projects'
 
     def execute_build(self):
-        self.show_projects(projname=self.hepwaf_project())
+        self.show_projects(projname=self.hepwaf_project_name())
         return
 
     def get_project_uses(self, projname):
-        projnames = self.env['HEPWAF_PROJECT_NAMES']
+        projnames = self.hepwaf_project_names()
         if not projname in projnames:
             self.fatal('project [%s] not in project list:\nprojects: %s' %
                        (projname, projnames))
             pass
-        projdeps = self.env['HEPWAF_PROJECT_DEPS_%s' % projname]
+        projdeps = self.hepwaf_project_deps(projname)
         return projdeps
 
     def do_display_project_uses(self, projname, depth=0):
@@ -681,7 +707,10 @@ class ShowProjects(waflib.Build.BuildContext):
             pass
         return
     
-    def show_projects(self, projname):
+    def show_projects(self, projname=None):
+        if projname is None:
+            projname = self.hepwaf_project_name()
+            pass
         projdeps = self.get_project_uses(projname)
         msg.info('project dependency list for [%s] (#projs=%s)' %
                  (projname, len(projdeps)))
