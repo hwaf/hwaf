@@ -35,7 +35,7 @@ def options(ctx):
     ctx.add_option(
         '--prefix',
         default=PREFIX,
-        help="installation prefix [default: '%(default)s']")
+        help="installation prefix [default: %r]"%PREFIX)
 
     ctx.add_option(
         '--local-cfg',
