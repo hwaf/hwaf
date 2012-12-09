@@ -28,7 +28,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-setup", flag.ExitOnError),
 	}
-	cmd.Flag.String("projects", "/opt/sw/mana", "Path to the project to setup against")
+	cmd.Flag.String("projects", "/opt/sw/mana", "List of paths to projects to setup against")
 	cmd.Flag.String("cfg", "", "Path to a configuration file")
 	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
 
