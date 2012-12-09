@@ -1,0 +1,31 @@
+TODO
+====
+
+- run, shell
+
+- goenv ?
+
+- "nut" packaging system ?
+
+- wrap all of waf+hep-waf-tools ?
+
+- look into EasyBuild + hashdist ?
+
+- minimal hwaf-runtime ? ie:
+  - locate default URI-path to packages
+    - hook into 'co' to get (default) package names/dirs ?
+      so: 'hwaf co Control/AthenaKernel'
+      looks up <repository>/package-db,
+      finds Control/AthenaKernel
+      clones from git://mana/mana-athenakernel
+      into Control/AthenaCommon
+  - default hierarchical structure:
+    <sitedir>/<projname>/<version>/<cmtcfg>
+  - env.vars for hep-waftools dir ?
+
+- consolidate caches: local-cfg.file, waf's _cache.py
+  - discriminate b/w configure/build/runtime caches ?
+
+- implement a subcommand plugin a-la git:
+  - looks up hwaf-XYZ under HWAF_PATH, then PATH
+  - executes as 'hwaf XYZ'
