@@ -26,7 +26,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-init", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("quiet", false, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
 
 	return cmd
 }
@@ -49,7 +49,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	dirname = os.ExpandEnv(dirname)
 	dirname = filepath.Clean(dirname)
 
-	quiet := cmd.Flag.Lookup("quiet").Value.Get().(bool)
+	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 
 	if !quiet {
 		fmt.Printf("%s: creating workarea [%s]...\n", n, dirname)
@@ -84,8 +84,8 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: add .hwaf/tools submodule...\n", n)
 	}
 	git = exec.Command("git", "submodule", "add",
-		"git://github.com/mana-fwk/hep-waftools",
-		//"file:///Users/binet/dev/mana/git/hep-waftools",
+		//"git://github.com/mana-fwk/hep-waftools",
+		"file:///Users/binet/dev/mana/git/hep-waftools",
 		".hwaf/tools",
 		)
 	if !quiet {
