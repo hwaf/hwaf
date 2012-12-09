@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/sbinet/go-commander"
 	"github.com/sbinet/go-flag"
@@ -22,14 +23,14 @@ ex:
  $ hwaf setup
  $ hwaf setup .
  $ hwaf setup my-work-area
- $ hwaf setup -project=/opt/sw/mana/mana-core/20121207 my-work-area
+ $ hwaf setup -projects=/opt/sw/mana/mana-core/20121207 my-work-area
  $ hwaf setup -cfg=${HWAF_CFG}/usr.cfg my-work-area
 `,
 		Flag: *flag.NewFlagSet("hwaf-setup", flag.ExitOnError),
 	}
-	cmd.Flag.String("project", "/opt/sw/mana", "Path to the project to setup against")
+	cmd.Flag.String("projects", "/opt/sw/mana", "Path to the project to setup against")
 	cmd.Flag.String("cfg", "", "Path to a configuration file")
-	cmd.Flag.Bool("quiet", false, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
 
 	return cmd
 }
@@ -51,30 +52,38 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	dirname = os.ExpandEnv(dirname)
 	dirname = filepath.Clean(dirname)
 
-	quiet := cmd.Flag.Lookup("quiet").Value.Get().(bool)
-	projdir := cmd.Flag.Lookup("project").Value.Get().(string)
+	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 	cfg_fname:= cmd.Flag.Lookup("cfg").Value.Get().(string)
 
-	projdir = os.ExpandEnv(projdir)
-	projdir = filepath.Clean(projdir)
+	projdirs := []string{}
+	const pathsep = string(os.PathListSeparator)
+	for _, v := range strings.Split(cmd.Flag.Lookup("projects").Value.Get().(string), pathsep) {
+		if v != "" {
+			v = os.ExpandEnv(v)
+			v = filepath.Clean(v)
+			projdirs = append(projdirs, v)
+		}
+	}
 
 	if !quiet {
 		fmt.Printf("%s: setup workarea [%s]...\n", n, dirname)
-		fmt.Printf("%s: project=%s\n", n, projdir)
+		fmt.Printf("%s: projects=%v\n", n, projdirs)
 		if cfg_fname != "" {
 			fmt.Printf("%s: cfg-file=%s\n", n, cfg_fname)
 		}			
 	}
 
-	if !path_exists(projdir) {
-		err = fmt.Errorf("no such directory: [%s]", projdir)
-		handle_err(err)
-	}
+	for _, projdir := range projdirs {
+		if !path_exists(projdir) {
+			err = fmt.Errorf("no such directory: [%s]", projdir)
+			handle_err(err)
+		}
 
-	pinfos := filepath.Join(projdir, "project.info")
-	if !path_exists(pinfos) {
-		err = fmt.Errorf("no such file: [%s]", pinfos)
-		handle_err(err)
+		pinfo := filepath.Join(projdir, "project.info")
+		if !path_exists(pinfo) {
+			err = fmt.Errorf("no such file: [%s]", pinfo)
+			handle_err(err)
+		}
 	}
 
 	pwd, err := os.Getwd()
@@ -103,7 +112,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	}
 	
 	for k, v := range map[string]string{
-		"projects": projdir,
+		"projects": strings.Join(projdirs, pathsep),
 		"cmtpkgs": "pkg",
 	} {
 		if !lcfg.AddOption(section, k, v) {
