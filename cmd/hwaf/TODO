@@ -29,3 +29,10 @@ TODO
 - implement a subcommand plugin a-la git:
   - looks up hwaf-XYZ under HWAF_PATH, then PATH
   - executes as 'hwaf XYZ'
+
+- hwaf-co:
+  - retrieve many packages in one go
+  - retrieve a package list from a file
+  - automatic re-configure when a new package is retrieved ?
+    - at least flag that re-configure is needed... (run waf clean ?)
+
