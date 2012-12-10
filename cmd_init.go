@@ -84,8 +84,8 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: add .hwaf/tools submodule...\n", n)
 	}
 	git = exec.Command("git", "submodule", "add",
-		//"git://github.com/mana-fwk/hep-waftools",
-		"file:///Users/binet/dev/mana/git/hep-waftools",
+		"git://github.com/mana-fwk/hep-waftools",
+		//"file:///Users/binet/dev/mana/git/hep-waftools",
 		".hwaf/tools",
 		)
 	if !quiet {
