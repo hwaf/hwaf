@@ -71,6 +71,13 @@ def find_posixlibs(ctx, **kwargs):
         )
 
     # find bfd
+    bfd_mandatory = kwargs.get('mandatory', True)
+    if ctx.is_darwin():
+        bfd_mandatory = kwargs.get('mandatory', False)
+        pass
+    bfd_kwargs = dict(kwargs)
+    bfd_kwargs['mandatory'] = bfd_mandatory
+    
     ctx.check_with(
         ctx.check,
         "bfd",
@@ -80,7 +87,7 @@ def find_posixlibs(ctx, **kwargs):
         lib='bfd',
         uselib_store='bfd',
         use='dl',
-        **kwargs
+        **bfd_kwargs
         )
     ctx.env.DEFINES_bfd = []
 
@@ -119,7 +126,7 @@ def find_posixlibs(ctx, **kwargs):
         ''',
         use="bfd dl",
         execute  = True,
-        mandatory= True,
+        mandatory= bfd_mandatory,
         )
 
     ctx.env.HEPWAF_FOUND_POSIXLIBS = 1
