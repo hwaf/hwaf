@@ -1,5 +1,6 @@
-mana-dev
-========
+hwaf
+====
 
-``mana-dev`` is a set of commands to ease developing against and with ``mana``.
+``hwaf`` is a set of commands to ease developing against and with ``mana``.
+
 
