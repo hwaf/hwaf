@@ -12,9 +12,9 @@ import (
 	"github.com/sbinet/go-flag"
 )
 
-func hwaf_make_cmd_self_init() *commander.Command {
+func hwaf_make_cmd_self_update() *commander.Command {
 	cmd := &commander.Command{
-		Run:       hwaf_run_cmd_self_init,
+		Run:       hwaf_run_cmd_self_update,
 		UsageLine: "self-update [options]",
 		Short:     "update hwaf itself",
 		Long: `
@@ -30,7 +30,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
