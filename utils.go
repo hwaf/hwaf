@@ -46,3 +46,9 @@ func load_local_cfg() *gocfg.Config {
 
 	return cfg
 }
+
+func hwaf_root() string {
+	return os.ExpandEnv(filepath.Join("${HOME}", ".config", "hwaf"))
+}
+
+// EOF
