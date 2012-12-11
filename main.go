@@ -46,13 +46,22 @@ func init() {
 			hwaf_make_cmd_init(),
 			hwaf_make_cmd_setup(),
 			hwaf_make_cmd_checkout(),
+
 			hwaf_make_cmd_self_init(),
+
+			hwaf_make_cmd_waf_configure(),
+			hwaf_make_cmd_waf_build(),
+			hwaf_make_cmd_waf_install(),
 		},
 		Flag: flag.NewFlagSet("hwaf", flag.ExitOnError),
 	}
 }
 
 func main() {
+
+	if len(os.Args) == 1 {
+		os.Args = append(os.Args, "build")
+	}
 
 	err := g_cmd.Flag.Parse(os.Args[1:])
 	if err != nil {
