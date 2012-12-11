@@ -48,6 +48,7 @@ func init() {
 			hwaf_make_cmd_checkout(),
 
 			hwaf_make_cmd_self_init(),
+			hwaf_make_cmd_self_update(),
 
 			hwaf_make_cmd_waf_configure(),
 			hwaf_make_cmd_waf_build(),
