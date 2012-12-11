@@ -18,6 +18,7 @@ def configure(conf):
 """
 import os
 import os.path as osp
+import subprocess
 import shlex
 
 import waflib.Build
@@ -30,10 +31,6 @@ import waflib.Utils
 try:    from urllib import request
 except: from urllib import urlopen
 else:   urlopen = request.urlopen
-
-# hepwaf imports
-import waflib.extras.waffle_utils as waffle_utils
-import waflib.extras.waffle_subprocess as subprocess
 
 CACHEVAR = 'WAFCACHE_PACKAGE'
 
@@ -199,11 +196,11 @@ def declare_build_external(
     ## env...
     self.env['EXT_BUNDLED_%s_ROOT'%name.upper()] = install_dir.abspath()
     if env is None:
-        env = waffle_utils._get_env_for_subproc(self, os_env_keys)
+        env = self._get_env_for_subproc(os_env_keys)
     else:
         # do not modify user's env...
         env = dict(env)
-        senv = waffle_utils._get_env_for_subproc(self, os_env_keys)
+        senv = self._get_env_for_subproc(os_env_keys)
         for k in ('CXXFLAGS',
                   'CCFLAGS',
                   'CFLAGS',
