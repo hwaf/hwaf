@@ -54,6 +54,115 @@ class RunCmdContext(waflib.Build.BuildContext):
         return ret
     pass # RunCmdContext
 
+def _hwaf_get_runtime_env(ctx):
+    """return an environment suitably modified to run locally built programs
+    """
+    import os
+    cwd = os.getcwd()
+    root = os.path.realpath(ctx.env.PREFIX)
+    root = os.path.realpath(ctx.env.INSTALL_AREA)
+    if ctx.env.DESTDIR:
+        root = ctx.env.DESTDIR + os.sep + ctx.env.INSTALL_AREA
+        pass
+    bindir = os.path.join(root, 'bin')
+    libdir = os.path.join(root, 'lib')
+    pydir  = os.path.join(root, 'python')
+
+    env = dict(os.environ)
+
+    def _env_prepend(k, *args):
+        v = env.get(k, '').split(os.pathsep)
+        env[k] = os.pathsep.join(args)
+        if v:
+            env[k] = os.pathsep.join([env[k]]+v)
+            pass
+        return
+    
+    for k in ctx.env.keys():
+        v = ctx.env[k]
+        # reject invalid values (for an environment)
+        if isinstance(v, (list,tuple)):
+            continue
+        # special case of PATH
+        if k == 'PATH': 
+            _env_prepend(k, v)
+            continue
+        
+        env[k] = str(v)
+        pass
+
+    ## handle the shell flavours...
+    if waffle_utils._is_linux(ctx):
+        ppid = os.getppid()
+        shell = os.path.realpath('/proc/%d/exe' % ppid)
+    elif waffle_utils._is_darwin(ctx):
+        ppid = os.getppid()
+        shell = os.popen('ps -p %d -o %s | tail -1' % (ppid, "command")).read()
+        shell = shell.strip()
+        if shell.startswith('-'):
+            shell = shell[1:]
+    elif waffle_utils._is_windows(ctx):
+        ## FIXME: ???
+        shell = None
+    else:
+        shell = None
+        pass
+
+    # catch-all
+    if not shell or "(deleted)" in shell:
+        # fallback on the *login* shell
+        shell = os.environ.get("SHELL", "/bin/sh")
+        pass
+
+    env['SHELL'] = shell
+    
+        
+    # joboptions support
+    _env_prepend('JOBOPTSEARCHPATH',
+                 '.',
+                 os.path.join(root, 'jobOptions'))
+
+    # clid and misc. support
+    _env_prepend('DATAPATH',
+                 '.',
+                 os.path.join(root, 'share'))
+    
+    # FIXME: this should probably be done elsewhere (and better)
+    #env['ROOTSYS'] = os.getenv('ROOTSYS', ctx.env.ROOTSYS)
+
+    # path
+    _env_prepend('PATH', bindir)
+
+    # lib
+    _env_prepend('LD_LIBRARY_PATH', libdir, *ctx.env.LIBPATH)
+
+    # dy-ld-library
+    if waffle_utils._is_darwin(ctx):
+        _env_prepend('DYLD_LIBRARY_PATH', libdir, *ctx.env.LIBPATH)
+    else:
+        env['DYLD_LIBRARY_PATH'] = ''
+        pass
+
+    # pythonpath
+    if ctx.env.ROOTSYS:
+        _env_prepend('PYTHONPATH', os.path.join(ctx.env.ROOTSYS,'lib'))
+        pass
+    _env_prepend('PYTHONPATH', pydir)
+
+    ## for k in ('PATH',
+    ##           'LD_LIBRARY_PATH',
+    ##           'PYTHONPATH',
+    ##           ):
+    ##     msg.info('env[%s]: %r' % (k,env[k]))
+
+    for k in env:
+        v = env[k]
+        if not isinstance(v, str):
+            msg.warning('env[%s]=%r (%s)' % (k,v,type(v)))
+            del env[k]
+            
+    return env
+
 def hwaf_run_cmd_with_runtime_env(ctx, cmds):
     # make sure we build first"
     # waflib.Scripting.run_command('install')
@@ -73,7 +182,7 @@ def hwaf_run_cmd_with_runtime_env(ctx, cmds):
     pydir  = os.path.join(root, 'python')
 
     # get the runtime...
-    env = _get_runtime_env(ctx)
+    env = _hwaf_get_runtime_env(ctx)
 
     for k in env:
         v = env[k]
