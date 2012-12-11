@@ -266,11 +266,9 @@ def hwaf_ishell(ctx):
 
     ## handle the shell flavours...
     if ctx.is_linux():
-        ppid = os.getppid()
-        shell = os.path.realpath('/proc/%d/exe' % ppid)
+        shell = os.environ.get("SHELL", "/bin/sh")
     elif ctx.is_darwin():
-        ppid = os.getppid()
-        shell = os.popen('ps -p %d -o %s | tail -1' % (ppid, "command")).read()
+        shell = os.environ.get("SHELL", "/bin/sh")
         shell = shell.strip()
         if shell.startswith('-'):
             shell = shell[1:]
@@ -390,12 +388,14 @@ def hwaf_ishell(ctx):
         v = env[k]
         if not isinstance(v, str):
             ctx.fatal('env[%s]=%r (%s)' % (k,v,type(v)))
-            
-
+            pass
+        pass
+    
     retval = subprocess.Popen(
         shell_cmd,
         env=env,
-        cwd=os.getcwd()
+        cwd=os.getcwd(),
+        shell=True,
         ).wait()
 
     try:
