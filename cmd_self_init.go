@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -74,17 +76,26 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 	// add bin dir
 	bin := filepath.Join(top, "bin")
 	if !path_exists(bin) {
-		err = os.MkdirAll(top, 0700)
+		err = os.MkdirAll(bin, 0700)
 		handle_err(err)
 	}
 	
 	// add waf-bin
-	waf := filepath.Join(bin, "waf")
-	if path_exists(waf) {
-		err = os.Remove(waf)
+	waf_fname := filepath.Join(bin, "waf")
+	if path_exists(waf_fname) {
+		err = os.Remove(waf_fname)
 		handle_err(err)
 	}
-	
+	waf, err := os.Create(waf_fname)
+	handle_err(err)
+	defer waf.Close()
+
+	resp, err := http.Get("https://github.com/mana-fwk/hwaf/raw/master/waf")
+	handle_err(err)
+	defer resp.Body.Close()
+	_, err = io.Copy(waf, resp.Body)
+	handle_err(err)
+
 	if !quiet {
 		fmt.Printf("%s: self-init... [ok]\n", n)
 	}
