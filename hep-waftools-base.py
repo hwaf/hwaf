@@ -37,6 +37,7 @@ def options(ctx):
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
     ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
     ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
+    ctx.load('hep-waftools-runtime', tooldir=_heptooldir)
 
     return
 
@@ -53,6 +54,7 @@ def configure(ctx):
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
     ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
     ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
+    ctx.load('hep-waftools-runtime', tooldir=_heptooldir)
 
     # register a couple of runtime environment variables
     ctx.declare_runtime_env('PATH')

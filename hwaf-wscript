@@ -58,3 +58,10 @@ def build(ctx):
 def check(ctx):
     return
 
+def shell(ctx):
+    ctx.load('hwaf', tooldir='.hwaf/tools')
+    hwaf_ishell(ctx)
+    return
+
+def run(ctx):
+    return
