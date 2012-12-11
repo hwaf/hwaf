@@ -81,27 +81,31 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 
 	// add hep-waf-tools
 	if !quiet {
-		fmt.Printf("%s: add .hwaf/tools submodule...\n", n)
+		fmt.Printf("%s: add .hwaf/tools...\n", n)
 	}
-	git = exec.Command("git", "submodule", "add",
-		"git://github.com/mana-fwk/hep-waftools",
-		//"file:///Users/binet/dev/mana/git/hep-waftools",
-		".hwaf/tools",
+	hwaf_tools_dir := filepath.Join("${HOME}", ".config", "hwaf", "tools")
+	hwaf_tools_dir = os.ExpandEnv(hwaf_tools_dir)
+	if !path_exists(hwaf_tools_dir) {
+		git = exec.Command(
+			"git", "clone",
+			"git://github.com/mana-fwk/hep-waftools",
+			hwaf_tools_dir,
 		)
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
+		if !quiet {
+			git.Stdout = os.Stdout
+			git.Stderr = os.Stderr
+		}
+		err = git.Run()
+		handle_err(err)
 	}
-	err = git.Run()
+	if !path_exists(".hwaf") {
+		err = os.MkdirAll(".hwaf", 0700)
+		handle_err(err)
+	}
+	err = os.Symlink(hwaf_tools_dir, ".hwaf/tools")
 	handle_err(err)
-
-	// init submodules
-	if !quiet {
-		fmt.Printf("%s: initialize submodule(s)...\n", n)
-	}
-	git = exec.Command("git", "submodule", "update",
-		"--recursive", "--init",
-		)
+	
+	git = exec.Command("git", "add", ".hwaf/tools")
 	if !quiet {
 		git.Stdout = os.Stdout
 		git.Stderr = os.Stderr
@@ -140,7 +144,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		err = os.MkdirAll("pkg", 0700)
 		handle_err(err)
 	}
-	
+
 	// commit
 	if !quiet {
 		fmt.Printf("%s: commit workarea...\n", n)
@@ -152,7 +156,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	}
 	err = git.Run()
 	handle_err(err)
-	
+
 	if !quiet {
 		fmt.Printf("%s: creating workarea [%s]... [ok]\n", n, dirname)
 	}
