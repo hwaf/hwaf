@@ -48,9 +48,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: self-init...\n", n)
 	}
 
-	top := filepath.Join("${HOME}", ".config", "hwaf")
-	top = os.ExpandEnv(top)
-
+	top := hwaf_root()
 	if !path_exists(top) {
 		err = os.MkdirAll(top, 0700)
 		handle_err(err)
