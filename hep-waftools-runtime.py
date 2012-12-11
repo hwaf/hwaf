@@ -77,6 +77,17 @@ def _hwaf_get_runtime_env(ctx):
             env[k] = os.pathsep.join([env[k]]+v)
             pass
         return
+
+    def _clean_env_path(env, k):
+        paths = env.get(k, '').split(os.pathsep)
+        o = []
+        for p in paths:
+            if osp.exists(p):
+                o.append(p)
+                pass
+            pass
+        env[k] = os.pathsep.join(o)
+        return
     
     for k in ctx.env.keys():
         v = ctx.env[k]
@@ -93,11 +104,9 @@ def _hwaf_get_runtime_env(ctx):
 
     ## handle the shell flavours...
     if ctx.is_linux():
-        ppid = os.getppid()
-        shell = os.path.realpath('/proc/%d/exe' % ppid)
+        shell = os.environ.get("SHELL", "/bin/sh")
     elif ctx.is_darwin():
-        ppid = os.getppid()
-        shell = os.popen('ps -p %d -o %s | tail -1' % (ppid, "command")).read()
+        shell = os.environ.get("SHELL", "/bin/sh")
         shell = shell.strip()
         if shell.startswith('-'):
             shell = shell[1:]
@@ -127,9 +136,6 @@ def _hwaf_get_runtime_env(ctx):
                  '.',
                  os.path.join(root, 'share'))
     
-    # FIXME: this should probably be done elsewhere (and better)
-    #env['ROOTSYS'] = os.getenv('ROOTSYS', ctx.env.ROOTSYS)
-
     # path
     _env_prepend('PATH', bindir)
 
@@ -160,7 +166,16 @@ def _hwaf_get_runtime_env(ctx):
         if not isinstance(v, str):
             msg.warning('env[%s]=%r (%s)' % (k,v,type(v)))
             del env[k]
-            
+
+    for k in (
+        'PATH',
+        'LD_LIBRARY_PATH',
+        'DYLD_LIBRARY_PATH',
+        'PYTHONPATH',
+        ):
+        _clean_env_path(env, k)
+        pass
+    
     return env
 
 def hwaf_run_cmd_with_runtime_env(ctx, cmds):
@@ -321,19 +336,6 @@ def hwaf_ishell(ctx):
         env['ENV'] = dotrc_fname
         pass
 
-    # FIXME: this should probably be done elsewhere (and better)
-    #env['ROOTSYS'] = os.getenv('ROOTSYS', ctx.env.ROOTSYS)
-    if ctx.env['BUNDLED_ROOT']:
-        rootsys_setup = textwrap.dedent('''
-        pushd ${ROOTSYS}
-        echo ":: sourcing \${ROOTSYS}/bin/thisroot.sh..."
-        source ./bin/thisroot.sh
-        popd
-        ''')
-
-    else:
-        rootsys_setup = ''
-        pass
     ###
 
 
@@ -351,22 +353,12 @@ def hwaf_ishell(ctx):
         export PATH=%(hwaf_path)s
         export LD_LIBRARY_PATH=%(hwaf_ld_library_path)s
         export DYLD_LIBRARY_PATH=%(hwaf_dyld_library_path)s
-
-        # for ROOT
-        ROOTSYS=%(rootsys)s
-        %(rootsys_setup)s
-
-        # setup PYTHONPATH *after* ROOT so "we" win
         export PYTHONPATH=%(hwaf_pythonpath)s
-
-        # env. variables for athena
-        JOBOPTSEARCHPATH=%(hwaf_joboptsearchpath)s
-        DATAPATH=.:%(hwaf_datapath)s
 
         # customize PS1 so we know we are in a hwaf subshell
         export PS1="[hwaf] ${PS1}"
 
-        echo ":: mana environment... [setup]"
+        echo ":: hwaf environment... [setup]"
         echo ":: hit ^D or exit to go back to the parent shell"
         echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
         ''' % {
@@ -375,10 +367,6 @@ def hwaf_ishell(ctx):
             'hwaf_ld_library_path': env['LD_LIBRARY_PATH'],
             'hwaf_dyld_library_path': env['DYLD_LIBRARY_PATH'],
             'hwaf_pythonpath': env['PYTHONPATH'],
-            'hwaf_joboptsearchpath': env['JOBOPTSEARCHPATH'],
-            'hwaf_datapath': env['DATAPATH'],
-            'rootsys':  env['ROOTSYS'],
-            'rootsys_setup': rootsys_setup,
             }
         ))
     dotrc.flush()
