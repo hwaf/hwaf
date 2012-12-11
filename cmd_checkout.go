@@ -15,9 +15,9 @@ func hwaf_make_cmd_checkout() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_checkout,
 		UsageLine: "co [options] <pkg-uri> [<local-pkg-name>]",
-		Short:     "checkout adds a package to the current workarea",
+		Short:     "add a package to the current workarea",
 		Long: `
-checkout adds a package to the current workarea.
+co adds a package to the current workarea.
 
 ex:
  $ hwaf co /foo/pkg
