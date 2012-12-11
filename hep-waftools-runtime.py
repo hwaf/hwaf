@@ -92,16 +92,16 @@ def _hwaf_get_runtime_env(ctx):
         pass
 
     ## handle the shell flavours...
-    if ctx._is_linux():
+    if ctx.is_linux():
         ppid = os.getppid()
         shell = os.path.realpath('/proc/%d/exe' % ppid)
-    elif ctx._is_darwin():
+    elif ctx.is_darwin():
         ppid = os.getppid()
         shell = os.popen('ps -p %d -o %s | tail -1' % (ppid, "command")).read()
         shell = shell.strip()
         if shell.startswith('-'):
             shell = shell[1:]
-    elif ctx._is_windows():
+    elif ctx.is_windows():
         ## FIXME: ???
         shell = None
     else:
@@ -137,7 +137,7 @@ def _hwaf_get_runtime_env(ctx):
     _env_prepend('LD_LIBRARY_PATH', libdir, *ctx.env.LIBPATH)
 
     # dy-ld-library
-    if ctx._is_darwin():
+    if ctx.is_darwin():
         _env_prepend('DYLD_LIBRARY_PATH', libdir, *ctx.env.LIBPATH)
     else:
         env['DYLD_LIBRARY_PATH'] = ''
@@ -265,16 +265,16 @@ def hwaf_ishell(ctx):
 
 
     ## handle the shell flavours...
-    if ctx._is_linux():
+    if ctx.is_linux():
         ppid = os.getppid()
         shell = os.path.realpath('/proc/%d/exe' % ppid)
-    elif ctx._is_darwin():
+    elif ctx.is_darwin():
         ppid = os.getppid()
         shell = os.popen('ps -p %d -o %s | tail -1' % (ppid, "command")).read()
         shell = shell.strip()
         if shell.startswith('-'):
             shell = shell[1:]
-    elif ctx._is_windows():
+    elif ctx.is_windows():
         ## FIXME: ???
         shell = None
     else:
