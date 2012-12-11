@@ -46,13 +46,21 @@ func init() {
 			hwaf_make_cmd_init(),
 			hwaf_make_cmd_setup(),
 			hwaf_make_cmd_checkout(),
+			hwaf_make_cmd_version(),
 
 			hwaf_make_cmd_self_init(),
 			hwaf_make_cmd_self_update(),
 
+			hwaf_make_cmd_waf(),
 			hwaf_make_cmd_waf_configure(),
 			hwaf_make_cmd_waf_build(),
 			hwaf_make_cmd_waf_install(),
+			hwaf_make_cmd_waf_clean(),
+			hwaf_make_cmd_waf_distclean(),
+
+			hwaf_make_cmd_waf_show_projects(),
+			hwaf_make_cmd_waf_show_pkg_uses(),
+			
 		},
 		Flag: flag.NewFlagSet("hwaf", flag.ExitOnError),
 	}

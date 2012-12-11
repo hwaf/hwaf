@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"runtime"
 
 	"github.com/sbinet/go-commander"
 	"github.com/sbinet/go-flag"
@@ -48,58 +49,55 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: self-update...\n", n)
 	}
 
-	top := hwaf_root()
-	if !path_exists(top) {
-		err = os.MkdirAll(top, 0700)
-		handle_err(err)
-	}
+	old, err := exec.LookPath(os.Args[0])
+	handle_err(err)
 
-	// add hep-waftools cache
-	hwaf_tools := filepath.Join(top, "tools")
-	if path_exists(hwaf_tools) {
-		err = os.RemoveAll(hwaf_tools)
-		handle_err(err)
-	}
-	git := exec.Command(
-		"git", "clone", "git://github.com/mana-fwk/hep-waftools",
-		hwaf_tools,
+	url := fmt.Sprintf(
+		"https://github.com/downloads/mana-fwk/hwaf/hwaf-%s-%s",
+		runtime.GOOS, runtime.GOARCH,
 	)
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
+	tmp, err := ioutil.TempFile("", "hwaf-")
+	handle_err(err)
+	defer tmp.Close()
+
+	// make it executable
+	err = tmp.Chmod(0777)
 	handle_err(err)
 
-	// add bin dir
-	bin := filepath.Join(top, "bin")
-	if !path_exists(bin) {
-		err = os.MkdirAll(bin, 0700)
-		handle_err(err)
-	}
-	
-	// add waf-bin
-	waf_fname := filepath.Join(bin, "waf")
-	if path_exists(waf_fname) {
-		err = os.Remove(waf_fname)
-		handle_err(err)
-	}
-	waf, err := os.OpenFile(waf_fname, os.O_WRONLY|os.O_CREATE, 0777)
-	handle_err(err)
-	defer func() {
-		err = waf.Sync()
-		handle_err(err)
-		err = waf.Close()
-		handle_err(err)
-	}()
-
-	resp, err := http.Get("https://github.com/mana-fwk/hwaf/raw/master/waf")
+	// download new file
+	resp, err := http.Get(url)
 	handle_err(err)
 	defer resp.Body.Close()
-	_, err = io.Copy(waf, resp.Body)
+
+	if resp.StatusCode != 200 {
+		err = fmt.Errorf("could not d/l [%s] (reason: %q)\n", url, resp.Status)
+		handle_err(err)
+	}
+
+	nbytes, err := io.Copy(tmp, resp.Body)
 	handle_err(err)
-	
+
+	if nbytes <= 0 {
+		err = fmt.Errorf("could not copy hwaf from [%s]", url)
+		handle_err(err)
+	}
+
+	err = tmp.Sync()
+	handle_err(err)
+
+	// self-init
+	hwaf := exec.Command(tmp.Name(), "self-init", fmt.Sprintf("-q=%v", quiet))
+	hwaf.Stderr = os.Stderr
+	hwaf.Stdout = os.Stdout
+	err = hwaf.Run()
+	handle_err(err)
+
+	// replace current binary
+	err = os.Rename(tmp.Name(), old)
+	handle_err(err)
+
 	if !quiet {
+		fmt.Printf("%s: [%s] updated\n", n, old)
 		fmt.Printf("%s: self-update... [ok]\n", n)
 	}
 }
