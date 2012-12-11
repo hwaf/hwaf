@@ -19,7 +19,7 @@ ex:
  $ hwaf version
  hwaf-20121211
 `,
-		Flag:        *flag.NewFlagSet("hwaf-version", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-version", flag.ExitOnError),
 	}
 	return cmd
 }

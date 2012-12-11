@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/sbinet/go-commander"
-	"github.com/sbinet/go-flag"
 	gocfg "github.com/sbinet/go-config/config"
+	"github.com/sbinet/go-flag"
 )
 
 func hwaf_make_cmd_setup() *commander.Command {
@@ -53,7 +53,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	dirname = filepath.Clean(dirname)
 
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
-	cfg_fname:= cmd.Flag.Lookup("cfg").Value.Get().(string)
+	cfg_fname := cmd.Flag.Lookup("cfg").Value.Get().(string)
 
 	projdirs := []string{}
 	const pathsep = string(os.PathListSeparator)
@@ -70,7 +70,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: projects=%v\n", n, projdirs)
 		if cfg_fname != "" {
 			fmt.Printf("%s: cfg-file=%s\n", n, cfg_fname)
-		}			
+		}
 	}
 
 	for _, projdir := range projdirs {
@@ -106,26 +106,26 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	lcfg := gocfg.NewDefault()
 	section := "hwaf-cfg"
 	if !lcfg.AddSection(section) {
-		err = fmt.Errorf("%s: could not create section [%s] in file [%s]", 
+		err = fmt.Errorf("%s: could not create section [%s] in file [%s]",
 			n, section, lcfg_fname)
 		handle_err(err)
 	}
-	
+
 	for k, v := range map[string]string{
 		"projects": strings.Join(projdirs, pathsep),
-		"cmtpkgs": "pkg",
+		"cmtpkgs":  "pkg",
 	} {
 		if !lcfg.AddOption(section, k, v) {
-			err := fmt.Errorf("%s: could not add option [%s] to section [%s]", 
+			err := fmt.Errorf("%s: could not add option [%s] to section [%s]",
 				n, k, section,
-				)
+			)
 			handle_err(err)
 		}
 	}
 
 	err = lcfg.WriteFile(lcfg_fname, 0600, "")
 	handle_err(err)
-	
+
 	if !quiet {
 		fmt.Printf("%s: setup workarea [%s]... [ok]\n", n, dirname)
 	}

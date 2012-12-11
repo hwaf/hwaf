@@ -71,18 +71,18 @@ func hwaf_run_cmd_checkout(cmd *commander.Command, args []string) {
 	git := exec.Command("git", "submodule", "add",
 		pkguri,
 		filepath.Join(pkgdir, pkgname),
-		)
+	)
 	if !quiet {
 		git.Stdout = os.Stdout
 		git.Stderr = os.Stderr
 	}
 	err = git.Run()
 	handle_err(err)
-	
+
 	git = exec.Command(
-		"git", "submodule", "update", 
+		"git", "submodule", "update",
 		"--init", "--recursive",
-		)
+	)
 	if !quiet {
 		git.Stdout = os.Stdout
 		git.Stderr = os.Stderr

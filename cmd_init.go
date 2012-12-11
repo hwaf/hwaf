@@ -104,7 +104,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	}
 	err = os.Symlink(hwaf_tools_dir, ".hwaf/tools")
 	handle_err(err)
-	
+
 	git = exec.Command("git", "add", ".hwaf/tools")
 	if !quiet {
 		git.Stdout = os.Stdout

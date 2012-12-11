@@ -77,7 +77,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 		err = os.MkdirAll(bin, 0700)
 		handle_err(err)
 	}
-	
+
 	// add waf-bin
 	waf_fname := filepath.Join(bin, "waf")
 	if path_exists(waf_fname) {
@@ -98,7 +98,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 	defer resp.Body.Close()
 	_, err = io.Copy(waf, resp.Body)
 	handle_err(err)
-	
+
 	if !quiet {
 		fmt.Printf("%s: self-init... [ok]\n", n)
 	}

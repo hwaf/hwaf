@@ -33,8 +33,8 @@ import (
 	"fmt"
 	"os"
 
-    "github.com/sbinet/go-commander"
-    "github.com/sbinet/go-flag"
+	"github.com/sbinet/go-commander"
+	"github.com/sbinet/go-flag"
 )
 
 var g_cmd *commander.Commander
@@ -60,7 +60,6 @@ func init() {
 
 			hwaf_make_cmd_waf_show_projects(),
 			hwaf_make_cmd_waf_show_pkg_uses(),
-			
 		},
 		Flag: flag.NewFlagSet("hwaf", flag.ExitOnError),
 	}

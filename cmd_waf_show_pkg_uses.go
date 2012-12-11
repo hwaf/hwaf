@@ -36,7 +36,7 @@ func hwaf_run_cmd_waf_show_pkg_uses(cmd *commander.Command, args []string) {
 		err = fmt.Errorf(
 			"no such file [%s]\nplease re-run 'hwaf self-init'\n",
 			waf,
-			)
+		)
 		handle_err(err)
 	}
 
