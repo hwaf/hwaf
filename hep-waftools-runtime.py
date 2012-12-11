@@ -261,7 +261,7 @@ def hwaf_ishell(ctx):
     pydir  = os.path.join(root, 'python')
 
     # get the runtime...
-    env = _get_runtime_env(ctx)
+    env = _hwaf_get_runtime_env(ctx)
 
 
     ## handle the shell flavours...
