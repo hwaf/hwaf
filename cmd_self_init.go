@@ -16,7 +16,7 @@ func hwaf_make_cmd_self_init() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_self_init,
 		UsageLine: "self-init [options] <workarea>",
-		Short:     "initialize hwaf proper",
+		Short:     "initialize hwaf itself",
 		Long: `
 self-init initializes hwaf internal files.
 
