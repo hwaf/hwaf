@@ -21,7 +21,7 @@ distclean removes the build directory of the local project or packages.
 ex:
  $ hwaf distclean
 `,
-		Flag: *flag.NewFlagSet("hwaf-waf-distclean", flag.ExitOnError),
+		Flag:        *flag.NewFlagSet("hwaf-waf-distclean", flag.ExitOnError),
 		CustomFlags: true,
 	}
 	return cmd

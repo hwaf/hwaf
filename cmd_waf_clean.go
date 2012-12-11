@@ -21,7 +21,7 @@ clean cleans the local project or packages.
 ex:
  $ hwaf clean
 `,
-		Flag: *flag.NewFlagSet("hwaf-waf-clean", flag.ExitOnError),
+		Flag:        *flag.NewFlagSet("hwaf-waf-clean", flag.ExitOnError),
 		CustomFlags: true,
 	}
 	return cmd

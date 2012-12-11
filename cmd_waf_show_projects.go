@@ -21,7 +21,7 @@ show project displays the project-dependency tree of the local project.
 ex:
  $ hwaf show-projects
 `,
-		Flag: *flag.NewFlagSet("hwaf-waf-show-projects", flag.ExitOnError),
+		Flag:        *flag.NewFlagSet("hwaf-waf-show-projects", flag.ExitOnError),
 		CustomFlags: true,
 	}
 	return cmd

@@ -23,7 +23,7 @@ ex:
  $ hwaf install --prefix=my-install-area
  $ hwaf install --prefix=my-install-area --destdir=/tmp/dest
 `,
-		Flag: *flag.NewFlagSet("hwaf-waf-install", flag.ExitOnError),
+		Flag:        *flag.NewFlagSet("hwaf-waf-install", flag.ExitOnError),
 		CustomFlags: true,
 	}
 	return cmd

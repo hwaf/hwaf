@@ -21,7 +21,7 @@ show project displays the project-dependency tree of the local project.
 ex:
  $ hwaf show-pkg-uses
 `,
-		Flag: *flag.NewFlagSet("hwaf-waf-show-pkg-uses", flag.ExitOnError),
+		Flag:        *flag.NewFlagSet("hwaf-waf-show-pkg-uses", flag.ExitOnError),
 		CustomFlags: true,
 	}
 	return cmd
