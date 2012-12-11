@@ -23,12 +23,13 @@ ex:
  $ hwaf setup
  $ hwaf setup .
  $ hwaf setup my-work-area
- $ hwaf setup -projects=/opt/sw/mana/mana-core/20121207 my-work-area
+ $ hwaf setup -p=/opt/sw/mana/mana-core/20121207 my-work-area
+ $ hwaf setup -p=/path1:/path2 my-work-area
  $ hwaf setup -cfg=${HWAF_CFG}/usr.cfg my-work-area
 `,
 		Flag: *flag.NewFlagSet("hwaf-setup", flag.ExitOnError),
 	}
-	cmd.Flag.String("projects", "/opt/sw/mana", "List of paths to projects to setup against")
+	cmd.Flag.String("p", "/opt/sw/mana", "List of paths to projects to setup against")
 	cmd.Flag.String("cfg", "", "Path to a configuration file")
 	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
 
@@ -57,7 +58,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 
 	projdirs := []string{}
 	const pathsep = string(os.PathListSeparator)
-	for _, v := range strings.Split(cmd.Flag.Lookup("projects").Value.Get().(string), pathsep) {
+	for _, v := range strings.Split(cmd.Flag.Lookup("p").Value.Get().(string), pathsep) {
 		if v != "" {
 			v = os.ExpandEnv(v)
 			v = filepath.Clean(v)
