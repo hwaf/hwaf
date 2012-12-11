@@ -50,7 +50,7 @@ func hwaf_run_cmd_checkout(cmd *commander.Command, args []string) {
 	}
 
 	pkguri = os.ExpandEnv(pkguri)
-	pkguri = filepath.Clean(pkguri)
+	//pkguri = filepath.Clean(pkguri)
 
 	pkgname = os.ExpandEnv(pkgname)
 	pkgname = filepath.Clean(pkgname)
