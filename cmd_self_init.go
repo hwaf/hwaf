@@ -84,16 +84,21 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 		err = os.Remove(waf_fname)
 		handle_err(err)
 	}
-	waf, err := os.Create(waf_fname)
+	waf, err := os.OpenFile(waf_fname, os.O_WRONLY|os.O_CREATE, 0777)
 	handle_err(err)
-	defer waf.Close()
+	defer func() {
+		err = waf.Sync()
+		handle_err(err)
+		err = waf.Close()
+		handle_err(err)
+	}()
 
 	resp, err := http.Get("https://github.com/mana-fwk/hwaf/raw/master/waf")
 	handle_err(err)
 	defer resp.Body.Close()
 	_, err = io.Copy(waf, resp.Body)
 	handle_err(err)
-
+	
 	if !quiet {
 		fmt.Printf("%s: self-init... [ok]\n", n)
 	}
