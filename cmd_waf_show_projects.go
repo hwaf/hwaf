@@ -22,6 +22,7 @@ ex:
  $ hwaf show-projects
 `,
 		Flag: *flag.NewFlagSet("hwaf-waf-show-projects", flag.ExitOnError),
+		CustomFlags: true,
 	}
 	return cmd
 }

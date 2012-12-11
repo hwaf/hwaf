@@ -24,6 +24,7 @@ ex:
  $ hwaf configure --prefix=my-install-area --with-clhep=/path/to/clhep
 `,
 		Flag: *flag.NewFlagSet("hwaf-waf-configure", flag.ExitOnError),
+		CustomFlags: true,
 	}
 	return cmd
 }

@@ -24,6 +24,7 @@ ex:
  $ hwaf build --prefix=my-install-area --destdir=/tmp/dest
 `,
 		Flag: *flag.NewFlagSet("hwaf-waf-build", flag.ExitOnError),
+		CustomFlags: true,
 	}
 	return cmd
 }

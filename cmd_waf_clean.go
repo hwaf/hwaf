@@ -22,6 +22,7 @@ ex:
  $ hwaf clean
 `,
 		Flag: *flag.NewFlagSet("hwaf-waf-clean", flag.ExitOnError),
+		CustomFlags: true,
 	}
 	return cmd
 }

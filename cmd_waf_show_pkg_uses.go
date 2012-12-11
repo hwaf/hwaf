@@ -22,6 +22,7 @@ ex:
  $ hwaf show-pkg-uses
 `,
 		Flag: *flag.NewFlagSet("hwaf-waf-show-pkg-uses", flag.ExitOnError),
+		CustomFlags: true,
 	}
 	return cmd
 }
