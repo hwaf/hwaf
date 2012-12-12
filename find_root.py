@@ -22,6 +22,7 @@ def options(ctx):
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
     ctx.load('find_libxml2',      tooldir=_heptooldir)
     ctx.load('find_python',       tooldir=_heptooldir)
+    ctx.load('find_gccxml', tooldir=_heptooldir)
 
     ctx.add_option(
         '--with-root',
@@ -36,7 +37,10 @@ def configure(ctx):
 @conf
 def find_root(ctx, **kwargs):
     
-    ctx.load('hep-waftools-base find_python find_libxml2', tooldir=_heptooldir)
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('find_python', tooldir=_heptooldir)
+    ctx.load('find_libxml2', tooldir=_heptooldir)
+    ctx.load('find_gccxml', tooldir=_heptooldir)
 
     if not ctx.env.HEPWAF_FOUND_PYTHON:
         ctx.find_python(version=kwargs.get('python_version', (2,6)))
