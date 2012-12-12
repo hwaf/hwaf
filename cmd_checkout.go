@@ -90,6 +90,17 @@ func hwaf_run_cmd_checkout(cmd *commander.Command, args []string) {
 	err = git.Run()
 	handle_err(err)
 
+	git = exec.Command(
+		"git", "commit", "-m",
+		fmt.Sprintf("adding package [%s]", pkgname),
+	)
+	if !quiet {
+		git.Stdout = os.Stdout
+		git.Stderr = os.Stderr
+	}
+	err = git.Run()
+	handle_err(err)
+
 	if !quiet {
 		fmt.Printf("%s: checkout package [%s]... [ok]\n", n, pkguri)
 	}

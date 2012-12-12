@@ -165,7 +165,10 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	if !quiet {
 		fmt.Printf("%s: commit workarea...\n", n)
 	}
-	git = exec.Command("git", "commit", "-m", `"init hwaf workarea"`)
+	git = exec.Command(
+		"git", "commit", "-m", 
+		fmt.Sprintf("init hwaf project [%s]", proj_name),
+	)
 	if !quiet {
 		git.Stdout = os.Stdout
 		git.Stderr = os.Stderr

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -125,6 +126,28 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	}
 
 	err = lcfg.WriteFile(lcfg_fname, 0600, "")
+	handle_err(err)
+
+	// add local config to git-repo
+	git := exec.Command(
+		"git", "add", lcfg_fname,
+	)
+	if !quiet {
+		git.Stdout = os.Stdout
+		git.Stderr = os.Stderr
+	}
+	err = git.Run()
+	handle_err(err)
+
+	// commit
+	git = exec.Command(
+		"git", "commit", "-m", "adding local config",
+	)
+	if !quiet {
+		git.Stdout = os.Stdout
+		git.Stderr = os.Stderr
+	}
+	err = git.Run()
 	handle_err(err)
 
 	if !quiet {
