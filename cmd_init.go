@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/sbinet/go-commander"
 	"github.com/sbinet/go-flag"
@@ -118,15 +120,25 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: add top-level wscript...\n", n)
 	}
 
-	wscript, err := os.Create("wscript")
-	handle_err(err)
-	defer wscript.Close()
-
 	wscript_tmpl, err := os.Open(".hwaf/tools/hwaf-wscript")
 	handle_err(err)
 	defer wscript_tmpl.Close()
 
-	_, err = io.Copy(wscript, wscript_tmpl)
+	wscript_b, err := ioutil.ReadAll(wscript_tmpl)
+	handle_err(err)
+
+	// replace 'hwaf-workarea' with workarea name
+	wscript_s := strings.Replace(
+		string(wscript_b),
+		"APPNAME = 'hwaf-workarea'",
+		fmt.Sprintf("APPNAME = '%s'", filepath.Base(dirname)),
+		-1)
+
+	wscript, err := os.Create("wscript")
+	handle_err(err)
+	defer wscript.Close()
+
+	_, err = io.WriteString(wscript, wscript_s)
 	handle_err(err)
 	handle_err(wscript.Sync())
 	handle_err(wscript.Close())
