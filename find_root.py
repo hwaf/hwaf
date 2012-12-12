@@ -247,6 +247,54 @@ def find_root(ctx, **kwargs):
     ctx.env.HEPWAF_FOUND_ROOT = 1
     return
 
+### ---------------------------------------------------------------------------
+g_dsomap_merger = None
+@feature('merge_dsomap')
+def schedule_merge_dsomap(self):
+    #bld_area = self.env['BUILD_INSTALL_AREA']
+    pass
+
+@extension('.dsomap')
+def merge_dsomap_hook(self, node):
+    global g_dsomap_merger
+    if g_dsomap_merger is None:
+        import os
+        bld_area = os.path.basename(self.env['BUILD_INSTALL_AREA'])
+        bld_node = self.bld.bldnode.find_dir(bld_area)
+        out_node = bld_node.make_node('lib').make_node(
+            'project_merged.rootmap')
+        g_dsomap_merger = self.create_task('merge_dsomap', node, out_node)
+        self.bld.install_files(
+            '${INSTALL_AREA}/lib',
+            out_node,
+            relative_trick=False
+            )
+    else:
+        g_dsomap_merger.inputs.append(node)
+    return g_dsomap_merger
+
+class merge_dsomap(waflib.Task.Task):
+    color='PINK'
+    ext_in = ['.dsomap']
+    ext_out= ['.rootmap']
+    after = ['gen_map', 'gen_reflex', 'symlink_tsk']
+    run_str = 'cat ${SRC} > ${TGT}'
+    shell = True
+
+    def runnable_status(self):
+        status = waflib.Task.Task.runnable_status(self)
+        if status == waflib.Task.ASK_LATER:
+            return status
+        
+        import os
+        for in_node in self.inputs:
+            try:
+                os.stat(in_node.abspath())
+            except:
+                msg.debug("::missing input [%s]" % in_node.abspath())
+                return waflib.Task.ASK_LATER
+        return waflib.Task.RUN_ME
+    
 ### ---
 waflib.Tools.ccroot.USELIB_VARS['gen_reflex'] = set(['GCCXML_FLAGS', 'DEFINES', 'INCLUDES', 'CPPFLAGS', 'LIB'])
 
@@ -328,7 +376,7 @@ def gen_map_hook(self, node):
     "Bind the .so file extension to the creation of a genmap task"
     dso = node.name
     bld_node = node.get_bld().parent
-    dso_ext = self.dso_ext()
+    dso_ext = self.bld.dso_ext()
     out_node = bld_node.make_node(dso.replace(dso_ext,".dsomap"))
     tsk = self.create_task('gen_map', node, out_node)
     self.source += tsk.outputs
@@ -351,7 +399,7 @@ class gen_map(waflib.Task.Task):
         fout = open(fout_node.abspath(), 'w')
         kw['stdout'] = fout
         kw['stderr'] = fout
-        kw['env'] = self._get_env_for_subproc()
+        kw['env'] = self.generator.bld._get_env_for_subproc()
         kw['cwd'] = self.inputs[0].get_bld().parent.abspath()
         rc = waflib.Task.Task.exec_command(self, cmd, **kw)
         if rc != 0:
@@ -376,7 +424,7 @@ class gen_map(waflib.Task.Task):
 def build_reflex_dict(self, name, source, selection_file, **kw):
 
     # extract package name
-    PACKAGE_NAME = _get_pkg_name(self)
+    PACKAGE_NAME = self._get_pkg_name()
 
     source = waflib.Utils.to_list(source)[0]
     src_node = self.path.find_resource(source)
@@ -405,7 +453,7 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         else:
             _defines.append(d)
     defines = _defines + defines
-    kw['defines'] = defines + _get_pkg_version_defines(self) + ['__REFLEX__',]
+    kw['defines'] = defines + self._get_pkg_version_defines() + ['__REFLEX__',]
     if self.is_dbg():
         #print(":"*80)
         # only add NDEBUG in dbg mode as it should already be added
