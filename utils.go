@@ -51,4 +51,14 @@ func hwaf_root() string {
 	return os.ExpandEnv(filepath.Join("${HOME}", ".config", "hwaf"))
 }
 
+func hwaf_setup_waf_env() {
+	py := os.Getenv("PYTHONPATH")
+	hwaf := filepath.Join(hwaf_root(), "tools")
+	if py == "" {
+		py = hwaf
+	} else {
+		py = hwaf + string(os.PathListSeparator) + py
+	}
+	os.Setenv("PYTHONPATH", py)
+}
 // EOF
