@@ -512,4 +512,31 @@ def _get_env_for_subproc(self, os_env_keys=None):
         if not isinstance(v, str):
             raise KeyError("env[%s]=%s" % (k,v))
     return env
+
+### ------------------------------------------------------------------------
+@conf
+def _get_pkg_name(self):
+    # FIXME: should this be more explicit ?
+    pkg_name = self.path.name
+    return pkg_name
+
+### ------------------------------------------------------------------------
+@conf
+def _get_pkg_version_defines(self):
+    pkg_name = _get_pkg_name(self)
+    pkg_vers = "%s-XX-XX-XX" % pkg_name
+    pkg_defines = ['PACKAGE_VERSION="%s"' % pkg_vers,
+                   'PACKAGE_VERSION_UQ=%s'% pkg_vers]
+    cmt_dir_node = self.path.get_src().find_dir('cmt')
+    if not cmt_dir_node:
+        return pkg_defines
+    version_cmt = cmt_dir_node.find_resource('version.cmt')
+    if not version_cmt:
+        return pkg_defines
+    pkg_vers = version_cmt.read().strip()
+    pkg_defines = ['PACKAGE_VERSION="%s"' % pkg_vers,
+                   'PACKAGE_VERSION_UQ=%s'% pkg_vers]
+    #msg.debug("*** %s %r" % (pkg_name, pkg_vers))
+    return pkg_defines
+
 ## EOF ##
