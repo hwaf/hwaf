@@ -14,6 +14,7 @@ import waflib.Logs as msg
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 g_HEPWAF_PROJECT_INFO = 'project.info'
+g_HEPWAF_MODULE_FMT = '__hwaf_module__%s'
 
 def options(ctx):
     #msg.info("[options] hep-waftools-project-mgr...")
@@ -29,6 +30,9 @@ def options(ctx):
 # def configure(ctx):
 #     msg.info("[configure] hep-waftools-project-mgr...")
 #     return
+
+def build(ctx):
+    pass
 
 @waflib.Configure.conf
 def _hepwaf_configure_project(ctx):
@@ -83,6 +87,8 @@ def _hepwaf_configure_project(ctx):
     ## configure packages
     ctx._hepwaf_configure_packages()
     
+    # create the project hwaf module...
+    hwaf=ctx._hepwaf_create_project_hwaf_module()
     return
 
 @waflib.Configure.conf
@@ -254,7 +260,15 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                 #ctx.fatal('invalid type (%s) for [%s]' % (type(v),k))
                 env[k] = v
             pass
+
+        # import hwaf modules from this project, if any
+        hwaf_mod_dir = osp.join(_un_massage(denv["INSTALL_AREA"]),
+                                "share", "hwaf")
+        hwaf_mod_name = g_HEPWAF_MODULE_FMT % (ppname.replace("-","_"),)
+        hwaf_fname = osp.join(hwaf_mod_dir, hwaf_mod_name+".py")
+        ctx._hepwaf_load_project_hwaf_module(hwaf_fname, do_export=True)
         pass # loop over proj-paths
+    
     if not all_good:
         ctx.fatal("error(s) while configuring project dependency tree")
         pass
@@ -318,10 +332,15 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
 
 @waflib.Configure.conf
 def _hepwaf_install_project_infos(ctx):
+
+    if ctx.cmd != 'install':
+        return
+    
     node = ctx.bldnode.make_node(g_HEPWAF_PROJECT_INFO)
     env = ctx.env.copy()
     del env.HEPWAF_PROJECT_ROOT
-
+    del env.HEPWAF_MODULES
+    
     prefix = ctx.env.PREFIX
     def _massage(v):
         if isinstance(v, type("")):
@@ -354,6 +373,81 @@ def _hepwaf_install_project_infos(ctx):
     node.sig = waflib.Utils.h_file(node.abspath())
 
     ctx.install_files('${INSTALL_AREA}', [node])
+
+    hwaf = ctx._hepwaf_create_project_hwaf_module()
+    hwaf.sig = waflib.Utils.h_file(hwaf.abspath())
+    ctx.install_files('${INSTALL_AREA}/share/hwaf/', [hwaf])
+    return
+
+@waflib.Configure.conf
+def _hepwaf_get_project_hwaf_module(ctx, fname=None):
+    if fname is None:
+        fname = g_HEPWAF_MODULE_FMT % ctx.env.HEPWAF_PROJECT_NAME.replace(
+            "-",
+            "_"
+            )
+        fname += ".py"
+        pass
+    if osp.isabs(fname): hwaf = ctx.root.find_node(fname)
+    else:
+        hwaf = ctx.bldnode.find_node(fname)
+        if not hwaf: hwaf = ctx.path.find_node(fname)
+        pass
+    if not hwaf:
+        msg.info("could not find hwaf-module [%s]" % (fname,))
+        aaa
+        ctx.fatal("could not find hwaf-module [%s]" % (fname,))
+        pass
+    return hwaf
+
+@waflib.Configure.conf
+def _hepwaf_create_project_hwaf_module(ctx):
+    # create a hwaf-module/<project-name>
+    hwaf_fname = g_HEPWAF_MODULE_FMT % ctx.env.HEPWAF_PROJECT_NAME.replace(
+        "-",
+        "_"
+        )
+    hwaf = ctx.bldnode.make_node(hwaf_fname+".py")
+    hwaf.write("# -*- python -*-\n"+
+               "## modules from [%s]\n" % ctx.env.HEPWAF_PROJECT_NAME,
+               flags="w")
+    for mod in ctx.env.HEPWAF_MODULES:
+        mnode = ctx.root.find_node(mod)
+        if not mnode:ctx.fatal("could not find hwaf-module [%s]" % mod)
+        #msg.info(">>> %s" % mod)
+        hwaf.write("\n", flags="a")
+        hwaf.write("#"*80, flags="a")
+        mod_name = mnode.srcpath()
+        hwaf.write("\n### beg: %s\n" % mod_name, flags="a")
+        hwaf.write(mnode.read(), flags="a")
+        hwaf.write("\n### end: %s\n" % mod_name, flags="a")
+        hwaf.write("#"*80, flags="a")
+        pass
+    hwaf.write("\n", flags="a")
+    hwaf.write("## EOF ##\n", flags="a")
+    return hwaf
+
+@waflib.Configure.conf
+def _hepwaf_load_project_hwaf_module(ctx, fname=None, do_export=False):
+    hwaf = ctx._hepwaf_get_project_hwaf_module(fname)
+    hwaf_fname = hwaf.abspath()
+    hwaf_mod_name = osp.basename(hwaf_fname)
+    if hwaf_mod_name.endswith(".py"):
+        hwaf_mod_name = hwaf_mod_name[:-len(".py")]
+    hwaf_mod_dir = osp.dirname(hwaf_fname)
+    if not osp.exists(hwaf_fname):
+        ctx.fatal("no such hwaf-module file [%s]" % hwaf_fname)
+        pass
+    waflib.Context.Context.load(
+        ctx,
+        hwaf_mod_name,
+        tooldir=hwaf_mod_dir,
+        name="__hwaf_module_load__",
+        )
+    if do_export:
+        # register that file to export so each project is self-contained
+        ctx.hwaf_export_module(hwaf_fname)
+    return hwaf
 
 @waflib.Configure.conf
 def _hepwaf_configure_packages(ctx):

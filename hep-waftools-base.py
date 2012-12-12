@@ -51,6 +51,9 @@ def configure(ctx):
         ctx.start_msg("Manifest file processing")
         ctx.end_msg(ok)
         pass
+
+    if not ctx.env.HEPWAF_MODULES: ctx.env.HEPWAF_MODULES = []
+
     ctx.load('hep-waftools-system', tooldir=_heptooldir)
     ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
     ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
@@ -138,6 +141,14 @@ def configure(ctx):
     ctx.msg('install-area', ctx.env.INSTALL_AREA)
     msg.info('='*80)
     
+    return
+
+def build(ctx):
+    ctx.load('hep-waftools-system', tooldir=_heptooldir)
+    ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
+    ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
+    ctx.load('hep-waftools-runtime', tooldir=_heptooldir)
+    ctx._hepwaf_load_project_hwaf_module(do_export=False)
     return
 
 ### ---------------------------------------------------------------------------
@@ -403,6 +414,24 @@ def declare_runtime_env(self, k):
         if v and not isinstance(v, str):
             raise KeyError("env[%s]=%s" % (k,v))
     self.env.append_unique('HEPWAF_RUNTIME_ENVVARS', k)
+    
+### ------------------------------------------------------------------------
+@conf
+def hwaf_export_module(self, fname="wscript"):
+    '''
+    hwaf_export_module registers the ``fname`` file for export.
+    it will be installed in the ${PREFIX}/share/hwaf directory to be picked
+    up by dependent projects.
+    '''
+    if not self.env.HEPWAF_MODULES:
+        self.env.HEPWAF_MODULES = []
+        pass
+    node = None
+    if osp.isabs(fname): node = self.root.find_or_declare(fname)
+    else:                node = self.path.find_node(fname)
+    if not node: self.fatal("could not find [%s]" % fname)
+    #msg.info("::: exporting [%s]" % node.abspath())
+    self.env.append_unique('HEPWAF_MODULES', node.abspath())
     
 ### ------------------------------------------------------------------------
 @conf
