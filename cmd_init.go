@@ -54,7 +54,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 	proj_name := cmd.Flag.Lookup("name").Value.Get().(string)
 	if proj_name == "" {
-		proj_name = filepath.Base(dirname)		
+		proj_name = filepath.Base(dirname)
 	}
 
 	if !quiet {
@@ -188,7 +188,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: commit workarea...\n", n)
 	}
 	git = exec.Command(
-		"git", "commit", "-m", 
+		"git", "commit", "-m",
 		fmt.Sprintf("init hwaf project [%s]", proj_name),
 	)
 	if !quiet {

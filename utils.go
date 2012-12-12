@@ -61,4 +61,5 @@ func hwaf_setup_waf_env() {
 	}
 	os.Setenv("PYTHONPATH", py)
 }
+
 // EOF
