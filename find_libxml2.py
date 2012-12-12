@@ -35,7 +35,7 @@ def find_libxml2(ctx, **kwargs):
     # find LibXML2
     xml_cfg = "xml2-config"
     path_list = []
-    if ctx.options.with_libxml2:
+    if getattr(ctx.options, 'with_libxml2', None):
         path_list.append(
             osp.abspath(
                 osp.join(ctx.options.with_libxml2, "bin")
