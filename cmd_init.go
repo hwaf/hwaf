@@ -161,6 +161,28 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
+	// add a default .gitignore
+	gitignore_tmpl, err := os.Open(".hwaf/tools/.gitignore")
+	handle_err(err)
+	defer gitignore_tmpl.Close()
+
+	gitignore, err := os.Create(".gitignore")
+	handle_err(err)
+	defer gitignore.Close()
+
+	_, err = io.Copy(gitignore, gitignore_tmpl)
+	handle_err(err)
+	handle_err(gitignore.Sync())
+	handle_err(gitignore.Close())
+
+	git = exec.Command("git", "add", ".gitignore")
+	if !quiet {
+		git.Stdout = os.Stdout
+		git.Stderr = os.Stderr
+	}
+	err = git.Run()
+	handle_err(err)
+
 	// commit
 	if !quiet {
 		fmt.Printf("%s: commit workarea...\n", n)
