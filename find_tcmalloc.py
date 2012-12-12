@@ -34,9 +34,9 @@ def find_tcmalloc(ctx, **kwargs):
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     path_list = []
-    if ctx.options.with_tcmalloc:
+    if getattr(ctx.options, 'with_tcmalloc', None):
         path_list.append(
-            osp.join(ctx.options.with_sqlite, "bin")
+            osp.join(ctx.options.with_tcmalloc, "bin")
             )
         pass
 

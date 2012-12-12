@@ -34,7 +34,7 @@ def find_valgrind(ctx, **kwargs):
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     path_list = []
-    if ctx.options.with_valgrind:
+    if getattr(ctx.options, 'with_valgrind', None):
         path_list.append(
             osp.join(ctx.options.with_valgrind, "bin")
             )

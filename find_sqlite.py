@@ -34,7 +34,7 @@ def find_sqlite(ctx, **kwargs):
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
     path_list = []
-    if ctx.options.with_sqlite:
+    if getattr(ctx.options, 'with_sqlite', None):
         path_list.append(
             osp.join(ctx.options.with_sqlite, "bin")
             )

@@ -34,7 +34,7 @@ def find_clhep(ctx, **kwargs):
 
     # find CLHEP
     clhep_cfg = "clhep-config"
-    if ctx.options.with_clhep:
+    if getattr(ctx.options, 'with_clhep', None):
         clhep_cfg = osp.abspath(
             osp.join(ctx.options.with_clhep, "bin", "clhep-config")
             )

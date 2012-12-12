@@ -36,7 +36,7 @@ def find_cmake(ctx, **kwargs):
 
 
     path_list = []
-    if ctx.options.with_cmake:
+    if getattr(ctx.options, 'with_cmake', None):
         path_list.append(
             osp.join(ctx.options.with_cmake, "bin")
             )
