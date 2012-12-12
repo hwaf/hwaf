@@ -41,7 +41,7 @@ func hwaf_run_cmd_waf_run(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	subargs := append([]string{"run"}, args...)
+	subargs := append([]string{"run", "--"}, args...)
 	sub := exec.Command(waf, subargs...)
 	sub.Stdin = os.Stdin
 	sub.Stdout = os.Stdout
