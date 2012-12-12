@@ -58,6 +58,7 @@ func init() {
 			hwaf_make_cmd_waf_clean(),
 			hwaf_make_cmd_waf_distclean(),
 			hwaf_make_cmd_waf_shell(),
+			hwaf_make_cmd_waf_run(),
 
 			hwaf_make_cmd_waf_show_projects(),
 			hwaf_make_cmd_waf_show_pkg_uses(),
