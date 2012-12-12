@@ -35,7 +35,7 @@ def find_gccxml(ctx, **kwargs):
 
 
     path_list = []
-    if ctx.options.with_gccxml:
+    if getattr(ctx.options, 'with_gccxml', None):
         path_list.append(
             osp.join(ctx.options.with_gccxml, "bin")
             )
