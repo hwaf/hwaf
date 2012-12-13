@@ -53,10 +53,10 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	url := fmt.Sprintf(
-		"https://github.com/downloads/mana-fwk/hwaf/hwaf-%s-%s",
+		"http://cern.ch/mana-fwk/downloads/bin/hwaf-%s-%s",
 		runtime.GOOS, runtime.GOARCH,
 	)
-	tmp, err := ioutil.TempFile("", "hwaf-")
+	tmp, err := ioutil.TempFile("", "hwaf-self-update-")
 	handle_err(err)
 	defer tmp.Close()
 
