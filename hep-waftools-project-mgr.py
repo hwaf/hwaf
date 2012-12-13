@@ -337,7 +337,8 @@ def _hepwaf_install_project_infos(ctx):
         return
     
     node = ctx.bldnode.make_node(g_HEPWAF_PROJECT_INFO)
-    env = ctx.env.copy()
+    env = ctx.env.derive()
+    env.detach()
     del env.HEPWAF_PROJECT_ROOT
     del env.HEPWAF_MODULES
     
