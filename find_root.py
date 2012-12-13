@@ -496,7 +496,7 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
     del kw['target']
     defines= kw['defines']
     del kw['defines']
-    o = self.new_task_gen(
+    o = self(
         features='gen_reflex cxx cxxshlib symlink_tsk',
         name='genreflex-%s' % name,
         source=source,
@@ -561,7 +561,7 @@ def build_rootcint_dict(self, name, source, target,
     
     env = self.env
     incpaths = [env.CPPPATH_ST % x for x in kw['includes']]
-    o = self.new_task_gen(
+    o = self(
         rule='${ROOTCINT} -f ${TGT} -c ${ROOTCINTINCPATHS} ${SRC}',
         name='rootcint-dict-%s' % name,
         source=source,
