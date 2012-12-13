@@ -30,7 +30,7 @@ def go(ctx):
     commands += ["configure", "clean", "build", "install"]
 
 def options(ctx):
-    ctx.load('hwaf', tooldir='.hwaf/tools')
+    ctx.load('hwaf')
 
     ctx.add_option(
         '--prefix',
@@ -44,13 +44,13 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('hwaf', tooldir='.hwaf/tools')
+    ctx.load('hwaf')
 
     ctx.hepwaf_configure()
     return
 
 def build(ctx):
-    ctx.load('hwaf', tooldir='.hwaf/tools')
+    ctx.load('hwaf')
 
     ctx.hepwaf_build()
     return
@@ -59,7 +59,7 @@ def check(ctx):
     return
 
 def shell(ctx):
-    ctx.load('hwaf', tooldir='.hwaf/tools')
+    ctx.load('hwaf')
     hwaf_ishell(ctx)
     return
 
