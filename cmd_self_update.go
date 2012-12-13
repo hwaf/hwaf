@@ -46,7 +46,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 
 	if !quiet {
-		fmt.Printf("%s: self-update...\n", n)
+		fmt.Printf("%s...\n", n)
 	}
 
 	old, err := exec.LookPath(os.Args[0])
@@ -85,6 +85,9 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	err = tmp.Sync()
 	handle_err(err)
 
+	err = tmp.Close()
+	handle_err(err)
+
 	// self-init
 	hwaf := exec.Command(tmp.Name(), "self-init", fmt.Sprintf("-q=%v", quiet))
 	hwaf.Stderr = os.Stderr
@@ -93,12 +96,15 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	// replace current binary
-	err = os.Rename(tmp.Name(), old)
+	mv := exec.Command("/bin/mv", "-f", tmp.Name(), old)
+	mv.Stderr = os.Stderr
+	mv.Stdout = os.Stdout
+	err = mv.Run()
 	handle_err(err)
 
 	if !quiet {
 		fmt.Printf("%s: [%s] updated\n", n, old)
-		fmt.Printf("%s: self-update... [ok]\n", n)
+		fmt.Printf("%s... [ok]\n", n)
 	}
 }
 
