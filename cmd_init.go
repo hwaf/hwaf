@@ -135,28 +135,30 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: add top-level wscript...\n", n)
 	}
 
-	wscript_tmpl, err := os.Open(".hwaf/tools/hwaf-wscript")
-	handle_err(err)
-	defer wscript_tmpl.Close()
+	if !path_exists("wscript") {
+		wscript_tmpl, err := os.Open(".hwaf/tools/hwaf-wscript")
+		handle_err(err)
+		defer wscript_tmpl.Close()
 
-	wscript_b, err := ioutil.ReadAll(wscript_tmpl)
-	handle_err(err)
+		wscript_b, err := ioutil.ReadAll(wscript_tmpl)
+		handle_err(err)
 
-	// replace 'hwaf-workarea' with workarea name
-	wscript_s := strings.Replace(
-		string(wscript_b),
-		"APPNAME = 'hwaf-workarea'",
-		fmt.Sprintf("APPNAME = '%s'", proj_name),
-		-1)
+		// replace 'hwaf-workarea' with workarea name
+		wscript_s := strings.Replace(
+			string(wscript_b),
+			"APPNAME = 'hwaf-workarea'",
+			fmt.Sprintf("APPNAME = '%s'", proj_name),
+			-1)
 
-	wscript, err := os.Create("wscript")
-	handle_err(err)
-	defer wscript.Close()
+		wscript, err := os.Create("wscript")
+		handle_err(err)
+		defer wscript.Close()
 
-	_, err = io.WriteString(wscript, wscript_s)
-	handle_err(err)
-	handle_err(wscript.Sync())
-	handle_err(wscript.Close())
+		_, err = io.WriteString(wscript, wscript_s)
+		handle_err(err)
+		handle_err(wscript.Sync())
+		handle_err(wscript.Close())
+	}
 
 	git = exec.Command("git", "add", "wscript")
 	if !quiet {
