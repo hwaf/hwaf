@@ -50,6 +50,10 @@ def options(ctx):
     ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
     ctx.load('hep-waftools-runtime', tooldir=_heptooldir)
 
+    pkgdir = 'pkg'
+    if osp.exists(pkgdir):
+        pkgs = hepwaf_find_suboptions(pkgdir)
+        ctx.recurse(pkgs, mandatory=False)
     return
 
 ### ---------------------------------------------------------------------------
@@ -193,6 +197,15 @@ def hepwaf_find_subpackages(self, directory='.'):
             pass
         pass
     return srcs
+
+### ---------------------------------------------------------------------------
+def hepwaf_find_suboptions(directory='.'):
+    pkgs = []
+    for root, dirs, files in os.walk(directory):
+        if 'wscript' in files:
+            pkgs.append(root)
+            continue
+    return pkgs
 
 ### ---------------------------------------------------------------------------
 @conf

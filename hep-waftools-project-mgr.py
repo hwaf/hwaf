@@ -368,7 +368,7 @@ import waflib.TaskGen
 def hepwaf_schedule_project_infos(self):
     fct = getattr(self, '_hepwaf_install_project_infos', None)
     if not fct: fct = getattr(self.bld, '_hepwaf_install_project_infos')
-    fct()
+    #fct()
     return
 
 @waflib.Configure.conf
