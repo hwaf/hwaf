@@ -40,7 +40,7 @@ def hepwaf_build(ctx):
     #     pass
     ctx.recurse(ctx.hepwaf_pkg_dirs())
 
-    #ctx._hepwaf_install_project_infos()
+    ctx._hepwaf_install_project_infos()
     return
 
 ## EOF ##
