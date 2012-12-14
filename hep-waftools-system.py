@@ -91,6 +91,13 @@ def configure(ctx):
         pass
     ctx.env.HEPWAF_PROJECT_NAME = projname
 
+    projvers = waflib.Context.g_module.VERSION
+    if ctx.options.project_version:
+        projvers = ctx.options.project_version
+        pass
+    waflib.Context.g_module.VERSION = projvers
+    ctx.env.HEPWAF_PROJECT_VERSION = projvers
+    
     cmtpkgs = os.environ.get('CMTPKGS', None)
     if not cmtpkgs and ctx.options.cmtpkgs:
         cmtpkgs = ctx.options.cmtpkgs
@@ -105,6 +112,12 @@ def configure(ctx):
         pass
 
     ctx.env.PREFIX = ctx.options.prefix or "/usr"
+
+    relocate_from = ctx.options.relocate_from
+    if not relocate_from:
+        relocate_from = ctx.env.PREFIX
+        pass
+    ctx.env.HEPWAF_RELOCATE = relocate_from
     
     # take INSTALL_AREA from PREFIX
     ctx.env.INSTALL_AREA = ctx.env.PREFIX

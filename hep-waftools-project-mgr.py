@@ -172,8 +172,9 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                 )
             pass
         
-        _proj_prefix = denv['PREFIX']
-        if _proj_prefix == '@@HEPWAF_PREFIX@@':
+        _proj_topdir = denv['HEPWAF_RELOCATE']
+        _proj_prefix = denv['HEPWAF_PREFIX']
+        if _proj_prefix == '@@HEPWAF_RELOCATE@@':
             _proj_prefix = proj_dir.abspath()
             pass
         
@@ -338,14 +339,16 @@ def _hepwaf_install_project_infos(ctx):
     
     node = ctx.bldnode.make_node(g_HEPWAF_PROJECT_INFO)
     env = ctx.env.derive()
+    print ":"*80
+    print env['PYTHONPATH']
     env.detach()
     del env.HEPWAF_PROJECT_ROOT
     del env.HEPWAF_MODULES
     
-    prefix = ctx.env.PREFIX
+    relocate = ctx.env.HEPWAF_RELOCATE
     def _massage(v):
         if isinstance(v, type("")):
-            return v.replace(prefix, '@@HEPWAF_PREFIX@@')
+            return v.replace(relocate, '@@HEPWAF_RELOCATE@@')
         elif isinstance(v, (list, tuple)):
             vv = []
             for ii in v:

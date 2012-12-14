@@ -61,6 +61,7 @@ def _hwaf_get_runtime_env(ctx):
     cwd = os.getcwd()
     root = os.path.realpath(ctx.env.PREFIX)
     root = os.path.realpath(ctx.env.INSTALL_AREA)
+    print ":::root:::",root
     if ctx.env.DESTDIR:
         root = ctx.env.DESTDIR + os.sep + ctx.env.INSTALL_AREA
         pass
@@ -85,6 +86,8 @@ def _hwaf_get_runtime_env(ctx):
             if osp.exists(p):
                 o.append(p)
                 pass
+            else:
+                print "discarding: %s" % p
             pass
         env[k] = os.pathsep.join(o)
         return

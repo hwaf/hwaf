@@ -29,6 +29,17 @@ def options(ctx):
             default=None,
             action='store_true',
             help="Enable Fink")
+        pass
+    ctx.add_option(
+        '--relocate-from',
+        default=None,
+        help='top-level path to relocate against (default=${PREFIX})',
+        )
+    ctx.add_option(
+        '--project-version',
+        default=None,
+        help='modify the project version used during build',
+        )
     ctx.add_option(
         '--local-cfg',
         default=None,
@@ -123,7 +134,8 @@ def configure(ctx):
 
     # display project infos...
     msg.info('='*80)
-    ctx.msg('project',    ctx.env.HEPWAF_PROJECT_NAME)
+    ctx.msg('project',    '%s-%s' % (ctx.env.HEPWAF_PROJECT_NAME,
+                                     ctx.env.HEPWAF_PROJECT_VERSION))
     ctx.msg('prefix',     ctx.env.PREFIX)
     if ctx.env.DESTDIR:
         ctx.msg('destdir',     ctx.env.DESTDIR)
@@ -150,6 +162,21 @@ def build(ctx):
     ctx.load('hep-waftools-runtime', tooldir=_heptooldir)
     ctx._hepwaf_load_project_hwaf_module(do_export=False)
     return
+
+### ---------------------------------------------------------------------------
+@conf
+def hepwaf_get_install_path(self, k, destdir=True):
+    """
+    Installation path obtained from ``self.dest`` and prefixed by the destdir.
+    The variables such as '${PREFIX}/bin' are substituted.
+    """
+    dest = waflib.Utils.subst_vars(k, self.env)
+    dest = dest.replace('/', os.sep)
+    if destdir and self.env.DESTDIR:
+        destdir = self.env.DESTDIR
+        dest = os.path.join(destdir, osp.splitdrive(dest)[1].lstrip(os.sep))
+        pass
+    return dest
 
 ### ---------------------------------------------------------------------------
 @conf
