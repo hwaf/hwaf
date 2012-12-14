@@ -27,12 +27,12 @@ def options(ctx):
         )
     return
 
-# def configure(ctx):
-#     msg.info("[configure] hep-waftools-project-mgr...")
-#     return
+def configure(ctx):
+    # msg.info("[configure] hep-waftools-project-mgr...")
+    return
 
 def build(ctx):
-    pass
+    return
 
 @waflib.Configure.conf
 def _hepwaf_configure_project(ctx):
@@ -358,12 +358,27 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
     # msg.info("PYTHONPATH: %s" % ctx.env['PYTHONPATH'])
     return
 
+### ---------------------------------------------------------------------------
+import waflib.TaskGen
+@waflib.TaskGen.feature('*')
+@waflib.TaskGen.after_method(
+    'apply_vnum','apply_link', 'apply_bundle',
+    'propagate_uselib_vars', 'propagate_use',
+    )
+def hepwaf_schedule_project_infos(self):
+    fct = getattr(self, '_hepwaf_install_project_infos', None)
+    if not fct: fct = getattr(self.bld, '_hepwaf_install_project_infos')
+    fct()
+    return
+
 @waflib.Configure.conf
 def _hepwaf_install_project_infos(ctx):
 
-    if ctx.cmd != 'install':
+    #msg.info('>'*80)
+    #msg.info('_hepwaf_install_project_infos(%s)...' % ctx.cmd)
+    if ctx.cmd in ('clean',):
         return
-    
+
     node = ctx.bldnode.make_node(g_HEPWAF_PROJECT_INFO)
     ctx.hepwaf_setup_runtime()
     env = ctx.env.derive()
@@ -373,10 +388,19 @@ def _hepwaf_install_project_infos(ctx):
     del env.HEPWAF_PROJECT_ROOT
     del env.HEPWAF_MODULES
     env['HEPWAF_PREFIX'] = env.PREFIX
+
+    destdir = None
+    if ctx.env.DESTDIR: destdir = ctx.env.DESTDIR
     
     relocate = ctx.env.HEPWAF_RELOCATE
     def _massage(v):
         if isinstance(v, type("")):
+            # prevent hysteresis: remove $DESTDIR we might have added
+            if destdir and v.startswith(destdir) and 1:
+                #msg.info("destdir: %s" % destdir)
+                #msg.info("v: %s" % v)
+                v = v[len(destdir):]
+                pass
             # only replace when it *starts* with relocate
             # to prevent hysteresis effects.
             if v.startswith(relocate):
