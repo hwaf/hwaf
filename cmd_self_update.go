@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/sbinet/go-commander"
 	"github.com/sbinet/go-flag"
@@ -51,6 +53,107 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 
 	old, err := exec.LookPath(os.Args[0])
 	handle_err(err)
+
+	if os.Getenv("GOPATH") != "" {
+		// use go get...
+		pwd := ""
+		pwd, err = os.Getwd()
+		handle_err(err)
+		gopaths := strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator))
+		gopath := ""
+		hwafpkg := filepath.Join("github.com", "mana-fwk", "hwaf")
+		for _, v := range gopaths {
+			if path_exists(filepath.Join(v, "src", hwafpkg)) {
+				gopath = v
+				break
+			}
+		}
+		if gopath == "" {
+			// hwaf package not installed...
+			gopath = gopaths[0]
+			gosrc := filepath.Join(gopath, "src")
+			if !path_exists(gosrc) {
+				err = os.MkdirAll(gosrc, 0700)
+				handle_err(err)
+			}
+			err = os.Chdir(gosrc)
+			handle_err(err)
+			// first try r/w repository
+			git := exec.Command(
+				"git", "clone", "git@github.com:mana-fwk/hwaf",
+				"github.com/mana-fwk/hwaf",
+			)
+
+			if !quiet {
+				git.Stdout = os.Stdout
+				git.Stderr = os.Stderr
+			}
+
+			if git.Run() != nil {
+				git := exec.Command(
+					"git", "clone",
+					"git://github.com/mana-fwk/hwaf",
+					"github.com/mana-fwk/hwaf",
+				)
+				if !quiet {
+					git.Stdout = os.Stdout
+					git.Stderr = os.Stderr
+				}
+				err = git.Run()
+				handle_err(err)
+			}
+			err = os.Chdir(pwd)
+			handle_err(err)
+		}
+		gosrc := filepath.Join(gopath, "src", hwafpkg)
+		err = os.Chdir(gosrc)
+		handle_err(err)
+
+		// update...
+		git := exec.Command("git", "checkout", "master")
+		if !quiet {
+			git.Stdout = os.Stdout
+			git.Stderr = os.Stderr
+		}
+		err = git.Run()
+		handle_err(err)
+		git = exec.Command("git", "pull", "origin", "master")
+		if !quiet {
+			git.Stdout = os.Stdout
+			git.Stderr = os.Stderr
+		}
+		err = git.Run()
+		handle_err(err)
+
+		// rebuild
+		goget := exec.Command("go", "build", ".")
+		if !quiet {
+			goget.Stdout = os.Stdout
+			goget.Stderr = os.Stderr
+		}
+		err = goget.Run()
+		handle_err(err)
+
+		// self-init
+		bin := filepath.Join(gosrc, "hwaf")
+		hwaf := exec.Command(bin, "self-init", fmt.Sprintf("-q=%v", quiet))
+		hwaf.Stderr = os.Stderr
+		hwaf.Stdout = os.Stdout
+		err = hwaf.Run()
+		handle_err(err)
+
+		// replace current binary
+		mv := exec.Command("/bin/mv", "-f", bin, old)
+		mv.Stderr = os.Stderr
+		mv.Stdout = os.Stdout
+		err = mv.Run()
+		handle_err(err)
+
+		if !quiet {
+			fmt.Printf("%s... [ok]\n", n)
+		}
+		return 
+	}
 
 	url := fmt.Sprintf(
 		"http://cern.ch/mana-fwk/downloads/bin/hwaf-%s-%s",
