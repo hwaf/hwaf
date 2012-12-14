@@ -69,7 +69,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 		git.Stdout = os.Stdout
 		git.Stderr = os.Stderr
 	}
-	
+
 	if git.Run() != nil {
 		git := exec.Command(
 			"git", "clone", "git://github.com/mana-fwk/hep-waftools",

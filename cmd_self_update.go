@@ -152,7 +152,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 		if !quiet {
 			fmt.Printf("%s... [ok]\n", n)
 		}
-		return 
+		return
 	}
 
 	url := fmt.Sprintf(
