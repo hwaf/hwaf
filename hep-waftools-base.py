@@ -438,7 +438,7 @@ def declare_runtime_env(self, k):
         pass
     if msg.verbose:
         v = self.env[k]
-        if v and not isinstance(v, str):
+        if v and isinstance(v, (list,tuple)) and len(v) != 1:
             raise KeyError("env[%s]=%s" % (k,v))
     self.env.append_unique('HEPWAF_RUNTIME_ENVVARS', k)
     
