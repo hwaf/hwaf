@@ -215,7 +215,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		git = exec.Command(
 			"git", "commit", "-m",
 			fmt.Sprintf("init hwaf project [%s]", proj_name),
-			)
+		)
 		if !quiet {
 			git.Stdout = os.Stdout
 			git.Stderr = os.Stderr
