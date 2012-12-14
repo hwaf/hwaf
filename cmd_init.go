@@ -56,6 +56,11 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	if proj_name == "" {
 		proj_name = filepath.Base(dirname)
 	}
+	if proj_name == "." {
+		pwd, err := os.Getwd()
+		handle_err(err)
+		proj_name = filepath.Base(pwd)
+	}
 
 	if !quiet {
 		fmt.Printf("%s: creating workarea [%s]...\n", n, dirname)
@@ -117,6 +122,10 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	}
 	if !path_exists(".hwaf") {
 		err = os.MkdirAll(".hwaf", 0700)
+		handle_err(err)
+	}
+	if path_exists(".hwaf/tools") {
+		err = os.RemoveAll(".hwaf/tools")
 		handle_err(err)
 	}
 	err = os.Symlink(hwaf_tools_dir, ".hwaf/tools")
@@ -196,20 +205,24 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	err = git.Run()
 	handle_err(err)
 
-	// commit
-	if !quiet {
-		fmt.Printf("%s: commit workarea...\n", n)
+	// check whether we need to commit
+	err = exec.Command("git", "diff", "--exit-code", "--quiet", "HEAD").Run()
+	if err != nil {
+		// commit
+		if !quiet {
+			fmt.Printf("%s: commit workarea...\n", n)
+		}
+		git = exec.Command(
+			"git", "commit", "-m",
+			fmt.Sprintf("init hwaf project [%s]", proj_name),
+			)
+		if !quiet {
+			git.Stdout = os.Stdout
+			git.Stderr = os.Stderr
+		}
+		err = git.Run()
+		handle_err(err)
 	}
-	git = exec.Command(
-		"git", "commit", "-m",
-		fmt.Sprintf("init hwaf project [%s]", proj_name),
-	)
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
-	handle_err(err)
 
 	if !quiet {
 		fmt.Printf("%s: creating workarea [%s]... [ok]\n", n, dirname)
