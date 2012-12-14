@@ -37,11 +37,14 @@ class hepwaf_runtime_tsk(waflib.Task.Task):
 def hepwaf_setup_runtime(self):
     feats = waflib.TaskGen.feats['hepwaf_runtime_tsk']
     for fctname in feats:
-        msg.info("triggering [%s]..." % fctname)
+        #msg.info("triggering [%s]..." % fctname)
         fct = getattr(waflib.TaskGen.task_gen, fctname, None)
         if fct:
+            # extract un-decorated function...
+            fct = getattr(fct, '__func__', fct)
             fct(self)
-        msg.info("triggering [%s]... [done]" % fctname)
+            pass
+        #msg.info("triggering [%s]... [done]" % fctname)
     return
 
 ### ---------------------------------------------------------------------------
