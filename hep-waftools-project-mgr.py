@@ -180,9 +180,9 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             _proj_prefix = proj_dir.abspath()
             if _relocate_topdir == "": _relocate_topdir = '/'
             if _relocate_prefix == "": _relocate_prefix = '/'
-            msg.info("_relocate_topdir: %s" % _relocate_topdir)
-            msg.info("_relocate_prefix: %s" % _relocate_prefix)
-            msg.info("_delta:           %s" % osp.relpath(_relocate_topdir, _relocate_prefix))
+            # msg.info("_relocate_topdir: %s" % _relocate_topdir)
+            # msg.info("_relocate_prefix: %s" % _relocate_prefix)
+            # msg.info("_delta:           %s" % osp.relpath(_relocate_topdir, _relocate_prefix))
             _proj_topdir = osp.realpath(
                 osp.join(_proj_prefix,
                          osp.relpath(_relocate_topdir, _relocate_prefix))
@@ -192,26 +192,26 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         _proj_destdir= denv['DESTDIR']
         # automatically prepend DESTDIR if PREFIX does not exist...
         if _proj_destdir and not ctx.root.find_dir(_proj_prefix):
-            msg.info("="*80)
-            msg.info(":: massaging following destdir...")
-            msg.info(":: destdir: [%s]" % _proj_destdir)
-            msg.info(":: -prefix: [%s]" % _proj_prefix)
+            # msg.info("="*80)
+            # msg.info(":: massaging following destdir...")
+            # msg.info(":: destdir: [%s]" % _proj_destdir)
+            # msg.info(":: -prefix: [%s]" % _proj_prefix)
             pp = osp.abspath(_proj_destdir) + osp.abspath(_proj_prefix)
             pp = ctx.root.find_dir(pp)
             if not pp:
                 msg.error("could not locate project at [%s]" % _proj_prefix)
                 all_good = False
                 continue
-            msg.info(":: +prefix: [%s]" % pp)
+            # msg.info(":: +prefix: [%s]" % pp)
             _proj_prefix = pp
             pass
 
-        msg.info("="*80)
-        msg.info("project: %s" % ppname)
-        msg.info("topdir:  %s" % _proj_topdir)
-        msg.info("prefix:  %s" % _proj_prefix)
-        msg.info("destdir: %s" % _proj_destdir)
-        msg.info("pypath:  %s" % denv['PYTHONPATH'])
+        # msg.info("="*80)
+        # msg.info("project: %s" % ppname)
+        # msg.info("topdir:  %s" % _proj_topdir)
+        # msg.info("prefix:  %s" % _proj_prefix)
+        # msg.info("destdir: %s" % _proj_destdir)
+        # msg.info("pypath:  %s" % denv['PYTHONPATH'])
         
         def _un_massage(v):
             if isinstance(v, type("")):
@@ -353,9 +353,9 @@ def _hepwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         ctx.env.PATH = os.pathsep.join(ctx.env.PATH)
         pass
 
-    msg.info(">"*80)
-    msg.info("INCPATHS: %s" % ctx.env['INCPATHS'])
-    msg.info("PYTHONPATH: %s" % ctx.env['PYTHONPATH'])
+    # msg.info(">"*80)
+    # msg.info("INCPATHS: %s" % ctx.env['INCPATHS'])
+    # msg.info("PYTHONPATH: %s" % ctx.env['PYTHONPATH'])
     return
 
 @waflib.Configure.conf
@@ -367,8 +367,8 @@ def _hepwaf_install_project_infos(ctx):
     node = ctx.bldnode.make_node(g_HEPWAF_PROJECT_INFO)
     ctx.hepwaf_setup_runtime()
     env = ctx.env.derive()
-    msg.info(":"*80)
-    msg.info(env['PYTHONPATH'])
+    # msg.info(":"*80)
+    # msg.info(env['PYTHONPATH'])
     env.detach()
     del env.HEPWAF_PROJECT_ROOT
     del env.HEPWAF_MODULES

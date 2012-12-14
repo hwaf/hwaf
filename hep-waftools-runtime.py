@@ -28,11 +28,11 @@ class hepwaf_runtime_tsk(waflib.Task.Task):
     always = True
     
     def run(self):
-        msg.info("%"*80)
-        aaaa
-        pass
-    pass
+        return
+    
+    pass # class hepwaf_runtime_tsk
 
+### ---------------------------------------------------------------------------
 @conf
 def hepwaf_setup_runtime(self):
     feats = waflib.TaskGen.feats['hepwaf_runtime_tsk']
@@ -126,7 +126,7 @@ def _hwaf_get_runtime_env(ctx):
     cwd = os.getcwd()
     root = os.path.realpath(ctx.env.PREFIX)
     root = os.path.realpath(ctx.env.INSTALL_AREA)
-    msg.info(":::root:::"+root)
+    #msg.info(":::root:::"+root)
     if ctx.env.DESTDIR:
         root = ctx.env.DESTDIR + os.sep + ctx.env.INSTALL_AREA
         pass
@@ -151,8 +151,7 @@ def _hwaf_get_runtime_env(ctx):
             if osp.exists(p):
                 o.append(p)
                 pass
-            else:
-                msg.info("discarding: %s" % p)
+            #else: msg.info("discarding: %s" % p)
             pass
         env[k] = os.pathsep.join(o)
         return
