@@ -69,8 +69,8 @@ The commands are:
     distclean   distclean local project or packages
     shell       run an interactive shell with the correct environment
     run         run a command with the correct (project) environment
-    show-projects show local project's dependencies
-    show-pkg-uses show local project's dependencies
+    show-projects show local project dependencies
+    show-pkg-uses show local project dependencies
 
 Use "hwaf help [command]" for more information about a command.
 
