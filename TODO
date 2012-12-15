@@ -1,6 +1,10 @@
 TODO
 ====
 
+- hwaf pkgmgr get cern.ch/mana-fwk/mana-20121212
+  hwaf pkgmgr get -src cern.ch/mana-fwk/mana-20121212
+  hwaf pkgmgr get -bin cern.ch/mana-fwk/mana-20121212
+
 - hwaf dump-env > setup.sh
 - hwaf dump-env -shell=csh > setup.csh
 
@@ -36,4 +40,6 @@ TODO
   - retrieve a package list from a file
   - automatic re-configure when a new package is retrieved ?
     - at least flag that re-configure is needed... (run waf clean ?)
+
+- hwaf zsh/bash auto-completion
 
