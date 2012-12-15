@@ -46,6 +46,40 @@ hwaf run my-command --verbose
 hwaf shell
 my-command --verbose
 ^D
+
+# when in doubt, you can always get some help:
+$ hwaf help
+Usage:
+
+		hwaf command [arguments]
+
+The commands are:
+
+    init        initialize a new workarea
+    setup       setup an existing workarea
+    co          add a package to the current workarea
+    version     print version and exit
+    self-init   initialize hwaf itself
+    self-update update hwaf itself
+    waf         run waf itself
+    configure   configure local project or packages
+    build       build local project or packages
+    install     install local project or packages
+    clean       clean local project or packages
+    distclean   distclean local project or packages
+    shell       run an interactive shell with the correct environment
+    run         run a command with the correct (project) environment
+    show-projects show local project's dependencies
+    show-pkg-uses show local project's dependencies
+
+Use "hwaf help [command]" for more information about a command.
+
+Additional help topics:
+
+
+Use "hwaf help [topic]" for more information about that topic.
+
+
 ```
 
 
