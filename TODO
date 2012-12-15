@@ -1,7 +1,8 @@
 TODO
 ====
 
-- run, shell
+- hwaf dump-env > setup.sh
+- hwaf dump-env -shell=csh > setup.csh
 
 - goenv ?
 
