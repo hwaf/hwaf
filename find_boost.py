@@ -83,6 +83,12 @@ def find_boost(ctx, **kwargs):
                      (libname,ctx.env['LIB_boost']))
         ctx.env['LIB_boost-%s'%libname] = lib[:]
 
+    # register the boost module
+    import sys
+    fname = sys.modules['waflib.Tools.boost'].__file__
+    if fname.endswith('.pyc'): fname = fname[:-1]
+    ctx.hwaf_export_module(ctx.root.find_node(fname).abspath())
+
     ctx.env.HEPWAF_FOUND_BOOST = 1
     return
 
