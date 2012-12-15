@@ -197,6 +197,12 @@ def find_python(ctx, **kwargs):
     ctx.env["LIBPATH_python"] = [l.replace("6464", "64")
                                  for l in ctx.env["LIBPATH_python"]]
 
+    # register the python module
+    import sys
+    fname = sys.modules['waflib.Tools.python'].__file__
+    if fname.endswith('.pyc'): fname = fname[:-1]
+    ctx.hwaf_export_module(ctx.root.find_node(fname).abspath())
+
     ctx.env.HEPWAF_FOUND_PYTHON = 1
     return
 
