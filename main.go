@@ -62,6 +62,8 @@ func init() {
 
 			hwaf_make_cmd_waf_show_projects(),
 			hwaf_make_cmd_waf_show_pkg_uses(),
+
+			hwaf_make_cmd_pkgmgr_get(),
 		},
 		Flag: flag.NewFlagSet("hwaf", flag.ExitOnError),
 	}
@@ -70,7 +72,7 @@ func init() {
 func main() {
 
 	if len(os.Args) == 1 && path_exists("wscript") {
-		os.Args = append(os.Args, "build")
+		os.Args = append(os.Args, "build", "install")
 	}
 
 	// fiddle with environment to allow locate hep-waftools
