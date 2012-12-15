@@ -248,6 +248,13 @@ def find_root(ctx, **kwargs):
     ctx.find_python_module('PyCintex')
 
     ctx.env.ROOT_VERSION = version
+
+    # register the find_root module
+    import sys
+    fname = __file__
+    if fname.endswith('.pyc'): fname = fname[:-1]
+    ctx.hwaf_export_module(ctx.root.find_node(fname).abspath())
+
     ctx.env.HEPWAF_FOUND_ROOT = 1
     return
 
