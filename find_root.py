@@ -397,7 +397,7 @@ class gen_map(waflib.Task.Task):
     vars = ['GENMAP', 'DEFINES', 'CPPFLAGS', 'INCLUDES']
     color= 'BLUE'
     run_str = '${GENMAP} -input-library ${SRC[0].name} -o ${TGT[0].name}'
-    ext_in  = ['.so', '.dylib', '.dll']
+    ext_in  = ['.so', '.dylib', '.dll', '.bin']
     ext_out = ['.dsomap']
     shell = False
     reentrant = True
