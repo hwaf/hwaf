@@ -391,7 +391,10 @@ def _hepwaf_install_project_infos(ctx):
 
     destdir = None
     if ctx.env.DESTDIR: destdir = ctx.env.DESTDIR
-    
+
+    pkgdir = ctx.env.CMTPKGS
+    pkgdir = ctx.path.find_node(pkgdir).abspath()
+
     relocate = ctx.env.HEPWAF_RELOCATE
     def _massage(v):
         if isinstance(v, type("")):
@@ -401,6 +404,10 @@ def _hepwaf_install_project_infos(ctx):
                 #msg.info("v: %s" % v)
                 v = v[len(destdir):]
                 pass
+            # remove local paths
+            if v.startswith(pkgdir):
+                #msg.info("::: discarding [%s]" % v)
+                return None
             # only replace when it *starts* with relocate
             # to prevent hysteresis effects.
             if v.startswith(relocate):
@@ -409,7 +416,8 @@ def _hepwaf_install_project_infos(ctx):
         elif isinstance(v, (list, tuple)):
             vv = []
             for ii in v:
-                vv.append(_massage(ii))
+                ii = _massage(ii)
+                if ii: vv.append(ii)
                 pass
             return type(v)(vv)
         elif isinstance(v, (int, float)):
