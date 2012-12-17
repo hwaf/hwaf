@@ -29,8 +29,8 @@ def configure(conf):
 @conf
 def find_aida(ctx, **kwargs):
     
-    if not ctx.env.CXX:
-        msg.fatal('load a C++ compiler first')
+    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+        ctx.fatal('load a C++ compiler first')
         pass
 
 

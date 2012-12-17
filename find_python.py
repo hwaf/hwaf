@@ -67,8 +67,12 @@ def find_python(ctx, **kwargs):
     
     ctx.load('hep-waftools-base', tooldir=_heptooldir)
 
-    if not ctx.env.CXX and not ctx.env.CC:
-        msg.fatal('load a C or C++ compiler first')
+    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+        ctx.fatal('load a C compiler first')
+        pass
+
+    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+        ctx.fatal('load a C++ compiler first')
         pass
 
     # FIXME: take it from a user configuration file ?

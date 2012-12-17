@@ -23,11 +23,15 @@ def configure(ctx):
 @conf
 def find_posixlibs(ctx, **kwargs):
     
-    if not ctx.env.CC or not ctx.env.CXX:
-        msg.fatal('load a C or C++ compiler first')
+    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+
+    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+        ctx.fatal('load a C compiler first')
         pass
 
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+        ctx.fatal('load a C++ compiler first')
+        pass
 
     # find libm
     ctx.check_with(

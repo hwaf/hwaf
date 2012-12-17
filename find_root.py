@@ -42,19 +42,22 @@ def find_root(ctx, **kwargs):
     ctx.load('find_libxml2', tooldir=_heptooldir)
     ctx.load('find_gccxml', tooldir=_heptooldir)
 
+    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+        ctx.fatal('load a C compiler first')
+        pass
+
+    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+        ctx.fatal('load a C++ compiler first')
+        pass
+
     if not ctx.env.HEPWAF_FOUND_PYTHON:
         ctx.find_python(version=kwargs.get('python_version', (2,6)))
     
     if not ctx.env.HEPWAF_FOUND_LIBXML2:
         ctx.find_libxml2(mandatory=False)
     
-    if not ctx.env.CXX:
-        msg.fatal('load a C++ compiler first')
-        pass
-
-
     if not ctx.env.PYTHON:
-        msg.fatal('load a python interpreter first')
+        ctx.fatal('load a python interpreter first')
         pass
 
     # find root

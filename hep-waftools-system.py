@@ -33,9 +33,9 @@ def options(ctx):
 ### ---------------------------------------------------------------------------
 def configure(ctx):
 
-    ctx.load('c_config')
-    ctx.load('compiler_cc')
-    ctx.load('compiler_cxx')
+    #ctx.load('c_config')
+    #ctx.load('compiler_cc')
+    #ctx.load('compiler_cxx')
 
     cmtcfg = os.environ.get('CMTCFG', None)
     if not cmtcfg and ctx.options.cmtcfg:
