@@ -20,13 +20,13 @@ def options(ctx):
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
-    if not ctx.HEPWAF_FOUND_C_COMPILER:
+    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
         ctx.find_c_compiler()
 
-    if not ctx.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
         ctx.find_cxx_compiler()
         
-    if not ctx.HEPWAF_FOUND_FORTRAN_COMPILER:
+    if not ctx.env.HEPWAF_FOUND_FORTRAN_COMPILER:
         ctx.find_fortran_compiler()
     return
 
@@ -50,6 +50,8 @@ def find_c_compiler(ctx, **kwargs):
     if not ctx.options.cc: ctx.options.cc = comp
     ctx.load('c_config')
     ctx.load('compiler_c')
+
+    ctx.env.HEPWAF_FOUND_C_COMPILER = 1
     return
 
 ### ---------------------------------------------------------------------------
@@ -74,6 +76,7 @@ def find_cxx_compiler(ctx, **kwargs):
 
     ctx.load('c_config')
     ctx.load('compiler_cxx')
+    ctx.env.HEPWAF_FOUND_CXX_COMPILER = 1
     return
 
 ### ---------------------------------------------------------------------------
@@ -85,6 +88,8 @@ def find_fortran_compiler(ctx, **kwargs):
 
     ctx.load('c_config')
     ctx.load('compiler_fc')
+
+    ctx.env.HEPWAF_FOUND_FORTRAN_COMPILER = 1
     return
 
 ## EOF ##
