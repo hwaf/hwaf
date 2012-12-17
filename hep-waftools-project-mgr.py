@@ -397,7 +397,7 @@ def _hepwaf_install_project_infos(ctx):
     if not pkgdir: ctx.fatal("could not find pkgdir node [%s]" % pkgdir)
     src_pkgdir = pkgdir.get_src().abspath()
     bld_pkgdir = pkgdir.get_bld().abspath()
-
+    
     relocate = ctx.env.HEPWAF_RELOCATE
     def _massage(v):
         if isinstance(v, type("")):
@@ -408,7 +408,7 @@ def _hepwaf_install_project_infos(ctx):
                 v = v[len(destdir):]
                 pass
             # remove local paths
-            if v.startswith((src_pkgdir,bld_pkgdir)):
+            if v.startswith((src_pkgdir, bld_pkgdir)):
                 #msg.info("::: discarding [%s]" % v)
                 return None
             # only replace when it *starts* with relocate
@@ -573,20 +573,12 @@ def hepwaf_project_root(self):
     return self.hepwaf_project()['root']
 
 @waflib.Configure.conf
-def _hepwaf_get_project_idx(self, projname):
-    projs = self.env['HEPWAF_PROJECTS']
-    for i,proj in enumerate(projs):
-        if proj['name'] == projname:
-            return i
-    return None
-
-@waflib.Configure.conf
 def _hepwaf_get_project(self, projname=None):
     if projname is None:
         projname = self.hepwaf_project_name()
         pass
     try:
-        return self.env['HEPWAF_PROJECTS'][projname]
+        return self.hepwaf_projects()[projname]
     except:
         raise KeyError(
             'no such project [%s] (values=%s)'%
@@ -642,6 +634,7 @@ def hepwaf_itr_projects(self, projname=None):
 ### API for package queries
 @waflib.Configure.conf
 def hepwaf_pkg_deps(self, pkgname, projname=None):
+    #msg.info(">>> deps[%s]..." % (pkgname,))
     pkg = self.hepwaf_find_pkg(pkgname, projname)
     deps = pkg['deps']
     #msg.info("+++ deps[%s]: %s" % (pkgname, deps))
