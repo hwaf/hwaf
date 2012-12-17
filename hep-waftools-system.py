@@ -103,7 +103,7 @@ def configure(ctx):
         cmtpkgs = ctx.options.cmtpkgs
         pass
     if not cmtpkgs:
-        cmtpkgs = 'pkg'
+        cmtpkgs = 'src'
         pass
     ctx.env.CMTPKGS = cmtpkgs
 

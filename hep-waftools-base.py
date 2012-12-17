@@ -50,7 +50,7 @@ def options(ctx):
     ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
     ctx.load('hep-waftools-runtime', tooldir=_heptooldir)
 
-    pkgdir = 'pkg'
+    pkgdir = 'src'
     if osp.exists(pkgdir):
         pkgs = hepwaf_find_suboptions(pkgdir)
         ctx.recurse(pkgs, mandatory=False)
