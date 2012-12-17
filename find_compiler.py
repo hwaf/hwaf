@@ -62,7 +62,7 @@ def find_cxx_compiler(ctx, **kwargs):
     comp = ctx.env.CFG_COMPILER
     for k,v in {
         'gcc': 'g++',
-        'g++': 'g++'
+        'g++': 'g++',
         'icc': 'icc',
         'clang': 'clang++',
         }.items():
