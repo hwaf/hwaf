@@ -85,7 +85,10 @@ def find_boost(ctx, **kwargs):
 
     # register the boost module
     import sys
-    fname = sys.modules['waflib.Tools.boost'].__file__
+    modname = 'waflib.Tools.boost'
+    if not modname in sys.modules:
+        ctx.fatal("no boost module to load.\n%s" % sys.modules.keys())
+    fname = sys.modules[modname].__file__
     if fname.endswith('.pyc'): fname = fname[:-1]
     ctx.hwaf_export_module(ctx.root.find_node(fname).abspath())
 
