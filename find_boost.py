@@ -85,7 +85,7 @@ def find_boost(ctx, **kwargs):
 
     # register the boost module
     import sys
-    modname = 'waflib.Tools.boost'
+    modname = 'waflib.extras.boost'
     if not modname in sys.modules:
         ctx.fatal("no boost module to load.\n%s" % sys.modules.keys())
     fname = sys.modules[modname].__file__
