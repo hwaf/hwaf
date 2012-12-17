@@ -47,7 +47,8 @@ def find_c_compiler(ctx, **kwargs):
             comp = v
             break
         pass
-    if not ctx.options.cc: ctx.options.cc = comp
+
+    ctx.env.CC = os.environ.get('CC', comp)
     ctx.load('c_config')
     ctx.load('compiler_c')
 
@@ -72,8 +73,8 @@ def find_cxx_compiler(ctx, **kwargs):
             comp = v
             break
         pass
-    if not ctx.options.cxx: ctx.options.cxx = comp
 
+    ctx.env.CXX = os.environ.get('CXX', comp)
     ctx.load('c_config')
     ctx.load('compiler_cxx')
     ctx.env.HEPWAF_FOUND_CXX_COMPILER = 1
@@ -86,6 +87,7 @@ def find_fortran_compiler(ctx, **kwargs):
     if ctx.env.HEPWAF_FOUND_FORTRAN_COMPILER:
         return
 
+    #ctx.env.FC = os.environ.get('FC', comp)
     ctx.load('c_config')
     ctx.load('compiler_fc')
 
