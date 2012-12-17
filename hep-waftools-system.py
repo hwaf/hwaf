@@ -27,6 +27,7 @@ def options(ctx):
         help="The directory where pkgs are located")
 
     ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
+    ctx.load('find_compiler',            tooldir=_heptooldir)
     return
 
 ### ---------------------------------------------------------------------------
