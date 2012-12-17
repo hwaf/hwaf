@@ -16,7 +16,6 @@ if not _heptooldir in sys.path: sys.path.append(_heptooldir)
 
 ### ---------------------------------------------------------------------------
 def options(ctx):
-    ctx.load('compiler_c compiler_cxx')
     if 'darwin' in sys.platform:
         ctx.add_option(
             '--use-macports',

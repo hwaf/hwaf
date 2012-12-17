@@ -43,7 +43,7 @@ def configure(ctx):
 
     cfg_arch = None
     cfg_os   = None
-    cfg_comp = osp.basename(ctx.env.CC[0])
+    cfg_comp = 'gcc'
     cfg_type = None
     
     if not cmtcfg or cmtcfg == 'default':
@@ -83,6 +83,10 @@ def configure(ctx):
     ctx.env.CFG_OS, \
     ctx.env.CFG_COMPILER, \
     ctx.env.CFG_TYPE = ctx.env.CFG_QUADRUPLET
+
+    ctx.load('find_compiler')
+    ctx.find_cxx_compiler(mandatory=True)
+    ctx.find_c_compiler(mandatory=True)
 
     projname = waflib.Context.g_module.APPNAME
     if not projname:
