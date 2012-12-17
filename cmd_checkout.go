@@ -62,7 +62,7 @@ func hwaf_run_cmd_checkout(cmd *commander.Command, args []string) {
 	}
 
 	cfg := load_local_cfg()
-	pkgdir := "pkg"
+	pkgdir := "src"
 	if cfg.HasOption("hwaf-cfg", "cmtpkgs") {
 		pkgdir, err = cfg.String("hwaf-cfg", "cmtpkgs")
 		handle_err(err)

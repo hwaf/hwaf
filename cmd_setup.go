@@ -115,7 +115,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 
 	for k, v := range map[string]string{
 		"projects": strings.Join(projdirs, pathsep),
-		"cmtpkgs":  "pkg",
+		"cmtpkgs":  "src",
 	} {
 		if !lcfg.AddOption(section, k, v) {
 			err := fmt.Errorf("%s: could not add option [%s] to section [%s]",

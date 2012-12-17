@@ -177,9 +177,9 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	err = git.Run()
 	handle_err(err)
 
-	// create 'pkg' directory
-	if !path_exists("pkg") {
-		err = os.MkdirAll("pkg", 0700)
+	// create 'src' directory
+	if !path_exists("src") {
+		err = os.MkdirAll("src", 0700)
 		handle_err(err)
 	}
 
