@@ -16,6 +16,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 def options(ctx):
     ctx.load('compiler_c')
     ctx.load('compiler_cxx')
+    ctx.load('compiler_fc')
     return
 
 ### ---------------------------------------------------------------------------
