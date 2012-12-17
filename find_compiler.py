@@ -21,14 +21,6 @@ def options(ctx):
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
-        ctx.find_c_compiler()
-
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
-        ctx.find_cxx_compiler()
-        
-    if not ctx.env.HEPWAF_FOUND_FORTRAN_COMPILER:
-        ctx.find_fortran_compiler()
     return
 
 ### ---------------------------------------------------------------------------
