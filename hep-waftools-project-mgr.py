@@ -393,7 +393,10 @@ def _hepwaf_install_project_infos(ctx):
     if ctx.env.DESTDIR: destdir = ctx.env.DESTDIR
 
     pkgdir = ctx.env.CMTPKGS
-    pkgdir = ctx.path.find_node(pkgdir).abspath()
+    pkgdir = ctx.path.find_node(pkgdir)
+    if not pkgdir: ctx.fatal("could not find pkgdir node [%s]" % pkgdir)
+    src_pkgdir = pkgdir.get_src().abspath()
+    bld_pkgdir = pkgdir.get_bld().abspath()
 
     relocate = ctx.env.HEPWAF_RELOCATE
     def _massage(v):
@@ -405,7 +408,7 @@ def _hepwaf_install_project_infos(ctx):
                 v = v[len(destdir):]
                 pass
             # remove local paths
-            if v.startswith(pkgdir):
+            if v.startswith((src_pkgdir,bld_pkgdir)):
                 #msg.info("::: discarding [%s]" % v)
                 return None
             # only replace when it *starts* with relocate
