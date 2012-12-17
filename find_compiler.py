@@ -34,7 +34,7 @@ def configure(ctx):
 @conf
 def find_c_compiler(ctx, **kwargs):
     # prevent hysteresis
-    if ctx.HEPWAF_FOUND_C_COMPILER:
+    if ctx.env.HEPWAF_FOUND_C_COMPILER:
         return
 
     comp = ctx.env.CFG_COMPILER
@@ -58,7 +58,7 @@ def find_c_compiler(ctx, **kwargs):
 @conf
 def find_cxx_compiler(ctx, **kwargs):
     # prevent hysteresis
-    if ctx.HEPWAF_FOUND_CXX_COMPILER:
+    if ctx.env.HEPWAF_FOUND_CXX_COMPILER:
         return
 
     comp = ctx.env.CFG_COMPILER
@@ -83,7 +83,7 @@ def find_cxx_compiler(ctx, **kwargs):
 @conf
 def find_fortran_compiler(ctx, **kwargs):
     # prevent hysteresis
-    if ctx.HEPWAF_FOUND_FORTRAN_COMPILER:
+    if ctx.env.HEPWAF_FOUND_FORTRAN_COMPILER:
         return
 
     ctx.load('c_config')
