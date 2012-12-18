@@ -45,6 +45,11 @@ def find_c_compiler(ctx, **kwargs):
     ctx.load('c_config')
     ctx.load('compiler_c')
 
+    if ctx.is_opt():
+        if ctx.is_windows(): pass
+        else: ctx.env.append_unique('CCFLAGS', '-O2')
+        pass
+
     ctx.env.HWAF_FOUND_C_COMPILER = 1
     return
 
@@ -70,6 +75,11 @@ def find_cxx_compiler(ctx, **kwargs):
     ctx.env.CXX = os.environ.get('CXX', comp)
     ctx.load('c_config')
     ctx.load('compiler_cxx')
+    if ctx.is_opt():
+        if ctx.is_windows(): pass
+        else: ctx.env.append_unique('CXXFLAGS', '-O2')
+        pass
+
     ctx.env.HWAF_FOUND_CXX_COMPILER = 1
     return
 
