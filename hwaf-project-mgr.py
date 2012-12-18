@@ -271,8 +271,8 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                 continue
             # if k.startswith('HWAF_') or k.endswith('_PATTERN'):
             #     continue
-            if k.endswith('_PATTERN'):
-                continue
+            # if k.endswith('_PATTERN'):
+            #     continue
             if k.startswith('HWAF_') and \
                    not k.startswith(('HWAF_FOUND_',)):
                 continue
