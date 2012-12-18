@@ -50,6 +50,13 @@ def find_c_compiler(ctx, **kwargs):
         else: ctx.env.append_unique('CCFLAGS', '-O2')
         pass
 
+    if ctx.is_darwin():
+        # use ELF .so instead of .dyld...
+        linkflags = ctx.env.LINKFLAGS_cshlib[:]
+        ctx.env.LINKFLAGS_cshlib = [l.replace('-dynamiclib', '-shared')
+                                    for l in linkflags]
+        ctx.env.cshlib_PATTERN = 'lib%s.so'
+        pass
     ctx.env.HWAF_FOUND_C_COMPILER = 1
     return
 
@@ -80,6 +87,13 @@ def find_cxx_compiler(ctx, **kwargs):
         else: ctx.env.append_unique('CXXFLAGS', '-O2')
         pass
 
+    if ctx.is_darwin():
+        # use ELF .so instead of .dyld...
+        linkflags = ctx.env.LINKFLAGS_cxxshlib[:]
+        ctx.env.LINKFLAGS_cxxshlib = [l.replace('-dynamiclib', '-shared')
+                                      for l in linkflags]
+        ctx.env.cxxshlib_PATTERN = 'lib%s.so'
+        pass
     ctx.env.HWAF_FOUND_CXX_COMPILER = 1
     return
 
