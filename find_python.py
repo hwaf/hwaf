@@ -101,10 +101,8 @@ def find_python(ctx, **kwargs):
             mandatory=True,
             )
     except waflib.Errors.ConfigurationError:
-        ctx.env.append_unique(
-            'CPPFLAGS',
-            ['-D__extern_always_inline=inline',
-             ])
+        ctx.env.append_unique('DEFINES',
+                              ['__extern_always_inline=inline',])
         pass
 
     ctx.load('python')
