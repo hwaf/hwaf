@@ -181,5 +181,7 @@ def dso_ext(ctx):
         return '.so'
     elif ctx.is_windows():
         return '.dll'
+    elif ctx.is_freebsd():
+        return '.so'
     else:
         raise RuntimeError('unhandled platform [%s]' % sys.platform)
