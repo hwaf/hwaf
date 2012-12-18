@@ -13,7 +13,7 @@ from waflib.Configure import conf
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     ctx.add_option(
         '--with-tcmalloc',
         default=None,
@@ -21,19 +21,19 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_tcmalloc(ctx, **kwargs):
     
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
 
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+    if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
@@ -73,7 +73,7 @@ def find_tcmalloc(ctx, **kwargs):
         }
         ''',
         use="tcmalloc",
-        define_name = "HEPWAF_TCMALLOC_VERSION",
+        define_name = "HWAF_TCMALLOC_VERSION",
         define_ret = True,
         execute  = True,
         mandatory= kwargs['mandatory'],
@@ -83,7 +83,7 @@ def find_tcmalloc(ctx, **kwargs):
 
     ctx.env.TCMALLOC_VERSION = version
 
-    ctx.env.HEPWAF_FOUND_TCMALLOC = 1
+    ctx.env.HWAF_FOUND_TCMALLOC = 1
     return
 
 ## EOF ##

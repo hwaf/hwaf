@@ -15,7 +15,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(opt):
 
-    opt.load('hep-waftools-base', tooldir=_heptooldir)
+    opt.load('hwaf-base', tooldir=_heptooldir)
 
     opt.add_option(
         '--with-cmake',
@@ -24,17 +24,17 @@ def options(opt):
     return
 
 def configure(conf):
-    conf.load('hep-waftools-base', tooldir=_heptooldir)
+    conf.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_cmake(ctx, **kwargs):
     
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+    if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
@@ -87,7 +87,7 @@ def find_cmake(ctx, **kwargs):
 
     ctx.env.CMAKE_HOME = osp.dirname(osp.dirname(ctx.env.CMAKE))
     ctx.env.CMAKE_VERSION = version
-    ctx.env.HEPWAF_FOUND_CMAKE = 1
+    ctx.env.HWAF_FOUND_CMAKE = 1
     return
 
 ## EOF ##

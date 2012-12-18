@@ -19,7 +19,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
 
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     ctx.load('find_libxml2',      tooldir=_heptooldir)
     ctx.load('find_python',       tooldir=_heptooldir)
     ctx.load('find_gccxml', tooldir=_heptooldir)
@@ -31,29 +31,29 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_root(ctx, **kwargs):
     
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     ctx.load('find_python', tooldir=_heptooldir)
     ctx.load('find_libxml2', tooldir=_heptooldir)
     ctx.load('find_gccxml', tooldir=_heptooldir)
 
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+    if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_PYTHON:
+    if not ctx.env.HWAF_FOUND_PYTHON:
         ctx.find_python(version=kwargs.get('python_version', (2,6)))
     
-    if not ctx.env.HEPWAF_FOUND_LIBXML2:
+    if not ctx.env.HWAF_FOUND_LIBXML2:
         ctx.find_libxml2(mandatory=False)
     
     if not ctx.env.PYTHON:
@@ -114,7 +114,7 @@ def find_root(ctx, **kwargs):
     ctx.env['LIB_XMLParser'] = ['XMLParser']
 
     # check for gccxml
-    if not ctx.env.HEPWAF_FOUND_GCCXML:
+    if not ctx.env.HWAF_FOUND_GCCXML:
         ctx.find_gccxml()
         pass
 
@@ -132,7 +132,7 @@ def find_root(ctx, **kwargs):
         }
         ''',
         use="ROOT",
-        define_name = "HEPWAF_ROOT_VERSION",
+        define_name = "HWAF_ROOT_VERSION",
         define_ret = True,
         execute  = True,
         mandatory=True,
@@ -258,7 +258,7 @@ def find_root(ctx, **kwargs):
     if fname.endswith('.pyc'): fname = fname[:-1]
     ctx.hwaf_export_module(ctx.root.find_node(fname).abspath())
 
-    ctx.env.HEPWAF_FOUND_ROOT = 1
+    ctx.env.HWAF_FOUND_ROOT = 1
     return
 
 ### ---------------------------------------------------------------------------

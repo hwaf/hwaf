@@ -15,7 +15,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
 
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
 
     ctx.add_option(
         '--with-boost',
@@ -24,23 +24,23 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_boost(ctx, **kwargs):
     
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
 
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+    if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_PYTHON:
+    if not ctx.env.HWAF_FOUND_PYTHON:
         ctx.find_python()
         pass
 
@@ -94,7 +94,7 @@ def find_boost(ctx, **kwargs):
     if fname.endswith('.pyc'): fname = fname[:-1]
     ctx.hwaf_export_module(ctx.root.find_node(fname).abspath())
 
-    ctx.env.HEPWAF_FOUND_BOOST = 1
+    ctx.env.HWAF_FOUND_BOOST = 1
     return
 
 

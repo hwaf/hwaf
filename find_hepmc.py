@@ -13,7 +13,7 @@ from waflib.Configure import conf
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     ctx.add_option(
         '--with-hepmc',
         default=None,
@@ -21,18 +21,18 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_hepmc(ctx, **kwargs):
     
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+    ctx.load('hwaf-base', tooldir=_heptooldir)
+    if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
@@ -78,7 +78,7 @@ def find_hepmc(ctx, **kwargs):
         }
         ''',
         use="HepMC",
-        define_name = "HEPWAF_HEPMC_VERSION",
+        define_name = "HWAF_HEPMC_VERSION",
         define_ret = True,
         execute  = True,
         mandatory=True,
@@ -87,7 +87,7 @@ def find_hepmc(ctx, **kwargs):
     ctx.end_msg(version)
 
     ctx.env.HEPMC_VERSION = version
-    ctx.env.HEPWAF_FOUND_HEPMC = 1
+    ctx.env.HWAF_FOUND_HEPMC = 1
     return
 
 ## EOF ##

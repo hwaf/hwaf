@@ -38,7 +38,7 @@ CACHEVAR = 'WAFCACHE_PACKAGE'
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def configure(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     pass
 
 @conf
@@ -155,7 +155,7 @@ def declare_build_external(
 
     if os_env_keys is None:
         os_env_keys = []
-    os_env_keys += self.env.HEPWAF_RUNTIME_ENVVARS[:]
+    os_env_keys += self.env.HWAF_RUNTIME_ENVVARS[:]
 
     for d in (tmp_dir,
               stamp_dir,

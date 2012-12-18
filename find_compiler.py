@@ -27,7 +27,7 @@ def configure(ctx):
 @conf
 def find_c_compiler(ctx, **kwargs):
     # prevent hysteresis
-    if ctx.env.HEPWAF_FOUND_C_COMPILER:
+    if ctx.env.HWAF_FOUND_C_COMPILER:
         return
 
     comp = ctx.env.CFG_COMPILER
@@ -45,14 +45,14 @@ def find_c_compiler(ctx, **kwargs):
     ctx.load('c_config')
     ctx.load('compiler_c')
 
-    ctx.env.HEPWAF_FOUND_C_COMPILER = 1
+    ctx.env.HWAF_FOUND_C_COMPILER = 1
     return
 
 ### ---------------------------------------------------------------------------
 @conf
 def find_cxx_compiler(ctx, **kwargs):
     # prevent hysteresis
-    if ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if ctx.env.HWAF_FOUND_CXX_COMPILER:
         return
 
     comp = ctx.env.CFG_COMPILER
@@ -70,21 +70,21 @@ def find_cxx_compiler(ctx, **kwargs):
     ctx.env.CXX = os.environ.get('CXX', comp)
     ctx.load('c_config')
     ctx.load('compiler_cxx')
-    ctx.env.HEPWAF_FOUND_CXX_COMPILER = 1
+    ctx.env.HWAF_FOUND_CXX_COMPILER = 1
     return
 
 ### ---------------------------------------------------------------------------
 @conf
 def find_fortran_compiler(ctx, **kwargs):
     # prevent hysteresis
-    if ctx.env.HEPWAF_FOUND_FORTRAN_COMPILER:
+    if ctx.env.HWAF_FOUND_FORTRAN_COMPILER:
         return
 
     #ctx.env.FC = os.environ.get('FC', comp)
     ctx.load('c_config')
     ctx.load('compiler_fc')
 
-    ctx.env.HEPWAF_FOUND_FORTRAN_COMPILER = 1
+    ctx.env.HWAF_FOUND_FORTRAN_COMPILER = 1
     return
 
 ## EOF ##

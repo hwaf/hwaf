@@ -14,7 +14,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(opt):
 
-    opt.load('hep-waftools-base', tooldir=_heptooldir)
+    opt.load('hwaf-base', tooldir=_heptooldir)
 
     opt.add_option(
         '--with-gccxml',
@@ -23,17 +23,17 @@ def options(opt):
     return
 
 def configure(conf):
-    conf.load('hep-waftools-base', tooldir=_heptooldir)
+    conf.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_gccxml(ctx, **kwargs):
     
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+    if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
@@ -70,7 +70,7 @@ def find_gccxml(ctx, **kwargs):
     ctx.declare_runtime_env('GCCXML')
     ctx.declare_runtime_env('GCCXML_BINDIR')
 
-    ctx.env.HEPWAF_FOUND_GCCXML = 1
+    ctx.env.HWAF_FOUND_GCCXML = 1
     return
 
 ## EOF ##

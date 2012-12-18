@@ -47,8 +47,8 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.env.HEPWAF_BDIST_APPNAME = getattr(waflib.Context.g_module, "APPNAME", "noname")
-    ctx.env.HEPWAF_BDIST_VERSION = getattr(waflib.Context.g_module, "VERSION", "0.0.1")
+    ctx.env.HWAF_BDIST_APPNAME = getattr(waflib.Context.g_module, "APPNAME", "noname")
+    ctx.env.HWAF_BDIST_VERSION = getattr(waflib.Context.g_module, "VERSION", "0.0.1")
     return
 
 ### ---------------------------------------------------------------------------
@@ -56,18 +56,18 @@ g_rpm_spec_tmpl = '''\
 %%define        __spec_install_post %%{nil}
 %%define          debug_package %%{nil}
 %%define        __os_install_post %%{_dbpath}/brp-compress
-%%define _topdir   %(HEPWAF_BDIST_RPMBUILDROOT)s/rpmbuild
+%%define _topdir   %(HWAF_BDIST_RPMBUILDROOT)s/rpmbuild
 %%define _tmppath  %%{_topdir}/tmp
-%%define _hepwaf_topdir %(PREFIX)s
+%%define _hwaf_topdir %(PREFIX)s
 
-Summary: hepwaf generated RPM for %(HEPWAF_BDIST_APPNAME)s
+Summary: hepwaf generated RPM for %(HWAF_BDIST_APPNAME)s
 Name: %(RPM_PKG_NAME)s
 Version: %(RPM_PKG_VER)s
 Release: %(RPM_PKG_REV)s
 License: BSD
 Group: Science
 SOURCE0 : %%{name}-%%{version}.tar.gz
-URL: %(HEPWAF_BDIST_URL)s
+URL: %(HWAF_BDIST_URL)s
 
 BuildRoot: %%{_tmppath}/%%{name}-%%{version}-%%{release}-root
 
@@ -96,7 +96,7 @@ rm -rf %%{buildroot}
 
 %%files
 %%defattr(-,root,root,-)
-%%{_hepwaf_topdir}/*
+%%{_hwaf_topdir}/*
 
 '''
 
@@ -158,7 +158,7 @@ class BdistRpmCmd(waflib.Configure.ConfigurationContext):
         if not pkg_url:
             pkg_url = "http://cern.ch"
             pass
-        self.env.HEPWAF_BDIST_URL = pkg_url
+        self.env.HWAF_BDIST_URL = pkg_url
 
         pkg_cfg = self.options.rpm_pkg_cfg
         if not pkg_cfg:
@@ -166,10 +166,10 @@ class BdistRpmCmd(waflib.Configure.ConfigurationContext):
             pass
         self.env.RPM_PKG_CFG = pkg_cfg
         
-        self.env.HEPWAF_BDIST_RPMBUILDROOT = self.tmp.abspath()
+        self.env.HWAF_BDIST_RPMBUILDROOT = self.tmp.abspath()
 
         for k in dict(self.env).keys():
-            if k.startswith(('RPM','HEPWAF_')):
+            if k.startswith(('RPM','HWAF_')):
                 self.declare_runtime_env(k)
                 pass
             pass
@@ -266,9 +266,9 @@ class BDist(waflib.Build.InstallContext):
         # we could mess with multiple inheritance but this is probably unnecessary
         from waflib import Scripting
         ctx = Scripting.Dist()
-        project_name = self.env.HEPWAF_BDIST_APPNAME
+        project_name = self.env.HWAF_BDIST_APPNAME
         variant = self.env.CMTCFG
-        version = self.env.HEPWAF_BDIST_VERSION
+        version = self.env.HWAF_BDIST_VERSION
         ctx.arch_name = '%s-%s-%s.tar.gz' % (project_name,
                                              variant,
                                              version)

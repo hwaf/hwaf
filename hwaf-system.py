@@ -26,7 +26,7 @@ def options(ctx):
         default=None,
         help="The directory where pkgs are located")
 
-    ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
+    ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
     ctx.load('find_compiler',            tooldir=_heptooldir)
     return
 
@@ -94,14 +94,14 @@ def configure(ctx):
         projname = osp.basename(os.getcwd())
         waflib.Context.g_module.APPNAME = projname
         pass
-    ctx.env.HEPWAF_PROJECT_NAME = projname
+    ctx.env.HWAF_PROJECT_NAME = projname
 
     projvers = waflib.Context.g_module.VERSION
     if ctx.options.project_version:
         projvers = ctx.options.project_version
         pass
     waflib.Context.g_module.VERSION = projvers
-    ctx.env.HEPWAF_PROJECT_VERSION = projvers
+    ctx.env.HWAF_PROJECT_VERSION = projvers
     
     cmtpkgs = os.environ.get('CMTPKGS', None)
     if not cmtpkgs and ctx.options.cmtpkgs:
@@ -122,7 +122,7 @@ def configure(ctx):
     if not relocate_from:
         relocate_from = ctx.env.PREFIX
         pass
-    ctx.env.HEPWAF_RELOCATE = relocate_from
+    ctx.env.HWAF_RELOCATE = relocate_from
     
     # take INSTALL_AREA from PREFIX
     ctx.env.INSTALL_AREA = ctx.env.PREFIX

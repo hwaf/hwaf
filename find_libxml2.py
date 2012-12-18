@@ -13,7 +13,7 @@ from waflib.Configure import conf
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(opt):
-    opt.load('hep-waftools-base', tooldir=_heptooldir)
+    opt.load('hwaf-base', tooldir=_heptooldir)
     opt.add_option(
         '--with-libxml2',
         default=None,
@@ -21,17 +21,17 @@ def options(opt):
     return
 
 def configure(conf):
-    conf.load('hep-waftools-base', tooldir=_heptooldir)
+    conf.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_libxml2(ctx, **kwargs):
     
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+    if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
@@ -77,7 +77,7 @@ def find_libxml2(ctx, **kwargs):
         }
         ''',
         use="libxml2",
-        define_name = "HEPWAF_LIBXML2_VERSION",
+        define_name = "HWAF_LIBXML2_VERSION",
         define_ret = True,
         execute  = True,
         mandatory=True,
@@ -86,7 +86,7 @@ def find_libxml2(ctx, **kwargs):
     ctx.end_msg(version)
 
     ctx.env.LIBXML2_VERSION = version
-    ctx.env.HEPWAF_FOUND_LIBXML2 = 1
+    ctx.env.HWAF_FOUND_LIBXML2 = 1
     return
 
 ## EOF ##

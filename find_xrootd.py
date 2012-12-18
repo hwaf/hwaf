@@ -13,7 +13,7 @@ from waflib.Configure import conf
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(opt):
-    opt.load('hep-waftools-base', tooldir=_heptooldir)
+    opt.load('hwaf-base', tooldir=_heptooldir)
     opt.add_option(
         '--with-xrootd',
         default=None,
@@ -21,17 +21,17 @@ def options(opt):
     return
 
 def configure(conf):
-    conf.load('hep-waftools-base', tooldir=_heptooldir)
+    conf.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_xrootd(ctx, **kwargs):
     
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+    if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
@@ -100,7 +100,7 @@ def find_xrootd(ctx, **kwargs):
         }
         ''',
         use="xrootd",
-        define_name = "HEPWAF_XROOTD_VERSION",
+        define_name = "HWAF_XROOTD_VERSION",
         define_ret = True,
         execute  = True,
         )
@@ -108,7 +108,7 @@ def find_xrootd(ctx, **kwargs):
     ctx.end_msg(version)
 
     ctx.env.XROOTD_VERSION = version
-    ctx.env.HEPWAF_FOUND_XROOTD = 1
+    ctx.env.HWAF_FOUND_XROOTD = 1
     return
 
 ## EOF ##

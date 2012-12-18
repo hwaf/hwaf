@@ -51,7 +51,7 @@ from waflib.Configure import conf
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     ctx.add_option(
         '--with-python',
         default=None,
@@ -59,19 +59,19 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_python(ctx, **kwargs):
     
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
 
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+    if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
@@ -207,19 +207,19 @@ def find_python(ctx, **kwargs):
     if fname.endswith('.pyc'): fname = fname[:-1]
     ctx.hwaf_export_module(ctx.root.find_node(fname).abspath())
 
-    ctx.env.HEPWAF_FOUND_PYTHON = 1
+    ctx.env.HWAF_FOUND_PYTHON = 1
     return
 
 @conf
 def find_python_module(ctx, module_name, condition='', **kwargs):
     
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
 
     if not ctx.env.CXX and not ctx.env.CC:
         msg.fatal('load a C or C++ compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_PYTHON:
+    if not ctx.env.HWAF_FOUND_PYTHON:
         ctx.find_python()
         pass
 

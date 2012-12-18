@@ -14,7 +14,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(opt):
 
-    opt.load('hep-waftools-base', tooldir=_heptooldir)
+    opt.load('hwaf-base', tooldir=_heptooldir)
 
     opt.add_option(
         '--with-aida',
@@ -23,13 +23,13 @@ def options(opt):
     return
 
 def configure(conf):
-    conf.load('hep-waftools-base', tooldir=_heptooldir)
+    conf.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_aida(ctx, **kwargs):
     
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
@@ -56,7 +56,7 @@ def find_aida(ctx, **kwargs):
     #     }
     #     ''',
     #     use="AIDA",
-    #     define_name = "HEPWAF_AIDA_VERSION",
+    #     define_name = "HWAF_AIDA_VERSION",
     #     define_ret = True,
     #     execute  = True,
     #     mandatory=True,
@@ -64,7 +64,7 @@ def find_aida(ctx, **kwargs):
     # ctx.start_msg("AIDA version")
     # ctx.end_msg(version)
 
-    ctx.env.HEPWAF_FOUND_AIDA = 1
+    ctx.env.HWAF_FOUND_AIDA = 1
     return
 
 ## EOF ##

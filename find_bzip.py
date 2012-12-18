@@ -13,22 +13,22 @@ from waflib.Configure import conf
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     return
 
 def configure(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     return
 
 @conf
 def find_bzip(ctx, **kwargs):
     
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
-    if not ctx.env.HEPWAF_FOUND_C_COMPILER:
+    ctx.load('hwaf-base', tooldir=_heptooldir)
+    if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HEPWAF_FOUND_CXX_COMPILER:
+    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
         ctx.fatal('load a C++ compiler first')
         pass
 
@@ -43,7 +43,7 @@ def find_bzip(ctx, **kwargs):
         **kwargs
         )
 
-    ctx.env.HEPWAF_FOUND_BZIP = 1
+    ctx.env.HWAF_FOUND_BZIP = 1
     return
 
 ## EOF ##

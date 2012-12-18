@@ -44,14 +44,14 @@ def options(ctx):
         default=None,
         help="Path to the local config file listing all type of configuration infos")
 
-    ctx.load('hep-waftools-system', tooldir=_heptooldir)
-    ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
-    ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
-    ctx.load('hep-waftools-runtime', tooldir=_heptooldir)
+    ctx.load('hwaf-system', tooldir=_heptooldir)
+    ctx.load('hwaf-dist',   tooldir=_heptooldir)
+    ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
+    ctx.load('hwaf-runtime', tooldir=_heptooldir)
 
     pkgdir = 'src'
     if osp.exists(pkgdir):
-        pkgs = hepwaf_find_suboptions(pkgdir)
+        pkgs = hwaf_find_suboptions(pkgdir)
         ctx.recurse(pkgs, mandatory=False)
     return
 
@@ -66,12 +66,12 @@ def configure(ctx):
         ctx.end_msg(ok)
         pass
 
-    if not ctx.env.HEPWAF_MODULES: ctx.env.HEPWAF_MODULES = []
+    if not ctx.env.HWAF_MODULES: ctx.env.HWAF_MODULES = []
 
-    ctx.load('hep-waftools-system', tooldir=_heptooldir)
-    ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
-    ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
-    ctx.load('hep-waftools-runtime', tooldir=_heptooldir)
+    ctx.load('hwaf-system', tooldir=_heptooldir)
+    ctx.load('hwaf-dist',   tooldir=_heptooldir)
+    ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
+    ctx.load('hwaf-runtime', tooldir=_heptooldir)
 
     # register a couple of runtime environment variables
     ctx.declare_runtime_env('PATH')
@@ -133,12 +133,12 @@ def configure(ctx):
         pass
 
     # configure project
-    ctx._hepwaf_configure_project()
+    ctx._hwaf_configure_project()
 
     # display project infos...
     msg.info('='*80)
-    ctx.msg('project',    '%s-%s' % (ctx.env.HEPWAF_PROJECT_NAME,
-                                     ctx.env.HEPWAF_PROJECT_VERSION))
+    ctx.msg('project',    '%s-%s' % (ctx.env.HWAF_PROJECT_NAME,
+                                     ctx.env.HWAF_PROJECT_VERSION))
     ctx.msg('prefix',     ctx.env.PREFIX)
     if ctx.env.DESTDIR:
         ctx.msg('destdir',     ctx.env.DESTDIR)
@@ -149,7 +149,7 @@ def configure(ctx):
     ctx.msg('OS',         ctx.env.CFG_OS)
     ctx.msg('compiler',   ctx.env.CFG_COMPILER)
     ctx.msg('build-type', ctx.env.CFG_TYPE)
-    deps = ctx.hepwaf_project_deps()
+    deps = ctx.hwaf_project_deps()
     if deps: deps = ','.join(deps)
     else:    deps = 'None'
     ctx.msg('projects deps', deps)
@@ -159,16 +159,16 @@ def configure(ctx):
     return
 
 def build(ctx):
-    ctx.load('hep-waftools-system', tooldir=_heptooldir)
-    ctx.load('hep-waftools-dist',   tooldir=_heptooldir)
-    ctx.load('hep-waftools-project-mgr', tooldir=_heptooldir)
-    ctx.load('hep-waftools-runtime', tooldir=_heptooldir)
-    ctx._hepwaf_load_project_hwaf_module(do_export=False)
+    ctx.load('hwaf-system', tooldir=_heptooldir)
+    ctx.load('hwaf-dist',   tooldir=_heptooldir)
+    ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
+    ctx.load('hwaf-runtime', tooldir=_heptooldir)
+    ctx._hwaf_load_project_hwaf_module(do_export=False)
     return
 
 ### ---------------------------------------------------------------------------
 @conf
-def hepwaf_get_install_path(self, k, destdir=True):
+def hwaf_get_install_path(self, k, destdir=True):
     """
     Installation path obtained from ``self.dest`` and prefixed by the destdir.
     The variables such as '${PREFIX}/bin' are substituted.
@@ -183,7 +183,7 @@ def hepwaf_get_install_path(self, k, destdir=True):
 
 ### ---------------------------------------------------------------------------
 @conf
-def hepwaf_find_subpackages(self, directory='.'):
+def hwaf_find_subpackages(self, directory='.'):
     srcs = []
     root_node = self.path.find_dir(directory)
     dirs = root_node.ant_glob('**/*', src=False, dir=True)
@@ -198,7 +198,7 @@ def hepwaf_find_subpackages(self, directory='.'):
     return srcs
 
 ### ---------------------------------------------------------------------------
-def hepwaf_find_suboptions(directory='.'):
+def hwaf_find_suboptions(directory='.'):
     pkgs = []
     for root, dirs, files in os.walk(directory):
         if 'wscript' in files:
@@ -445,14 +445,14 @@ def declare_runtime_env(self, k):
     declare_runtime_env register a particular key ``k`` as the name of an
     environment variable the project will need at runtime.
     '''
-    if not self.env.HEPWAF_RUNTIME_ENVVARS:
-        self.env.HEPWAF_RUNTIME_ENVVARS = []
+    if not self.env.HWAF_RUNTIME_ENVVARS:
+        self.env.HWAF_RUNTIME_ENVVARS = []
         pass
     if msg.verbose:
         v = self.env[k]
         if v and isinstance(v, (list,tuple)) and len(v) != 1:
             raise KeyError("env[%s]=%s" % (k,v))
-    self.env.append_unique('HEPWAF_RUNTIME_ENVVARS', k)
+    self.env.append_unique('HWAF_RUNTIME_ENVVARS', k)
     
 ### ------------------------------------------------------------------------
 @conf
@@ -462,15 +462,15 @@ def hwaf_export_module(self, fname="wscript"):
     it will be installed in the ${PREFIX}/share/hwaf directory to be picked
     up by dependent projects.
     '''
-    if not self.env.HEPWAF_MODULES:
-        self.env.HEPWAF_MODULES = []
+    if not self.env.HWAF_MODULES:
+        self.env.HWAF_MODULES = []
         pass
     node = None
     if osp.isabs(fname): node = self.root.find_or_declare(fname)
     else:                node = self.path.find_node(fname)
     if not node: self.fatal("could not find [%s]" % fname)
     #msg.info("::: exporting [%s]" % node.abspath())
-    self.env.append_unique('HEPWAF_MODULES', node.abspath())
+    self.env.append_unique('HWAF_MODULES', node.abspath())
     
 ### ------------------------------------------------------------------------
 @conf
@@ -483,7 +483,7 @@ def _get_env_for_subproc(self, os_env_keys=None):
     #env = dict(self.env)
     if not os_env_keys:
         os_env_keys = []
-    os_env_keys += self.env.HEPWAF_RUNTIME_ENVVARS
+    os_env_keys += self.env.HWAF_RUNTIME_ENVVARS
     for k,v in dict(self.env).items():
         if not k in os_env_keys:
             try:            del env[k]

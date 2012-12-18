@@ -19,7 +19,7 @@ import waflib.Utils
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
 ### ---------------------------------------------------------------------------
-class hepwaf_runtime_tsk(waflib.Task.Task):
+class hwaf_runtime_tsk(waflib.Task.Task):
     """
     A task to properly configure runtime environment
     """
@@ -30,12 +30,12 @@ class hepwaf_runtime_tsk(waflib.Task.Task):
     def run(self):
         return
     
-    pass # class hepwaf_runtime_tsk
+    pass # class hwaf_runtime_tsk
 
 ### ---------------------------------------------------------------------------
 @conf
-def hepwaf_setup_runtime(self):
-    feats = waflib.TaskGen.feats['hepwaf_runtime_tsk']
+def hwaf_setup_runtime(self):
+    feats = waflib.TaskGen.feats['hwaf_runtime_tsk']
     for fctname in feats:
         #msg.info("triggering [%s]..." % fctname)
         fct = getattr(waflib.TaskGen.task_gen, fctname, None)
@@ -50,15 +50,15 @@ def hepwaf_setup_runtime(self):
 ### ---------------------------------------------------------------------------
 import waflib.Utils
 from waflib.TaskGen import feature, before_method, after_method
-@feature('hepwaf_runtime_tsk', '*')
+@feature('hwaf_runtime_tsk', '*')
 @before_method('process_rule')
 def insert_project_level_bindir(self):
     '''
     insert_project_level_bindir adds ${INSTALL_AREA}/bin into the
     ${PATH} environment variable.
     '''
-    _get = getattr(self, 'hepwaf_get_install_path', None)
-    if not _get: _get = getattr(self.bld, 'hepwaf_get_install_path')
+    _get = getattr(self, 'hwaf_get_install_path', None)
+    if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
     d = _get('${INSTALL_AREA}/bin')
     self.env.prepend_value('PATH', d)
     return
@@ -66,15 +66,15 @@ def insert_project_level_bindir(self):
 ### ---------------------------------------------------------------------------
 import waflib.Utils
 from waflib.TaskGen import feature, before_method, after_method
-@feature('hepwaf_runtime_tsk', '*')
+@feature('hwaf_runtime_tsk', '*')
 @before_method('process_rule')
 def insert_project_level_libdir(self):
     '''
     insert_project_level_bindir adds ${INSTALL_AREA}/lib into the
     ${LD_LIBRARY_PATH} and ${DYLD_LIBRARY_PATH} environment variables.
     '''
-    _get = getattr(self, 'hepwaf_get_install_path', None)
-    if not _get: _get = getattr(self.bld, 'hepwaf_get_install_path')
+    _get = getattr(self, 'hwaf_get_install_path', None)
+    if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
     d = _get('${INSTALL_AREA}/lib')
     self.env.prepend_value('LD_LIBRARY_PATH', d)
     self.env.prepend_value('DYLD_LIBRARY_PATH', d)
@@ -114,7 +114,7 @@ class RunCmdContext(waflib.Build.BuildContext):
             pass
         
         #msg.info("args: %s" % args)
-        self.hepwaf_setup_runtime()
+        self.hwaf_setup_runtime()
         ret = hwaf_run_cmd_with_runtime_env(self, args)
         return ret
     pass # RunCmdContext
@@ -158,7 +158,7 @@ def _hwaf_get_runtime_env(ctx):
     
     for k in ctx.env.keys():
         v = ctx.env[k]
-        if k in ctx.env.HEPWAF_RUNTIME_ENVVARS:
+        if k in ctx.env.HWAF_RUNTIME_ENVVARS:
             if isinstance(v, (list,tuple)):
                 v = os.pathsep.join(v)
                 pass
@@ -311,7 +311,7 @@ class IShellContext(waflib.Build.BuildContext):
             ret = super(IShellContext, self).execute_build()
         finally:
             msg.log.setLevel(lvl)
-        self.hepwaf_setup_runtime()
+        self.hwaf_setup_runtime()
         ret = hwaf_ishell(self)
         return ret
     

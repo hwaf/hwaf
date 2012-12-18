@@ -42,7 +42,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
 
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
     
     for t in _heptools:
         ctx.load('find_%s' % t,  tooldir=_heptooldir)
@@ -51,13 +51,13 @@ def options(ctx):
     return
 
 def configure(ctx):
-    ctx.load('hep-waftools-base', tooldir=_heptooldir)
+    ctx.load('hwaf-base', tooldir=_heptooldir)
 
     for t in _heptools:
         ctx.load('find_%s' % t, tooldir=_heptooldir)
         pass
 
-    ctx.env.HEPWAF_HEPTOOLS = _heptools[:]
+    ctx.env.HWAF_HEPTOOLS = _heptools[:]
     return
 
 ## EOF ##
