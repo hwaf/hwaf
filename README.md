@@ -14,7 +14,7 @@ The typical workflow of somebody developing against some project:
 
 ```sh
 # initialize hwaf. this has to be done the first time you install hwaf
-hwaf self-init
+hwaf self init
 
 # initialize a local workarea
 hwaf init work
@@ -27,8 +27,8 @@ hwaf setup -p /opt/sw/mana/mana-core/<vers>/<cmtcfg>
 
 
 # checkout a few packages
-hwaf co git://github.com/mana-fwk/mana-core-athenakernel Control/AthenaKernel
-hwaf co git://github.com/mana-fwk/mana-core-gaudikernel GaudiKernel
+hwaf pkg co git://github.com/mana-fwk/mana-core-athenakernel Control/AthenaKernel
+hwaf pkg co git://github.com/mana-fwk/mana-core-gaudikernel GaudiKernel
 
 # configure (every time a new package has been added)
 hwaf configure
@@ -57,10 +57,7 @@ The commands are:
 
     init        initialize a new workarea
     setup       setup an existing workarea
-    co          add a package to the current workarea
     version     print version and exit
-    self-init   initialize hwaf itself
-    self-update update hwaf itself
     waf         run waf itself
     configure   configure local project or packages
     build       build local project or packages
@@ -69,8 +66,14 @@ The commands are:
     distclean   distclean local project or packages
     shell       run an interactive shell with the correct environment
     run         run a command with the correct (project) environment
-    show-projects show local project dependencies
-    show-pkg-uses show local project dependencies
+    sdist       create a source distribution from the project or packages
+    bdist       create a binary distribution from the project or packages
+    bdist-rpm   create a RPM from the local project/packages
+
+    pkg         add, remove or inspect sub-packages
+    show        show informations about packages and projects
+    pmgr        query, download and install projects
+    self        modify hwaf internal state
 
 Use "hwaf help [command]" for more information about a command.
 
@@ -78,7 +81,6 @@ Additional help topics:
 
 
 Use "hwaf help [topic]" for more information about that topic.
-
 
 ```
 
