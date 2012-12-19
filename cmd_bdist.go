@@ -16,7 +16,7 @@ func hwaf_make_cmd_waf_bdist() *commander.Command {
 		UsageLine: "bdist [output-filename]",
 		Short:     "create a binary distribution from the project or packages",
 		Long: `
-bdist create a binary distribution from the project or packages.
+bdist creates a binary distribution from the project or packages.
 
 ex:
  $ hwaf bdist
