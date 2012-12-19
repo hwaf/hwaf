@@ -14,18 +14,18 @@ import (
 func hwaf_make_cmd_pkg_add() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_pkg_add,
-		UsageLine: "add-pkg [options] <pkg-uri> [<local-pkg-name>]",
+		UsageLine: "co [options] <pkg-uri> [<local-pkg-name>]",
 		Short:     "add a package to the current workarea",
 		Long: `
-add-pkg adds a package to the current workarea.
+co adds a package to the current workarea.
 
 ex:
- $ hwaf add-pkg /foo/pkg
- $ hwaf add-pkg Control/AthenaKernel
- $ hwaf add-pkg git://github.com/mana-fwk/mana-core-athenakernel
- $ hwaf add-pkg git://github.com/mana-fwk/mana-core-athenakernel Control/AthenaKernel
+ $ hwaf pkg co /foo/pkg
+ $ hwaf pkg co Control/AthenaKernel
+ $ hwaf pkg co git://github.com/mana-fwk/mana-core-athenakernel
+ $ hwaf pkg co git://github.com/mana-fwk/mana-core-athenakernel Control/AthenaKernel
 `,
-		Flag: *flag.NewFlagSet("hwaf-pkg-add", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-pkg-co", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
 
@@ -34,7 +34,7 @@ ex:
 
 func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	var err error
-	n := "hwaf-" + cmd.Name()
+	n := "hwaf-pkg-" + cmd.Name()
 	pkguri := ""
 	pkgname := ""
 	switch len(args) {

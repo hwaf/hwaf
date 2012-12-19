@@ -45,8 +45,6 @@ func init() {
 		Commands: []*commander.Command{
 			hwaf_make_cmd_init(),
 			hwaf_make_cmd_setup(),
-			hwaf_make_cmd_pkg_add(),
-			hwaf_make_cmd_pkg_rm(),
 			hwaf_make_cmd_version(),
 
 			hwaf_make_cmd_self_init(),
@@ -61,12 +59,13 @@ func init() {
 			hwaf_make_cmd_waf_shell(),
 			hwaf_make_cmd_waf_run(),
 
-			hwaf_make_cmd_waf_show_projects(),
-			hwaf_make_cmd_waf_show_pkg_uses(),
-
 			hwaf_make_cmd_pkgmgr_get(),
 		},
 		Flag: flag.NewFlagSet("hwaf", flag.ExitOnError),
+	Commanders: []*commander.Commander{
+			hwaf_make_cmd_pkg(),
+			hwaf_make_cmd_waf_show(),
+	 	},
 	}
 }
 

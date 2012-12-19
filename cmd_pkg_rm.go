@@ -15,16 +15,16 @@ import (
 func hwaf_make_cmd_pkg_rm() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_pkg_rm,
-		UsageLine: "rm-pkg [options] <local-pkg-name>",
+	UsageLine: "rm [options] <local-pkg-name>",
 		Short:     "remove a package from the current workarea",
 		Long: `
-rm-pkg removes a package from the current workarea.
+rm removes a package from the current workarea.
 
 ex:
- $ hwaf rm-pkg ./src/foo/pkg
- $ hwaf rm-pkg Control/AthenaKernel
+ $ hwaf pkg rm ./src/foo/pkg
+ $ hwaf pkg rm Control/AthenaKernel
 `,
-		Flag: *flag.NewFlagSet("hwaf-rm-pkg", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-pkg-rm", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
 
@@ -33,7 +33,7 @@ ex:
 
 func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 	var err error
-	n := "hwaf-" + cmd.Name()
+	n := "hwaf-pkg-" + cmd.Name()
 	pkgname := ""
 	switch len(args) {
 	case 1:
