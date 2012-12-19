@@ -96,7 +96,6 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 	out, err = git.Output()
 	handle_err(err)
 	root := strings.Trim(string(out), " \n\r")
-	println(">>> [" + root + "]")
 	err = os.Chdir(root)
 	handle_err(err)
 
