@@ -13,13 +13,13 @@ import (
 func hwaf_make_cmd_waf_show_projects() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_waf_show_projects,
-		UsageLine: "show-projects",
+		UsageLine: "projects",
 		Short:     "show local project's dependencies",
 		Long: `
 show project displays the project-dependency tree of the local project.
 
 ex:
- $ hwaf show-projects
+ $ hwaf show projects
 `,
 		Flag:        *flag.NewFlagSet("hwaf-waf-show-projects", flag.ExitOnError),
 		CustomFlags: true,

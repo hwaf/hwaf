@@ -13,13 +13,13 @@ import (
 func hwaf_make_cmd_waf_show_pkg_uses() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_waf_show_pkg_uses,
-		UsageLine: "show-pkg-uses",
+		UsageLine: "pkg-uses",
 		Short:     "show local project's dependencies",
 		Long: `
-show project displays the project-dependency tree of the local project.
+show pkg-uses displays the uses of a given package.
 
 ex:
- $ hwaf show-pkg-uses
+ $ hwaf show pkg-uses Control/AthenaCommon
 `,
 		Flag:        *flag.NewFlagSet("hwaf-waf-show-pkg-uses", flag.ExitOnError),
 		CustomFlags: true,
