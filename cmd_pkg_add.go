@@ -11,28 +11,28 @@ import (
 	//gocfg "github.com/sbinet/go-config/config"
 )
 
-func hwaf_make_cmd_checkout() *commander.Command {
+func hwaf_make_cmd_pkg_add() *commander.Command {
 	cmd := &commander.Command{
-		Run:       hwaf_run_cmd_checkout,
-		UsageLine: "co [options] <pkg-uri> [<local-pkg-name>]",
+		Run:       hwaf_run_cmd_pkg_add,
+		UsageLine: "add-pkg [options] <pkg-uri> [<local-pkg-name>]",
 		Short:     "add a package to the current workarea",
 		Long: `
-co adds a package to the current workarea.
+add-pkg adds a package to the current workarea.
 
 ex:
- $ hwaf co /foo/pkg
- $ hwaf co Control/AthenaKernel
- $ hwaf co git://github.com/mana-fwk/mana-core-athenakernel
- $ hwaf co git://github.com/mana-fwk/mana-core-athenakernel Control/AthenaKernel
+ $ hwaf add-pkg /foo/pkg
+ $ hwaf add-pkg Control/AthenaKernel
+ $ hwaf add-pkg git://github.com/mana-fwk/mana-core-athenakernel
+ $ hwaf add-pkg git://github.com/mana-fwk/mana-core-athenakernel Control/AthenaKernel
 `,
-		Flag: *flag.NewFlagSet("hwaf-checkout", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-pkg-add", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
 
 	return cmd
 }
 
-func hwaf_run_cmd_checkout(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	var err error
 	n := "hwaf-" + cmd.Name()
 	pkguri := ""

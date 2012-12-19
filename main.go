@@ -45,7 +45,8 @@ func init() {
 		Commands: []*commander.Command{
 			hwaf_make_cmd_init(),
 			hwaf_make_cmd_setup(),
-			hwaf_make_cmd_checkout(),
+			hwaf_make_cmd_pkg_add(),
+			hwaf_make_cmd_pkg_rm(),
 			hwaf_make_cmd_version(),
 
 			hwaf_make_cmd_self_init(),
