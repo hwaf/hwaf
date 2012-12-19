@@ -47,9 +47,6 @@ func init() {
 			hwaf_make_cmd_setup(),
 			hwaf_make_cmd_version(),
 
-			hwaf_make_cmd_self_init(),
-			hwaf_make_cmd_self_update(),
-
 			hwaf_make_cmd_waf(),
 			hwaf_make_cmd_waf_configure(),
 			hwaf_make_cmd_waf_build(),
@@ -65,6 +62,7 @@ func init() {
 	Commanders: []*commander.Commander{
 			hwaf_make_cmd_pkg(),
 			hwaf_make_cmd_waf_show(),
+			hwaf_make_cmd_self(),
 	 	},
 	}
 }
