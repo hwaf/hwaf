@@ -18,13 +18,13 @@ import (
 func hwaf_make_cmd_self_update() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_self_update,
-		UsageLine: "self-update [options]",
+		UsageLine: "update [options]",
 		Short:     "update hwaf itself",
 		Long: `
-self-update updates hwaf internal files and the hwaf binary itself.
+update updates hwaf internal files and the hwaf binary itself.
 
 ex:
- $ hwaf self-update
+ $ hwaf self update
 `,
 		Flag: *flag.NewFlagSet("hwaf-self-update", flag.ExitOnError),
 	}
@@ -35,7 +35,7 @@ ex:
 
 func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	var err error
-	n := "hwaf-" + cmd.Name()
+	n := "hwaf-self-" + cmd.Name()
 
 	switch len(args) {
 	case 0:

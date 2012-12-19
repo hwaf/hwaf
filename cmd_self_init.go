@@ -15,13 +15,13 @@ import (
 func hwaf_make_cmd_self_init() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_self_init,
-		UsageLine: "self-init [options] <workarea>",
+		UsageLine: "init [options] <workarea>",
 		Short:     "initialize hwaf itself",
 		Long: `
-self-init initializes hwaf internal files.
+init initializes hwaf internal files.
 
 ex:
- $ hwaf self-init
+ $ hwaf self init
 `,
 		Flag: *flag.NewFlagSet("hwaf-self-init", flag.ExitOnError),
 	}
@@ -32,7 +32,7 @@ ex:
 
 func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 	var err error
-	n := "hwaf-" + cmd.Name()
+	n := "hwaf-self-" + cmd.Name()
 
 	switch len(args) {
 	case 0:
