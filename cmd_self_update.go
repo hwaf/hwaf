@@ -134,9 +134,9 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 		err = goget.Run()
 		handle_err(err)
 
-		// self-init
+		// self init
 		bin := filepath.Join(gosrc, "hwaf")
-		hwaf := exec.Command(bin, "self-init", fmt.Sprintf("-q=%v", quiet))
+		hwaf := exec.Command(bin, "self", "init", fmt.Sprintf("-q=%v", quiet))
 		hwaf.Stderr = os.Stderr
 		hwaf.Stdout = os.Stdout
 		err = hwaf.Run()
