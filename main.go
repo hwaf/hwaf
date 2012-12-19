@@ -55,6 +55,9 @@ func init() {
 			hwaf_make_cmd_waf_distclean(),
 			hwaf_make_cmd_waf_shell(),
 			hwaf_make_cmd_waf_run(),
+
+			hwaf_make_cmd_waf_bdist(),
+			hwaf_make_cmd_waf_bdist_rpm(),
 		},
 		Flag: flag.NewFlagSet("hwaf", flag.ExitOnError),
 	Commanders: []*commander.Commander{
