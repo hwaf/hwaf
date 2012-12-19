@@ -14,28 +14,28 @@ import (
 	"github.com/sbinet/go-flag"
 )
 
-func hwaf_make_cmd_pkgmgr_get() *commander.Command {
+func hwaf_make_cmd_pmgr_get() *commander.Command {
 	cmd := &commander.Command{
-		Run:       hwaf_run_cmd_pkgmgr_get,
-		UsageLine: "pkgmgr-get [options] <pkguri>",
+		Run:       hwaf_run_cmd_pmgr_get,
+		UsageLine: "get [options] <pkguri>",
 		Short:     "download and install a package/project",
 		Long: `
-pkgmgr-get downloads and installs a package or project from a URI.
+get downloads and installs a package or project from a URI.
 
 ex:
- $ hwaf pkgmgr-get cern.ch/mana-fwk/mana-latest
- $ hwaf pkgmgr-get -o /opt cern.ch/mana-fwk/mana-latest
+ $ hwaf pmgr get cern.ch/mana-fwk/mana-latest
+ $ hwaf pmgr get -o /opt cern.ch/mana-fwk/mana-latest
 `,
-		Flag: *flag.NewFlagSet("hwaf-pkgmgr-get", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-pmgr-get", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
 	cmd.Flag.String("o", "", "directory where to install the package")
 	return cmd
 }
 
-func hwaf_run_cmd_pkgmgr_get(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_pmgr_get(cmd *commander.Command, args []string) {
 	var err error
-	n := "hwaf-" + cmd.Name()
+	n := "hwaf-pmgr-" + cmd.Name()
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 
 	pkguri := ""

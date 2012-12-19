@@ -55,13 +55,12 @@ func init() {
 			hwaf_make_cmd_waf_distclean(),
 			hwaf_make_cmd_waf_shell(),
 			hwaf_make_cmd_waf_run(),
-
-			hwaf_make_cmd_pkgmgr_get(),
 		},
 		Flag: flag.NewFlagSet("hwaf", flag.ExitOnError),
 	Commanders: []*commander.Commander{
 			hwaf_make_cmd_pkg(),
 			hwaf_make_cmd_waf_show(),
+			hwaf_make_cmd_pmgr(),
 			hwaf_make_cmd_self(),
 	 	},
 	}
