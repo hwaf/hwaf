@@ -194,28 +194,6 @@ def _hwaf_get_runtime_env(ctx):
     env['SHELL'] = shell
     
         
-    # # path
-    # _env_prepend('PATH', bindir)
-
-    # # lib
-    # _env_prepend('LD_LIBRARY_PATH', libdir) #, *ctx.env.LIBPATH)
-
-    # # dy-ld-library
-    # if ctx.is_darwin():
-    #     _env_prepend('DYLD_LIBRARY_PATH', libdir) #, *ctx.env.LIBPATH)
-    # else:
-    #     env['DYLD_LIBRARY_PATH'] = ''
-    #     pass
-
-    # # pythonpath
-    # _env_prepend('PYTHONPATH', pydir) #, *ctx.env.PYTHONPATH)
-
-    ## for k in ('PATH',
-    ##           'LD_LIBRARY_PATH',
-    ##           'PYTHONPATH',
-    ##           ):
-    ##     msg.info('env[%s]: %r' % (k,env[k]))
-
     for k in env:
         v = env[k]
         if not isinstance(v, str):
@@ -243,14 +221,6 @@ def hwaf_run_cmd_with_runtime_env(ctx, cmds):
 
     #env = ctx.env
     cwd = os.getcwd()
-    root = os.path.realpath(ctx.options.prefix)
-    # FIXME: we should use the *local* install-area to be
-    #        able to test the runtime w/o requiring an actual install!!
-    root = os.path.realpath(ctx.env['INSTALL_AREA'])
-    bindir = os.path.join(root, 'bin')
-    libdir = os.path.join(root, 'lib')
-    pydir  = os.path.join(root, 'python')
-
     # get the runtime...
     env = _hwaf_get_runtime_env(ctx)
 
@@ -488,25 +458,21 @@ class DumpEnvCmdContext(waflib.Build.BuildContext):
             msg.log.setLevel(lvl)
 
         py_exe = self.env.PYTHON
-        if isinstance(py_exe, (type(""), tuple)):
-            py_exe = self.env.PYTHON[0]
+        if isinstance(py_exe, (list, tuple)):
+            if len(py_exe) > 0: py_exe = str(py_exe[0])
+            else: py_exe = "python"
             pass
-        
-        args = [py_exe, "-c", """\
-import json
-import os
-import sys
+        if py_exe == "": py_exe = "python"
 
-env = dict(os.environ)
-sys.stdout.write("%s\n" % json.dumps(env))
-sys.stdout.flush()
-sys.exit(0)
-"""]
-        msg.info("args: %s" % args)
-        self.hwaf_setup_runtime()
-        ret = hwaf_run_cmd_with_runtime_env(self, args)
+        # get the runtime...
+        env = _hwaf_get_runtime_env(self)
 
-        return ret
+        import json
+        import sys
+
+        sys.stdout.write("%s\n" % json.dumps(env))
+        sys.stdout.flush()
+        return 0
     pass # RunCmdContext
 
 ## EOF ##
