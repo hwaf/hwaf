@@ -466,4 +466,42 @@ def hwaf_ishell(ctx):
                 "Command %s exited with code %i" % (shell_cmd, retval))
     return retval
 
+### ---------------------------------------------------------------------------
+import waflib.Build
+import waflib.Scripting
+import waflib.Utils
+
+class DumpEnvCmdContext(waflib.Build.BuildContext):
+    """print the runtime environment in a json format"""
+    cmd = 'dump-env'
+
+    def execute_build(self):
+        self.logger = msg
+
+        lvl = msg.log.level
+        if lvl < msg.logging.ERROR:
+            msg.log.setLevel(msg.logging.ERROR)
+            pass
+        try:
+            ret = super(DumpEnvCmdContext, self).execute_build()
+        finally:
+            msg.log.setLevel(lvl)
+
+        #msg.info("args: %s" % args)
+        self.hwaf_setup_runtime()
+        ret = hwaf_run_cmd_with_runtime_env(
+            self, 
+            ctx.env.PYTHON, "-c", """\
+import json
+import os
+import sys
+
+env = dict(os.environ)
+sys.stdout.write("%s\n" % json.dumps(env))
+sys.stdout.flush()
+sys.exit(0)
+""")
+        return ret
+    pass # RunCmdContext
+
 ## EOF ##
