@@ -488,7 +488,7 @@ class DumpEnvCmdContext(waflib.Build.BuildContext):
             msg.log.setLevel(lvl)
 
         py_exe = self.env.PYTHON
-        if isinstance(py_exe, (string, tuple)):
+        if isinstance(py_exe, (type(""), tuple)):
             py_exe = self.env.PYTHON[0]
             pass
 
