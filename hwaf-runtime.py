@@ -491,7 +491,7 @@ class DumpEnvCmdContext(waflib.Build.BuildContext):
         self.hwaf_setup_runtime()
         ret = hwaf_run_cmd_with_runtime_env(
             self, 
-            ctx.env.PYTHON, "-c", """\
+            self.env.PYTHON, "-c", """\
 import json
 import os
 import sys
