@@ -487,11 +487,16 @@ class DumpEnvCmdContext(waflib.Build.BuildContext):
         finally:
             msg.log.setLevel(lvl)
 
+        py_exe = self.env.PYTHON
+        if isinstance(py_exe, (string, tuple)):
+            py_exe = self.env.PYTHON[0]
+            pass
+
         #msg.info("args: %s" % args)
         self.hwaf_setup_runtime()
         ret = hwaf_run_cmd_with_runtime_env(
             self, 
-            [self.env.PYTHON, "-c", """\
+            [py_exe, "-c", """\
 import json
 import os
 import sys
