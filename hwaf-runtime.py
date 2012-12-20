@@ -136,11 +136,11 @@ def _hwaf_get_runtime_env(ctx):
 
     env = dict(os.environ)
 
-    def _env_prepend(k, *args):
-        v = env.get(k, '').split(os.pathsep)
+    def _env_prepend(k, args):
+        old_v = env.get(k, '').split(os.pathsep)
         env[k] = os.pathsep.join(args)
-        if v:
-            env[k] = os.pathsep.join([env[k]]+v)
+        if old_v:
+            env[k] = os.pathsep.join([env[k]]+old_v)
             pass
         return
 
@@ -160,9 +160,12 @@ def _hwaf_get_runtime_env(ctx):
         v = ctx.env[k]
         if k in ctx.env.HWAF_RUNTIME_ENVVARS:
             if isinstance(v, (list,tuple)):
-                v = os.pathsep.join(v)
+                if len(v) == 1: v = v[0]
+                else:           v = os.pathsep.join(v)
                 pass
-            _env_prepend(k, v)
+            # FIXME: we should have an API to decide...
+            if k.endswith('PATH'): _env_prepend(k, v)
+            else:                  env[k]=v
             continue
         # reject invalid values (for an environment)
         if isinstance(v, (list,tuple)):
