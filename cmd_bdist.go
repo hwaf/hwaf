@@ -59,17 +59,6 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	workdir, err := get_workarea_root()
 	handle_err(err)
 
-	// FIXME: get actual value from waf, somehow
-	pinfo_name := filepath.Join(workdir, "__build__", "project.info")
-	if !path_exists(pinfo_name) {
-		err = fmt.Errorf(
-			"no such file [%s]. did you run \"hwaf configure\" ?",
-			pinfo_name,
-		)
-		handle_err(err)
-	}
-	pinfo, err := NewProjectInfo(pinfo_name)
-	handle_err(err)
 	if fname == "" {
 		if bdist_name == "" {
 			bdist_name = workdir
@@ -79,6 +68,17 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 			bdist_vers = time.Now().Format("20060102")
 		}
 		if bdist_cmtcfg == "" {
+			// FIXME: get actual value from waf, somehow
+			pinfo_name := filepath.Join(workdir, "__build__", "c4che", "_cache.py")
+			if !path_exists(pinfo_name) {
+				err = fmt.Errorf(
+					"no such file [%s]. did you run \"hwaf configure\" ?",
+					pinfo_name,
+				)
+				handle_err(err)
+			}
+			pinfo, err := NewProjectInfo(pinfo_name)
+			handle_err(err)
 			bdist_cmtcfg, err = pinfo.Get("CMTCFG")
 			handle_err(err)
 		}
