@@ -138,7 +138,11 @@ def _hwaf_get_runtime_env(ctx):
 
     def _env_prepend(k, args):
         old_v = env.get(k, '').split(os.pathsep)
-        env[k] = os.pathsep.join(args)
+        if isinstance(args, (list,tuple)):
+            env[k] = os.pathsep.join(args)
+        else:
+            env[k] = args
+            pass
         if old_v:
             env[k] = os.pathsep.join([env[k]]+old_v)
             pass
