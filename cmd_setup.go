@@ -113,9 +113,20 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
+	// fetch a few informations from the first project.info
+	cmtcfg := get_default_cmtcfg()
+	//projvers := time.Now().Format("20060102")
+	if len(projdirs) > 0 {
+		pinfo, err := NewProjectInfo(filepath.Join(projdirs[0], "project.info"))
+		handle_err(err)
+		cmtcfg, err = pinfo.Get("CMTCFG")
+		handle_err(err)
+	}
+
 	for k, v := range map[string]string{
 		"projects": strings.Join(projdirs, pathsep),
 		"cmtpkgs":  "src",
+		"cmtcfg":   cmtcfg,
 	} {
 		if !lcfg.AddOption(section, k, v) {
 			err := fmt.Errorf("%s: could not add option [%s] to section [%s]",
