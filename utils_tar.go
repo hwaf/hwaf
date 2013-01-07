@@ -78,11 +78,16 @@ func _tar_gz(targ, workdir string) error {
 			return err
 		}
 		for i,m := range matches {
-			matches[i] = m[len(workdir):]
+			matches[i] = m[len(workdir)+1:]
 		}
 		args := []string{"-zcf", targ}
 		args = append(args, matches...)
+		//fmt.Printf(">> %v\n", args)
 		cmd := exec.Command("tar", args...)
+		cmd.Dir = workdir
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 		return cmd.Run()
 	}
 
