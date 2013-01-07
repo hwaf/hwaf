@@ -13,6 +13,8 @@ func hwaf_make_cmd_waf_show() *commander.Commander {
 		Commands: []*commander.Command{
 			hwaf_make_cmd_waf_show_cmtcfg(),
 			hwaf_make_cmd_waf_show_projects(),
+			hwaf_make_cmd_waf_show_project_name(),
+			hwaf_make_cmd_waf_show_project_version(),
 			hwaf_make_cmd_waf_show_pkg_uses(),
 		},
 		Flag: flag.NewFlagSet("hwaf-show", flag.ExitOnError),
