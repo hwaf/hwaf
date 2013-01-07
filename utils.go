@@ -1,7 +1,10 @@
 package main
 
 import (
+    "archive/tar"
+    "compress/gzip"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -121,6 +124,81 @@ func (pi *ProjectInfo) Get(key string) (string, error) {
 		}
 	}
 	return s, err
+}
+
+func _tar_gz_write(p string, tw *tar.Writer, fi os.FileInfo) error {
+	f, err := os.Open(p)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	hdr := &tar.Header{
+		Name: p,
+		Size: fi.Size(),
+		Mode: int64(fi.Mode()),
+		ModTime: fi.ModTime(),
+	}
+	err = tw.WriteHeader(hdr)
+	if err != nil {
+		return err
+	}
+	
+	_, err = io.Copy(tw, f)
+	return err
+}
+
+func _iter_dir(dirpath string, tw *tar.Writer) error {
+	var err error
+	//fmt.Printf("::> [%s]...\n", dirpath)
+	dir, err := os.Open(dirpath)
+	if err != nil {
+		return err
+	}
+	defer dir.Close()
+
+	finfos, err := dir.Readdir(0)
+	if err != nil {
+		return err
+	}
+	
+	for _, fi := range finfos {
+		cur := filepath.Join(dirpath, fi.Name())
+		//fmt.Printf("~~> [%s]...\n", cur)
+		if fi.IsDir() {
+			err = _iter_dir(cur, tw)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = _tar_gz_write(cur, tw, fi)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return err
+}
+
+func _tar_gz(dst, src string) error {
+	fw, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		fw.Sync()
+		fw.Close()
+	}()
+
+	// compress
+	gw := gzip.NewWriter(fw)
+	defer gw.Close()
+	
+	// tar
+	tw := tar.NewWriter(gw)
+	defer tw.Close()
+
+	return _iter_dir(src, tw)
 }
 
 // EOF
