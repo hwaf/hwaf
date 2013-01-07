@@ -1,13 +1,15 @@
 *~
 *.pyc
+*.pyo
 __pycache__
 *.root
 /__build__*
 
 # WAF files
-/.lock-waf_linux2_build
-/.lock-waf_darwin_build
+/.lock-waf*
 /.unittest-gtest/
 /.waf-*/
 /.waf3-*/
 
+# hwaf defaults
+/install-area
