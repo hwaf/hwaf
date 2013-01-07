@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"os"
+	// "os"
 	// "os/exec"
 	"path/filepath"
 	"strings"
@@ -100,10 +100,7 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 		)
 		handle_err(err)
 	}
-	err = os.Chdir(install_area)
-	handle_err(err)
-
-	err = _tar_gz(fname, ".")
+	err = _tar_gz(fname, install_area)
 	handle_err(err)
 }
 
