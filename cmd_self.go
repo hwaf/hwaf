@@ -13,6 +13,7 @@ func hwaf_make_cmd_self() *commander.Commander {
 		Commands: []*commander.Command{
 			hwaf_make_cmd_self_init(),
 			hwaf_make_cmd_self_update(),
+			hwaf_make_cmd_self_upload(),
 		},
 		Flag: flag.NewFlagSet("hwaf-self", flag.ExitOnError),
 	}
