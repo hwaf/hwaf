@@ -8,9 +8,9 @@ import (
 
 func hwaf_make_cmd_waf_show() *commander.Commander {
 	cmd := &commander.Commander{
-	Name: "show",
-	Short: "show informations about packages and projects",
-	Commands: []*commander.Command{
+		Name:  "show",
+		Short: "show informations about packages and projects",
+		Commands: []*commander.Command{
 			hwaf_make_cmd_waf_show_projects(),
 			hwaf_make_cmd_waf_show_pkg_uses(),
 		},
@@ -18,4 +18,5 @@ func hwaf_make_cmd_waf_show() *commander.Commander {
 	}
 	return cmd
 }
+
 // EOF

@@ -25,8 +25,8 @@ ex:
  $ hwaf dump-env -shell=sh
  $ hwaf dump-env -shell=csh
 `,
-		Flag:        *flag.NewFlagSet("hwaf-dump-env", flag.ExitOnError),
-	//CustomFlags: true,
+		Flag: *flag.NewFlagSet("hwaf-dump-env", flag.ExitOnError),
+		//CustomFlags: true,
 	}
 	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
 	cmd.Flag.String("shell", "", "type of shell to print the environment for (default=sh)")
@@ -75,7 +75,7 @@ func hwaf_run_cmd_dump_env(cmd *commander.Command, args []string) {
 	buf := new(bytes.Buffer)
 	waf := exec.Command(
 		bin, "waf", "dump-env",
-		)
+	)
 	waf.Stdin = os.Stdin
 	waf.Stdout = buf
 	waf.Stderr = os.Stderr
@@ -88,7 +88,7 @@ func hwaf_run_cmd_dump_env(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	//fmt.Printf("%v\n", env)
-	for k,v := range env {
+	for k, v := range env {
 		if k == "_" || k == "PS1" {
 			continue
 		}

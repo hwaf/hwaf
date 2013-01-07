@@ -63,12 +63,12 @@ func init() {
 			hwaf_make_cmd_dump_env(),
 		},
 		Flag: flag.NewFlagSet("hwaf", flag.ExitOnError),
-	Commanders: []*commander.Commander{
+		Commanders: []*commander.Commander{
 			hwaf_make_cmd_pkg(),
 			hwaf_make_cmd_waf_show(),
 			hwaf_make_cmd_pmgr(),
 			hwaf_make_cmd_self(),
-	 	},
+		},
 	}
 }
 

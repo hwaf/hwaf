@@ -8,9 +8,9 @@ import (
 
 func hwaf_make_cmd_self() *commander.Commander {
 	cmd := &commander.Commander{
-	Name: "self",
-	Short: "modify hwaf internal state",
-	Commands: []*commander.Command{
+		Name:  "self",
+		Short: "modify hwaf internal state",
+		Commands: []*commander.Command{
 			hwaf_make_cmd_self_init(),
 			hwaf_make_cmd_self_update(),
 		},
@@ -18,4 +18,5 @@ func hwaf_make_cmd_self() *commander.Commander {
 	}
 	return cmd
 }
+
 // EOF

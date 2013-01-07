@@ -1,8 +1,8 @@
 package main
 
 import (
-    "archive/tar"
-    "compress/gzip"
+	"archive/tar"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
@@ -134,16 +134,16 @@ func _tar_gz_write(p string, tw *tar.Writer, fi os.FileInfo) error {
 	defer f.Close()
 
 	hdr := &tar.Header{
-		Name: p,
-		Size: fi.Size(),
-		Mode: int64(fi.Mode()),
+		Name:    p,
+		Size:    fi.Size(),
+		Mode:    int64(fi.Mode()),
 		ModTime: fi.ModTime(),
 	}
 	err = tw.WriteHeader(hdr)
 	if err != nil {
 		return err
 	}
-	
+
 	_, err = io.Copy(tw, f)
 	return err
 }
@@ -161,7 +161,7 @@ func _iter_dir(dirpath string, tw *tar.Writer) error {
 	if err != nil {
 		return err
 	}
-	
+
 	for _, fi := range finfos {
 		cur := filepath.Join(dirpath, fi.Name())
 		//fmt.Printf("~~> [%s]...\n", cur)
@@ -193,7 +193,7 @@ func _tar_gz(dst, src string) error {
 	// compress
 	gw := gzip.NewWriter(fw)
 	defer gw.Close()
-	
+
 	// tar
 	tw := tar.NewWriter(gw)
 	defer tw.Close()

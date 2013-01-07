@@ -47,7 +47,6 @@ func hwaf_run_cmd_pmgr_get(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	
 	pkguri = strings.Replace(pkguri, "http://", "", 1)
 	pkguri = strings.Replace(pkguri, "https://", "", 1)
 

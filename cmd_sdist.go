@@ -22,8 +22,8 @@ ex:
  $ hwaf sdist
  $ hwaf sdist mana-20121218
 `,
-		Flag:        *flag.NewFlagSet("hwaf-sdist", flag.ExitOnError),
-	//CustomFlags: true,
+		Flag: *flag.NewFlagSet("hwaf-sdist", flag.ExitOnError),
+		//CustomFlags: true,
 	}
 	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
 	return cmd
@@ -47,7 +47,6 @@ func hwaf_run_cmd_waf_sdist(cmd *commander.Command, args []string) {
 	if fname == "" {
 	}
 
-	
 }
 
 // EOF

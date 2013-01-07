@@ -15,7 +15,7 @@ import (
 func hwaf_make_cmd_pkg_rm() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_pkg_rm,
-	UsageLine: "rm [options] <local-pkg-name>",
+		UsageLine: "rm [options] <local-pkg-name>",
 		Short:     "remove a package from the current workarea",
 		Long: `
 rm removes a package from the current workarea.
@@ -90,7 +90,7 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 	out, err = git.Output()
 	handle_err(err)
 	pkg = strings.Trim(string(out), " \n\r")
-	
+
 	// get toplevel directory
 	git = exec.Command("git", "rev-parse", "--show-toplevel")
 	out, err = git.Output()
@@ -129,7 +129,7 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 	git = exec.Command(
 		"git", "config", "--get",
 		fmt.Sprintf("submodule.%s.url", pkg),
-		)
+	)
 	out, err = git.Output()
 	url := strings.Trim(string(out), " \r\n")
 	if err != nil {
@@ -140,10 +140,10 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 	exec.Command("git", "config", "-f", ".gitmodules",
 		"--remove-section",
 		fmt.Sprintf("submodule.%s", pkg),
-		).Run()
+	).Run()
 	exec.Command("git", "config", "--remove-section",
 		fmt.Sprintf("submodule.%s", pkg),
-		).Run()
+	).Run()
 	git = exec.Command("git", "rm", "--cached", pkg)
 	if !quiet {
 		git.Stdin = os.Stdin
@@ -171,7 +171,7 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 
 	git = exec.Command("git", "commit", "-m",
 		fmt.Sprintf("removed package [%s] (url: %s)", pkgname, url),
-		)
+	)
 	if !quiet {
 		git.Stdin = os.Stdin
 		git.Stdout = os.Stdout
@@ -179,7 +179,7 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 	}
 	err = git.Run()
 	handle_err(err)
-	
+
 	if !quiet {
 		fmt.Printf("%s: remove package [%s]... [ok]\n", n, pkgname)
 	}

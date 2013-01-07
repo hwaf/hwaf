@@ -63,12 +63,12 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	pinfo_name := filepath.Join(workdir, "__build__", "project.info")
 	if !path_exists(pinfo_name) {
 		err = fmt.Errorf(
-			"no such file [%s]. did you run \"hwaf configure\" ?", 
+			"no such file [%s]. did you run \"hwaf configure\" ?",
 			pinfo_name,
-			)
+		)
 		handle_err(err)
 	}
-	pinfo,err := NewProjectInfo(pinfo_name)
+	pinfo, err := NewProjectInfo(pinfo_name)
 	handle_err(err)
 	if fname == "" {
 		if bdist_name == "" {
@@ -97,7 +97,7 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 		err = fmt.Errorf(
 			"no such directory [%s]. did you run \"hwaf install\" ?",
 			install_area,
-			)
+		)
 		handle_err(err)
 	}
 	err = os.Chdir(install_area)

@@ -8,9 +8,9 @@ import (
 
 func hwaf_make_cmd_pkg() *commander.Commander {
 	cmd := &commander.Commander{
-	Name: "pkg",
-	Short: "add, remove or inspect sub-packages",
-	Commands: []*commander.Command{
+		Name:  "pkg",
+		Short: "add, remove or inspect sub-packages",
+		Commands: []*commander.Command{
 			hwaf_make_cmd_pkg_add(),
 			hwaf_make_cmd_pkg_rm(),
 		},
@@ -18,4 +18,5 @@ func hwaf_make_cmd_pkg() *commander.Commander {
 	}
 	return cmd
 }
+
 // EOF
