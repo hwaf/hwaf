@@ -71,7 +71,7 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 			err = fmt.Errorf(
 				"no such file [%s]. did you run \"hwaf configure\" ?",
 				pinfo_name,
-				)
+			)
 			handle_err(err)
 		}
 		pinfo, err := NewProjectInfo(pinfo_name)

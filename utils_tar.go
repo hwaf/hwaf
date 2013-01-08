@@ -78,21 +78,21 @@ func _tar_gz(targ, workdir, prefix string) error {
 		if err != nil {
 			return err
 		}
-		for i,m := range matches {
+		for i, m := range matches {
 			matches[i] = m[len(workdir)+1:]
 		}
 		args := []string{}
 		switch runtime.GOOS {
 		case "linux":
 			args = append(args,
-				"--transform", 
+				"--transform",
 				"s,^,"+prefix+"/,",
-				)
+			)
 		case "darwin", "freebsd":
 			args = append(args,
-				"-s", 
+				"-s",
 				",^,"+prefix+"/,",
-				)
+			)
 		}
 		args = append(args, "-zcf", targ)
 		args = append(args, matches...)

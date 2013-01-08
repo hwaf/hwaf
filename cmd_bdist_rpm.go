@@ -95,7 +95,7 @@ func hwaf_run_cmd_waf_bdist_rpm(cmd *commander.Command, args []string) {
 			err = fmt.Errorf(
 				"no such file [%s]. did you run \"hwaf configure\" ?",
 				pinfo_name,
-				)
+			)
 			handle_err(err)
 		}
 		pinfo, err := NewProjectInfo(pinfo_name)
@@ -259,11 +259,11 @@ rm -rf %{buildroot}
 		handle_err(err)
 	}
 	srcname := fmt.Sprintf(
-	"%s-%s-%s.%s.rpm", 
-	rpminfos.Name,
-	rpminfos.Vers,
-	rpminfos.Release,
-	rpmarch)
+		"%s-%s-%s.%s.rpm",
+		rpminfos.Name,
+		rpminfos.Vers,
+		rpminfos.Release,
+		rpmarch)
 
 	src, err := os.Open(filepath.Join(rpmbldroot, "RPMS", rpmarch, srcname))
 	handle_err(err)

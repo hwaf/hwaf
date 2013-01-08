@@ -46,7 +46,6 @@ func hwaf_run_cmd_self_upload(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: self-upload...\n", n)
 	}
 
-	
 	old, err := exec.LookPath(os.Args[0])
 	handle_err(err)
 	dst_dir := "binet@lxplus.cern.ch:~/dev/repos/mana-fwk/www/downloads/bin"

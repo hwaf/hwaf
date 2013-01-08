@@ -20,7 +20,7 @@ ex:
  $ hwaf show project-version
  0.0.1
 `,
-		Flag:        *flag.NewFlagSet("hwaf-waf-show-project-version", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-waf-show-project-version", flag.ExitOnError),
 	}
 	return cmd
 }
@@ -38,10 +38,10 @@ func hwaf_run_cmd_waf_show_project_version(cmd *commander.Command, args []string
 		err = fmt.Errorf(
 			"no such file [%s]. did you run \"hwaf configure\" ?",
 			pinfo_name,
-			)
+		)
 		handle_err(err)
 	}
-	
+
 	pinfo, err := NewProjectInfo(pinfo_name)
 	handle_err(err)
 	val, err := pinfo.Get("HWAF_PROJECT_VERSION")
