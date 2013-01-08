@@ -91,7 +91,7 @@ func _tar_gz(targ, workdir, prefix string) error {
 		case "darwin", "freebsd":
 			args = append(args,
 				"-s", 
-				"^,"+prefix+"/,",
+				",^,"+prefix+"/,",
 				)
 		}
 		args = append(args, "-zcf", targ)
