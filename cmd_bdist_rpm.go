@@ -26,11 +26,12 @@ bdist-rpm creates a RPM from the local project/packages.
 
 ex:
  $ hwaf bdist-rpm
- $ hwaf bdist-rpm mana-20121218
+ $ hwaf bdist-rpm -name=mana
+ $ hwaf bdist-rpm -name=mana -version=20130101
 `,
 		Flag: *flag.NewFlagSet("hwaf-bdist-rpm", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
 	cmd.Flag.String("name", "", "name of the binary distribution (default: project name)")
 	cmd.Flag.String("version", "", "version of the binary distribution (default: project version)")
 	cmd.Flag.String("release", "1", "release version of the binary distribution (default: 1)")
@@ -44,13 +45,8 @@ func hwaf_run_cmd_waf_bdist_rpm(cmd *commander.Command, args []string) {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
-	fname := ""
-
 	switch len(args) {
 	case 0:
-		fname = ""
-	case 1:
-		fname = args[0]
 	default:
 		err = fmt.Errorf("%s: too many arguments (%s)", n, len(args))
 		handle_err(err)
@@ -85,34 +81,32 @@ func hwaf_run_cmd_waf_bdist_rpm(cmd *commander.Command, args []string) {
 	}
 	handle_err(err)
 
-	if fname == "" {
-		if bdist_name == "" {
-			bdist_name = workdir
-			bdist_name = filepath.Base(bdist_name)
-		}
-		if bdist_vers == "" {
-			bdist_vers = time.Now().Format("20060102")
-		}
-		if bdist_cmtcfg == "" {
-			// FIXME: get actual value from waf, somehow
-			pinfo_name := filepath.Join(workdir, "__build__", "c4che", "_cache.py")
-			if !path_exists(pinfo_name) {
-				err = fmt.Errorf(
-					"no such file [%s]. did you run \"hwaf configure\" ?",
-					pinfo_name,
-				)
-				handle_err(err)
-			}
-			pinfo, err := NewProjectInfo(pinfo_name)
-			handle_err(err)
-			bdist_cmtcfg, err = pinfo.Get("CMTCFG")
-			handle_err(err)
-		}
-		fname = bdist_name + "-" + bdist_vers + "-" + bdist_cmtcfg
+	if bdist_name == "" {
+		bdist_name = workdir
+		bdist_name = filepath.Base(bdist_name)
 	}
+	if bdist_vers == "" {
+		bdist_vers = time.Now().Format("20060102")
+	}
+	if bdist_cmtcfg == "" {
+		// FIXME: get actual value from waf, somehow
+		pinfo_name := filepath.Join(workdir, "__build__", "c4che", "_cache.py")
+		if !path_exists(pinfo_name) {
+			err = fmt.Errorf(
+				"no such file [%s]. did you run \"hwaf configure\" ?",
+				pinfo_name,
+				)
+			handle_err(err)
+		}
+		pinfo, err := NewProjectInfo(pinfo_name)
+		handle_err(err)
+		bdist_cmtcfg, err = pinfo.Get("CMTCFG")
+		handle_err(err)
+	}
+	fname := bdist_name + "-" + bdist_vers + "-" + bdist_cmtcfg
 	rpmbldroot, err := ioutil.TempDir("", "hwaf-rpm-buildroot-")
 	handle_err(err)
-	//defer os.RemoveAll(rpmbldroot)
+	defer os.RemoveAll(rpmbldroot)
 	for _, dir := range []string{
 		"RPMS", "SRPMS", "BUILD", "SOURCES", "SPECS", "tmp",
 	} {

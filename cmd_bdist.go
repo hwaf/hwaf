@@ -5,7 +5,6 @@ import (
 	"os"
 	// "os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/sbinet/go-commander"
@@ -15,7 +14,7 @@ import (
 func hwaf_make_cmd_waf_bdist() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_waf_bdist,
-		UsageLine: "bdist [output-filename]",
+		UsageLine: "bdist [options]",
 		Short:     "create a binary distribution from the project or packages",
 		Long: `
 bdist creates a binary distribution from the project or packages.
@@ -25,7 +24,6 @@ ex:
  $ hwaf bdist -name=mana
  $ hwaf bdist -name=mana -version=20121218
  $ hwaf bdist -name=mana -version -cmtcfg=x86_64-linux-gcc-opt
- $ hwaf bdist mana-20121218-x86_64-linux-gcc-opt
 `,
 		Flag: *flag.NewFlagSet("hwaf-bdist", flag.ExitOnError),
 		//CustomFlags: true,
@@ -41,12 +39,8 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
-	fname := ""
 	switch len(args) {
 	case 0:
-		fname = ""
-	case 1:
-		fname = args[0]
 	default:
 		err = fmt.Errorf("%s: too many arguments (%d)", n, len(args))
 		handle_err(err)
@@ -63,34 +57,29 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	}
 	handle_err(err)
 
-	if fname == "" {
-		if bdist_name == "" {
-			bdist_name = workdir
-			bdist_name = filepath.Base(bdist_name)
-		}
-		if bdist_vers == "" {
-			bdist_vers = time.Now().Format("20060102")
-		}
-		if bdist_cmtcfg == "" {
-			// FIXME: get actual value from waf, somehow
-			pinfo_name := filepath.Join(workdir, "__build__", "c4che", "_cache.py")
-			if !path_exists(pinfo_name) {
-				err = fmt.Errorf(
-					"no such file [%s]. did you run \"hwaf configure\" ?",
-					pinfo_name,
+	if bdist_name == "" {
+		bdist_name = workdir
+		bdist_name = filepath.Base(bdist_name)
+	}
+	if bdist_vers == "" {
+		bdist_vers = time.Now().Format("20060102")
+	}
+	if bdist_cmtcfg == "" {
+		// FIXME: get actual value from waf, somehow
+		pinfo_name := filepath.Join(workdir, "__build__", "c4che", "_cache.py")
+		if !path_exists(pinfo_name) {
+			err = fmt.Errorf(
+				"no such file [%s]. did you run \"hwaf configure\" ?",
+				pinfo_name,
 				)
-				handle_err(err)
-			}
-			pinfo, err := NewProjectInfo(pinfo_name)
-			handle_err(err)
-			bdist_cmtcfg, err = pinfo.Get("CMTCFG")
 			handle_err(err)
 		}
-		fname = bdist_name + "-" + bdist_vers + "-" + bdist_cmtcfg
+		pinfo, err := NewProjectInfo(pinfo_name)
+		handle_err(err)
+		bdist_cmtcfg, err = pinfo.Get("CMTCFG")
+		handle_err(err)
 	}
-	if !strings.HasSuffix(fname, ".tar.gz") {
-		fname = fname + ".tar.gz"
-	}
+	fname := bdist_name + "-" + bdist_vers + "-" + bdist_cmtcfg + ".tar.gz"
 
 	//fmt.Printf(">> fname=[%s]\n", fname)
 	fname = filepath.Join(workdir, fname)
