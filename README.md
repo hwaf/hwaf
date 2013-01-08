@@ -51,7 +51,7 @@ my-command --verbose
 $ hwaf help
 Usage:
 
-		hwaf command [arguments]
+	hwaf command [arguments]
 
 The commands are:
 
@@ -69,6 +69,7 @@ The commands are:
     sdist       create a source distribution from the project or packages
     bdist       create a binary distribution from the project or packages
     bdist-rpm   create a RPM from the local project/packages
+    dump-env    print the environment on STDOUT
 
     pkg         add, remove or inspect sub-packages
     show        show informations about packages and projects
