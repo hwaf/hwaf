@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	// "os"
+	"os"
 	// "os/exec"
 	"path/filepath"
 	"strings"
@@ -57,6 +57,10 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	bdist_cmtcfg := cmd.Flag.Lookup("cmtcfg").Value.Get().(string)
 
 	workdir, err := get_workarea_root()
+	if err != nil {
+		// not a git repo... assume we are at the root, then...
+		workdir, err = os.Getwd()
+	}
 	handle_err(err)
 
 	if fname == "" {
@@ -100,7 +104,9 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 		)
 		handle_err(err)
 	}
-	err = _tar_gz(fname, install_area)
+	// the prefix to prepend inside the tar-ball
+	prefix := bdist_name + "-" + bdist_vers //+ "-" + bdist_cmtcfg
+	err = _tar_gz(fname, install_area, prefix)
 	handle_err(err)
 }
 
