@@ -109,8 +109,17 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 		err = os.Chdir(gosrc)
 		handle_err(err)
 
+		// fetch...
+		git := exec.Command("git", "fetch", "--all")
+		if !quiet {
+			git.Stdout = os.Stdout
+			git.Stderr = os.Stderr
+		}
+		err = git.Run()
+		handle_err(err)
+
 		// update...
-		git := exec.Command("git", "checkout", "master")
+		git = exec.Command("git", "checkout", "master")
 		if !quiet {
 			git.Stdout = os.Stdout
 			git.Stderr = os.Stderr
