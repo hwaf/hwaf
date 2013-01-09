@@ -134,8 +134,17 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 		err = git.Run()
 		handle_err(err)
 
+		// make sure we have all deps
+		goget := exec.Command("go", "get", "-d", ".")
+		if !quiet {
+			goget.Stdout = os.Stdout
+			goget.Stderr = os.Stderr
+		}
+		err = goget.Run()
+		handle_err(err)
+
 		// rebuild
-		goget := exec.Command("go", "build", ".")
+		goget = exec.Command("go", "build", ".")
 		if !quiet {
 			goget.Stdout = os.Stdout
 			goget.Stderr = os.Stderr
