@@ -148,7 +148,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 	bdist_fname, err = filepath.Abs(bdist_fname)
 	handle_err(err)
 	{
-		untar := exec.Command("tar", "-zxf", bdist_fname)
+		untar := exec.Command("tar", "-zxf", bdist_fname, "--strip", "1")
 		untar.Dir = debbldroot
 		untar.Stdin = os.Stdin
 		untar.Stdout = os.Stdout
