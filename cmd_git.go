@@ -11,6 +11,7 @@ func hwaf_make_cmd_git() *commander.Commander {
 		Name:  "git",
 		Short: "hwaf related git tools",
 		Commands: []*commander.Command{
+			hwaf_make_cmd_git_rm_submodule(),
 		},
 		Flag: flag.NewFlagSet("hwaf-git", flag.ExitOnError),
 	}
