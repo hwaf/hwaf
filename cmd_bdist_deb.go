@@ -153,6 +153,8 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 		untar.Stdin = os.Stdin
 		untar.Stdout = os.Stdout
 		untar.Stderr = os.Stderr
+		err = untar.Run()
+		handle_err(err)
 	}
 
 	if bdist_spec != "" {
