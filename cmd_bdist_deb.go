@@ -105,9 +105,14 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 	fname := bdist_name + "-" + bdist_vers + "-" + bdist_cmtcfg
-	debbldroot, err := ioutil.TempDir("", "hwaf-deb-buildroot-")
+	debtopdir, err := ioutil.TempDir("", "hwaf-deb-buildroot-")
 	handle_err(err)
-	defer os.RemoveAll(debbldroot)
+	defer os.RemoveAll(debtopdir)
+
+	debbldroot := filepath.Join(debtopdir, "debian")
+	err = os.MkdirAll(debbldroot, 0755)
+	handle_err(err)
+
 	for _, dir := range []string{
 		"DEBIAN",
 	} {
@@ -210,9 +215,9 @@ Description: hwaf generated DEB for {{.Name}}
 	//dpkg-deb --build debian
 	deb := exec.Command(debbld,
 		"--build",
-		".",
+		"debian",
 	)
-	deb.Dir = debbldroot
+	deb.Dir = debtopdir
 	if !quiet {
 		deb.Stdin = os.Stdin
 		deb.Stdout = os.Stdout
@@ -225,7 +230,7 @@ Description: hwaf generated DEB for {{.Name}}
 	handle_err(err)
 	defer dst.Close()
 
-	src, err := os.Open(filepath.Join(debbldroot, "..deb"))
+	src, err := os.Open(filepath.Join(debtopdir, "debian.deb"))
 	handle_err(err)
 	defer src.Close()
 
