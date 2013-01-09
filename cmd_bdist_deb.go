@@ -111,7 +111,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 	for _, dir := range []string{
 		"DEBIAN",
 	} {
-		err = os.MkdirAll(filepath.Join(debbldroot, dir), 0700)
+		err = os.MkdirAll(filepath.Join(debbldroot, dir), 0755)
 		handle_err(err)
 	}
 
