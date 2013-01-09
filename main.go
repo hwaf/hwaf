@@ -33,8 +33,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sbinet/go-commander"
-	"github.com/sbinet/go-flag"
+	"github.com/gonuts/commander"
+	"github.com/gonuts/flag"
 )
 
 var g_cmd *commander.Commander

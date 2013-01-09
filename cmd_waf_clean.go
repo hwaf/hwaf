@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/sbinet/go-commander"
-	"github.com/sbinet/go-flag"
+	"github.com/gonuts/commander"
+	"github.com/gonuts/flag"
 )
 
 func hwaf_make_cmd_waf_clean() *commander.Command {

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/sbinet/go-commander"
-	"github.com/sbinet/go-flag"
+	"github.com/gonuts/commander"
+	"github.com/gonuts/flag"
 	//gocfg "github.com/sbinet/go-config/config"
 )
 

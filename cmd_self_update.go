@@ -11,8 +11,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/sbinet/go-commander"
-	"github.com/sbinet/go-flag"
+	"github.com/gonuts/commander"
+	"github.com/gonuts/flag"
 )
 
 func hwaf_make_cmd_self_update() *commander.Command {

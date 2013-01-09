@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sbinet/go-commander"
+	"github.com/gonuts/commander"
 	gocfg "github.com/sbinet/go-config/config"
-	"github.com/sbinet/go-flag"
+	"github.com/gonuts/flag"
 )
 
 func hwaf_make_cmd_setup() *commander.Command {
