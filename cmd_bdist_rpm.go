@@ -253,7 +253,7 @@ rm -rf %{buildroot}
 	case "amd64":
 		rpmarch = "x86_64"
 	case "i386":
-		rpmarch = "i386"
+		rpmarch = "i686"
 	default:
 		err = fmt.Errorf("unhandled GOARCH [%s]", runtime.GOARCH)
 		handle_err(err)
