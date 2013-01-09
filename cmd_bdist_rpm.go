@@ -233,7 +233,7 @@ rm -rf %{buildroot}
 
 	rpm := exec.Command(rpmbld,
 		"-bb",
-		fmt.Sprintf("SPECS/%s.spec", rpminfos.Name),
+		filepath.Join("SPECS", rpminfos.Name+".spec"),
 	)
 	rpm.Dir = rpmbldroot
 	if !quiet {
