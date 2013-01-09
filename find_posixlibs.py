@@ -75,6 +75,10 @@ def find_posixlibs(ctx, **kwargs):
         )
 
     # find libiberty
+    iberty_mandatory = kwargs.get('mandatory', True)
+    if ctx.is_darwin():
+        iberty_mandatory = kwargs.get('mandatory', False)
+        pass
     ctx.check_with(
         ctx.check,
         "iberty",
@@ -82,7 +86,7 @@ def find_posixlibs(ctx, **kwargs):
         header_name="libiberty.h",
         lib='iberty',
         uselib_store='iberty',
-        **kwargs
+        **iberty_kwargs
         )
 
     # find bfd
