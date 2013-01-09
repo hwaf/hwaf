@@ -79,6 +79,8 @@ def find_posixlibs(ctx, **kwargs):
     if ctx.is_darwin():
         iberty_mandatory = kwargs.get('mandatory', False)
         pass
+    iberty_kwargs = dict(kwargs)
+    iberty_kwargs['mandatory'] = iberty_mandatory
     ctx.check_with(
         ctx.check,
         "iberty",
