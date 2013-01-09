@@ -176,7 +176,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 		var spec_tmpl *template.Template
 		spec_tmpl, err = template.New("SPEC").Parse(`
 Package: {{.Name}}
-Version: {{.Version}}-{{.Release}}
+Version: {{.Vers}}-{{.Release}}
 Section: devel
 Priority: optional
 Architecture: {{.Arch}}
