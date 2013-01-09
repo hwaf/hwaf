@@ -6,6 +6,7 @@ import os.path as osp
 import sys
 
 # waf imports ---
+import waflib.Options
 import waflib.Utils
 import waflib.Logs as msg
 from waflib.Configure import conf
@@ -154,6 +155,7 @@ def configure(ctx):
     else:    deps = 'None'
     ctx.msg('projects deps', deps)
     ctx.msg('install-area', ctx.env.INSTALL_AREA)
+    ctx.msg('njobs-max', waflib.Options.options.jobs)
     msg.info('='*80)
     
     return
