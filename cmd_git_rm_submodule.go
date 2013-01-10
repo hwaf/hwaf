@@ -23,7 +23,7 @@ ex:
  $ hwaf git rm-submodule src/Control/AthenaCommon
  $ hwaf git rm-submodule -no-commit src/Control/AthenaCommon
 `,
-		Flag:        *flag.NewFlagSet("hwaf-git-rm-submodule", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-git-rm-submodule", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("no-commit", true, "do not commit the result")
 	return cmd
@@ -38,7 +38,7 @@ func hwaf_run_cmd_git_rm_submodule(cmd *commander.Command, args []string) {
 	switch len(args) {
 	case 1:
 		pkgdir = args[0]
-		pkgname= args[0]
+		pkgname = args[0]
 	default:
 		err = fmt.Errorf("%s: needs a submodule name to remove", n)
 		handle_err(err)
@@ -73,9 +73,9 @@ func hwaf_run_cmd_git_rm_submodule(cmd *commander.Command, args []string) {
 		handle_err(err)
 
 		git = exec.Command(
-			"git", "commit", "-m", 
+			"git", "commit", "-m",
 			fmt.Sprintf("removed submodule [%s]", pkgname),
-			)
+		)
 		err = git.Run()
 		handle_err(err)
 	}

@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/gonuts/commander"
-	gocfg "github.com/sbinet/go-config/config"
 	"github.com/gonuts/flag"
+	gocfg "github.com/sbinet/go-config/config"
 )
 
 func hwaf_make_cmd_setup() *commander.Command {
