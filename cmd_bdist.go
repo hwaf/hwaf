@@ -95,7 +95,24 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	}
 	// the prefix to prepend inside the tar-ball
 	prefix := bdist_name + "-" + bdist_vers //+ "-" + bdist_cmtcfg
-	err = _tar_gz(fname, install_area, prefix)
+	// create a temporary install-area with the correct structure:
+	//  install-area/<pkgname>-<pkgvers>/...
+	bdist_dir := filepath.Join(workdir, ".hwaf-bdist-install-area-"+bdist_cmtcfg)
+	_ = os.RemoveAll(bdist_dir)
+	err = os.MkdirAll(bdist_dir, 0700)
+	handle_err(err)
+
+	// move the install-area...
+	err = os.Rename(install_area, filepath.Join(bdist_dir, prefix))
+	handle_err(err)
+	defer func() {
+		err = os.Rename(filepath.Join(bdist_dir, prefix), install_area)
+		handle_err(err)
+		err = os.RemoveAll(bdist_dir)
+		handle_err(err)
+	}()
+
+	err = _tar_gz(fname, bdist_dir)
 	handle_err(err)
 }
 

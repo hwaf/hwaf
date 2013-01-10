@@ -11,7 +11,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -71,7 +70,7 @@ func _tar_FileInfoHeader(fi os.FileInfo, link string) (*tar.Header, error) {
 	return h, nil
 }
 
-func _tar_gz(targ, workdir, prefix string) error {
+func _tar_gz(targ, workdir string) error {
 	// FIXME: use archive/tar instead (once go-1.1 is out)
 	{
 		matches, err := filepath.Glob(filepath.Join(workdir, "*"))
@@ -82,18 +81,6 @@ func _tar_gz(targ, workdir, prefix string) error {
 			matches[i] = m[len(workdir)+1:]
 		}
 		args := []string{}
-		switch runtime.GOOS {
-		case "linux":
-			args = append(args,
-				"--transform",
-				"s,^,"+prefix+"/,",
-			)
-		case "darwin", "freebsd":
-			args = append(args,
-				"-s",
-				",^,"+prefix+"/,",
-			)
-		}
 		args = append(args, "-zcf", targ)
 		args = append(args, matches...)
 		//fmt.Printf(">> %v\n", args)
@@ -125,10 +112,10 @@ func _tar_gz(targ, workdir, prefix string) error {
 		if strings.HasPrefix(name, "/") {
 			name = name[1:]
 		}
-		// prepend prefix, if any
-		if prefix != "" {
-			name = filepath.Join(prefix, name)
-		}
+		// // prepend prefix, if any
+		// if prefix != "" {
+		// 	name = filepath.Join(prefix, name)
+		// }
 		target, _ := os.Readlink(path)
 		hdr, err := _tar_FileInfoHeader(fi, target)
 		if err != nil {
