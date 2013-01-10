@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
@@ -24,10 +25,13 @@ ex:
  $ hwaf pkg co Control/AthenaKernel
  $ hwaf pkg co git://github.com/mana-fwk/mana-core-athenakernel
  $ hwaf pkg co git://github.com/mana-fwk/mana-core-athenakernel Control/AthenaKernel
+ $ hwaf pkg co -b=rel/mana git://github.com/mana-fwk/mana-core-athenakernel Control/AthenaKernel
+ $ hwaf pkg co -b=AthenaKernel-00-00-01 svn+ssh://svn.cern.ch/reps/atlasoff/Control/AthenaKernel Control/AthenaKernel
 `,
 		Flag: *flag.NewFlagSet("hwaf-pkg-co", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.String("b", "", "branch to checkout (default=master)")
 
 	return cmd
 }
@@ -56,6 +60,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	pkgname = filepath.Clean(pkgname)
 
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	bname := cmd.Flag.Lookup("b").Value.Get().(string)
 
 	if !quiet {
 		fmt.Printf("%s: checkout package [%s]...\n", n, pkguri)
@@ -68,10 +73,35 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	git := exec.Command("git", "submodule", "add",
-		pkguri,
-		filepath.Join(pkgdir, pkgname),
-	)
+	if strings.HasPrefix(pkguri, "svn+ssh:/") {
+		if !quiet {
+			fmt.Printf("%s: svn repo. doing staging...\n", n)
+		}
+		staging := filepath.Join(".git", "hwaf-svn-staging")
+		if !path_exists(staging) {
+			err = os.MkdirAll(staging, 0700)
+			handle_err(err)
+		}
+		_ = os.RemoveAll(filepath.Join(staging, pkgname))
+		err = os.MkdirAll(filepath.Join(staging, pkgname), 0700)
+		handle_err(err)
+		git := exec.Command(
+			"go-svn2git", "-verbose", "-revision=1", pkguri,
+		)
+		git.Dir = filepath.Join(staging, pkgname)
+		err = git.Run()
+		handle_err(err)
+
+		pkguri, err = filepath.Abs(filepath.Join(staging, pkgname))
+		handle_err(err)
+		if !quiet {
+			fmt.Printf("%s: svn repo. doing staging... [ok]\n", n)
+		}
+	}
+	git := exec.Command(
+		"git", "submodule", "add",
+		pkguri, filepath.Join(pkgdir, pkgname),
+		)
 	if !quiet {
 		git.Stdout = os.Stdout
 		git.Stderr = os.Stderr
@@ -89,6 +119,15 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	}
 	err = git.Run()
 	handle_err(err)
+
+	if bname != "" {
+		git = exec.Command(
+			"git", "checkout", bname,
+			)
+		git.Dir = filepath.Join(pkgdir, pkgname)
+		err = git.Run()
+		handle_err(err)
+	}
 
 	git = exec.Command(
 		"git", "commit", "-m",
