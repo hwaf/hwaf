@@ -23,7 +23,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-self-upload", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
 
 	return cmd
 }

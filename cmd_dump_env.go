@@ -28,7 +28,7 @@ ex:
 		Flag: *flag.NewFlagSet("hwaf-dump-env", flag.ExitOnError),
 		//CustomFlags: true,
 	}
-	cmd.Flag.Bool("q", false, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
 	cmd.Flag.String("shell", "", "type of shell to print the environment for (default=sh)")
 	return cmd
 }
