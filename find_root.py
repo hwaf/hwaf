@@ -545,8 +545,7 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
     return o
 
 ### ------------------------------------------------------------------------
-def build_rootcint_dict(self, name, source, target,
-                      **kw):
+def build_rootcint_dict(self, name, source, target, **kw):
     kw = dict(kw)
 
     _src = []
@@ -555,7 +554,8 @@ def build_rootcint_dict(self, name, source, target,
         _src.extend(s)
     source = _src
     del _src
-    
+
+    kw['target'] = target
     includes = kw.get('includes', [])
     tgtdir = self.bldnode.find_or_declare(target).parent.abspath()
     kw['includes'] = [
@@ -575,7 +575,6 @@ def build_rootcint_dict(self, name, source, target,
         rule='${ROOTCINT} -f ${TGT} -c ${ROOTCINTINCPATHS} ${SRC}',
         name='rootcint-dict-%s' % name,
         source=source,
-        target=target,
         reentrant=True,
         **kw
         )
