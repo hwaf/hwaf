@@ -74,9 +74,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	}
 
 	if strings.HasPrefix(pkguri, "svn+ssh:/") {
-		if !quiet {
-			fmt.Printf("%s: svn repo. doing staging...\n", n)
-		}
+		fmt.Printf("%s: svn repo. doing staging...\n", n)
 		staging := filepath.Join(".git", "hwaf-svn-staging")
 		if !path_exists(staging) {
 			err = os.MkdirAll(staging, 0700)
@@ -94,9 +92,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 
 		pkguri, err = filepath.Abs(filepath.Join(staging, pkgname))
 		handle_err(err)
-		if !quiet {
-			fmt.Printf("%s: svn repo. doing staging... [ok]\n", n)
-		}
+		fmt.Printf("%s: svn repo. doing staging... [ok]\n", n)
 	}
 	git := exec.Command(
 		"git", "submodule", "add",
