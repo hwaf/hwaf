@@ -37,7 +37,7 @@ func hwaf_run_cmd_waf_install(cmd *commander.Command, args []string) {
 	waf := filepath.Join(top, "bin", "waf")
 	if !path_exists(waf) {
 		err = fmt.Errorf(
-			"no such file [%s]\nplease re-run 'hwaf self-init'\n",
+			"no such file [%s]\nplease re-run 'hwaf self init'\n",
 			waf,
 		)
 		handle_err(err)

@@ -45,7 +45,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 
 	if !quiet {
-		fmt.Printf("%s: self-init...\n", n)
+		fmt.Printf("%s...\n", n)
 	}
 
 	top := hwaf_root()
@@ -112,7 +112,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	if !quiet {
-		fmt.Printf("%s: self-init... [ok]\n", n)
+		fmt.Printf("%s... [ok]\n", n)
 	}
 }
 

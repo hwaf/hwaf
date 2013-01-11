@@ -210,7 +210,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	// self-init
-	hwaf := exec.Command(tmp.Name(), "self-init", fmt.Sprintf("-q=%v", quiet))
+	hwaf := exec.Command(tmp.Name(), "self init", fmt.Sprintf("-q=%v", quiet))
 	hwaf.Stderr = os.Stderr
 	hwaf.Stdout = os.Stdout
 	err = hwaf.Run()
