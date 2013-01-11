@@ -86,7 +86,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		err = os.MkdirAll(filepath.Join(staging, pkgname), 0700)
 		handle_err(err)
 		git := exec.Command(
-			"go-svn2git", "-verbose", "-revision=1", pkguri,
+			"hwaf", "git", "svn-clone", "-verbose", "-revision=1", pkguri,
 		)
 		git.Dir = filepath.Join(staging, pkgname)
 		err = git.Run()
