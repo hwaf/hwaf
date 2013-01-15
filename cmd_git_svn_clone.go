@@ -35,7 +35,7 @@ ex:
 	cmd.Flag.String("tags", "tags", "subpath to tags from repository URL")
 	cmd.Flag.String("exclude", "", "regular expression to filter paths when fetching")
 	cmd.Flag.String("revision", "", "start importing from SVN revision START_REV; optionally end at END_REV. e.g. -revision START_REV:END_REV")
-	
+
 	cmd.Flag.Bool("no-trunk", false, "do not import anything from trunk")
 	cmd.Flag.Bool("no-branches", false, "do not import anything from branches")
 	cmd.Flag.Bool("no-tags", false, "do not import anything from tags")
@@ -64,7 +64,7 @@ func hwaf_run_cmd_git_svn_clone(cmd *commander.Command, args []string) {
 		cmd.Flag.Lookup("no-branches").Value.Get().(bool),
 		cmd.Flag.Lookup("no-tags").Value.Get().(bool),
 		cmd.Flag.Lookup("authors").Value.Get().(string),
-		)
+	)
 
 	if ctx.RootIsTrunk {
 		ctx.Trunk = ""
@@ -96,7 +96,7 @@ func hwaf_run_cmd_git_svn_clone(cmd *commander.Command, args []string) {
 		fmt.Printf(" root-is-trunk: %v\n", ctx.RootIsTrunk)
 		fmt.Printf(" exclude:  %q\n", ctx.Exclude)
 	}
-	
+
 	if ctx.Rebase {
 		if len(args) > 0 {
 			fmt.Printf("%s: too many arguments\n", n)

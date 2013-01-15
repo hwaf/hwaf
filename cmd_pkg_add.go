@@ -97,7 +97,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	git := exec.Command(
 		"git", "submodule", "add",
 		pkguri, filepath.Join(pkgdir, pkgname),
-		)
+	)
 	if !quiet {
 		git.Stdout = os.Stdout
 		git.Stderr = os.Stderr
@@ -119,7 +119,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	if bname != "" {
 		git = exec.Command(
 			"git", "checkout", bname,
-			)
+		)
 		git.Dir = filepath.Join(pkgdir, pkgname)
 		err = git.Run()
 		handle_err(err)
