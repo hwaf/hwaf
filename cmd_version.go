@@ -25,7 +25,7 @@ ex:
 }
 
 func hwaf_run_cmd_version(cmd *commander.Command, args []string) {
-	fmt.Printf("hwaf-20130111\n")
+	fmt.Printf("hwaf-20130115\n")
 }
 
 // EOF
