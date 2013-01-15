@@ -1,0 +1,113 @@
+
+$ time curl -O -L http://mana-fwk.web.cern.ch/mana-fwk/downloads/tar/mana-20130114-x86_64-darwin106-gcc42-opt.tar.gz 
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  154M  100  154M    0     0  11.0M      0  0:00:13  0:00:13 --:--:-- 11.1M
+curl -O -L   0.50s user 2.67s system 22% cpu 13.979 total
+
+$ tar zxf mana-20130114-x86_64-darwin106-gcc42-opt.tar.gz 
+$ du -hs mana-20130114
+781M	mana-20130114
+
+$ time hwaf init work 
+hwaf init work  0.02s user 0.04s system 59% cpu 0.116 total
+$ cd work 
+$ time hwaf setup -p ../mana-20130114/opt/sw/mana/mana-core/20130114/x86_64-darwin106-gcc42-opt
+hwaf setup -p   0.02s user 0.02s system 76% cpu 0.049 total
+
+$ time hwaf configure build install
+Setting top to                           : /Users/binet/dev/git/bin-mana/work 
+Setting out to                           : /Users/binet/dev/git/bin-mana/work/__build__ 
+Manifest file                            : /Users/binet/dev/git/bin-mana/work/.hwaf/local.cfg 
+Manifest file processing                 : ok 
+Checking for 'g++' (c++ compiler)        : g++ 
+Checking for 'gcc' (c compiler)          : gcc 
+================================================================================
+project                                  : work-0.0.1 
+prefix                                   : install-area 
+pkg dir                                  : src 
+variant                                  : x86_64-darwin106-gcc42-opt 
+arch                                     : x86_64 
+OS                                       : darwin106 
+compiler                                 : gcc42 
+build-type                               : opt 
+projects deps                            : mana-core 
+install-area                             : install-area 
+njobs-max                                : 16 
+================================================================================
+'configure' finished successfully (0.344s)
+Waf: Entering directory `/Users/binet/dev/git/bin-mana/work/__build__'
+Waf: Leaving directory `/Users/binet/dev/git/bin-mana/work/__build__'
+'build' finished successfully (0.067s)
+'install' finished successfully (0.050s)
+hwaf configure build install  0.50s user 0.15s system 49% cpu 1.325 total
+
+$ time hwaf run athena.py -c 'FNAMES="http://cern.ch/mana-fwk/data/small.ntuple.0.root"' \
+>   AthenaRootComps/tests/test_athena_ntuple_dumper.py
+[...]
+ChronoStatSvc.f...   INFO  Service finalized successfully 
+ApplicationMgr       INFO Application Manager Finalized successfully
+ApplicationMgr       INFO Application Manager Terminated successfully
+Py:Athena            INFO leaving with code 0: "successful run"
+'run' finished successfully (2.955s)
+hwaf run athena.py -c  AthenaRootComps/tests/test_athena_ntuple_dumper.py  2.04s user 0.33s system 74% cpu 3.171 total
+
+$ time hwaf pkg co git://github.com/mana-fwk/mana-tests manatests
+hwaf pkg co git://github.com/mana-fwk/mana-tests manatests  0.13s user 0.24s system 19% cpu 1.916 total
+
+$ time hwaf configure build install
+Setting top to                           : /Users/binet/dev/git/bin-mana/work 
+Setting out to                           : /Users/binet/dev/git/bin-mana/work/__build__ 
+Manifest file                            : /Users/binet/dev/git/bin-mana/work/.hwaf/local.cfg 
+Manifest file processing                 : ok 
+Checking for 'g++' (c++ compiler)        : g++ 
+Checking for 'gcc' (c compiler)          : gcc 
+================================================================================
+project                                  : work-0.0.1 
+prefix                                   : install-area 
+pkg dir                                  : src 
+variant                                  : x86_64-darwin106-gcc42-opt 
+arch                                     : x86_64 
+OS                                       : darwin106 
+compiler                                 : gcc42 
+build-type                               : opt 
+projects deps                            : mana-core 
+install-area                             : install-area 
+njobs-max                                : 16 
+================================================================================
+'configure' finished successfully (0.245s)
+Waf: Entering directory `/Users/binet/dev/git/bin-mana/work/__build__'
+[ 1/11] cxx: src/manatests/src/RootAsciiDumperAlgHandle.cxx -> __build__/src/manatests/src/RootAsciiDumperAlgHandle.cxx.1.o
+[ 2/11] cxx: src/manatests/src/components/manatests_entries.cxx -> __build__/src/manatests/src/components/manatests_entries.cxx.1.o
+[ 3/11] cxx: src/manatests/src/components/manatests_load.cxx -> __build__/src/manatests/src/components/manatests_load.cxx.1.o
+[ 4/11] cxxshlib: __build__/src/manatests/src/RootAsciiDumperAlgHandle.cxx.1.o __build__/src/manatests/src/components/manatests_entries.cxx.1.o __build__/src/manatests/src/components/manatests_load.cxx.1.o -> __build__/src/manatests/libmanatests.so
+[ 5/11] symlink_tsk: __build__/src/manatests/libmanatests.so -> __build__/.install_area/lib/libmanatests.so
+[ 6/11] gen_map: __build__/src/manatests/libmanatests.so -> __build__/src/manatests/libmanatests.dsomap
+[ 8/11] merge_dsomap: __build__/src/manatests/libmanatests.dsomap -> __build__/.install_area/lib/project_merged.rootmap
+[ 8/11] gen_conf: __build__/src/manatests/libmanatests.so -> __build__/src/manatests/genConf/manatests/manatestsConf.py __build__/src/manatests/genConf/manatests __build__/src/manatests/genConf/manatests/__init__.py __build__/src/manatests/genConf/manatests/manatests_confDb.py
+[ 9/11] merge_confdb: __build__/src/manatests/genConf/manatests/manatests_confDb.py __build__/src/manatests/genConf/manatests/manatests_confDb.py -> __build__/.install_area/python/project_work_merged_confDb.py
+[10/11] gen_cliddb: __build__/src/manatests/libmanatests.so -> __build__/src/manatests/manatests_clid.db
+[11/11] merge_cliddb: __build__/src/manatests/manatests_clid.db -> __build__/.install_area/share/clid.db
+Waf: Leaving directory `/Users/binet/dev/git/bin-mana/work/__build__'
+'build' finished successfully (7.081s)
+'install' finished successfully (0.168s)
+hwaf configure build install  11.01s user 1.15s system 157% cpu 7.722 total
+
+$ time hwaf
+Waf: Entering directory `/Users/binet/dev/git/bin-mana/work/__build__'
+[ 7/11] merge_dsomap: __build__/src/manatests/libmanatests.dsomap -> __build__/.install_area/lib/project_merged.rootmap
+[ 9/11] merge_confdb: __build__/src/manatests/genConf/manatests/manatests_confDb.py __build__/src/manatests/genConf/manatests/manatests_confDb.py -> __build__/.install_area/python/project_work_merged_confDb.py
+[11/11] merge_cliddb: __build__/src/manatests/manatests_clid.db -> __build__/.install_area/share/clid.db
+Waf: Leaving directory `/Users/binet/dev/git/bin-mana/work/__build__'
+'build' finished successfully (0.133s)
+'install' finished successfully (0.063s)
+hwaf  0.30s user 0.11s system 100% cpu 0.413 total
+
+$ time hwaf run athena.py manatests/jobo.py
+[...]
+ChronoStatSvc.f...   INFO  Service finalized successfully 
+ApplicationMgr       INFO Application Manager Finalized successfully
+ApplicationMgr       INFO Application Manager Terminated successfully
+Py:Athena            INFO leaving with code 0: "successful run"
+'run' finished successfully (2.505s)
+hwaf run athena.py manatests/jobo.py  2.09s user 0.35s system 89% cpu 2.723 total
