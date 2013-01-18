@@ -61,7 +61,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 	}
 
 	// add hep-waftools cache
-	hwaf_tools := filepath.Join(top, "share", "hwaf", "tools")
+	hwaf_tools := filepath.Join(top, "tools")
 	if path_exists(hwaf_tools) {
 		err = os.RemoveAll(hwaf_tools)
 		handle_err(err)
