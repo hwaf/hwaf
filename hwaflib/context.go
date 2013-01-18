@@ -138,6 +138,11 @@ func hwaf_root() string {
 	//  /top/dir/bin/hwaf (this executable)
 	//          /share/hwaf
 	exe, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		// impossible ?
+		panic(err.Error())
+	}
+
 	bin, err := filepath.Abs(filepath.Dir(exe))
 	if err == nil {
 		root := filepath.Dir(bin)
