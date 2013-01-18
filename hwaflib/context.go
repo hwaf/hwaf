@@ -137,7 +137,8 @@ func hwaf_root() string {
 	// check if we have the expected structure:
 	//  /top/dir/bin/hwaf (this executable)
 	//          /share/hwaf
-	bin,err := filepath.Abs(filepath.Dir(os.Args[0]))
+	exe, err := exec.LookPath(os.Args[0])
+	bin, err := filepath.Abs(filepath.Dir(exe))
 	if err == nil {
 		root := filepath.Dir(bin)
 		share := filepath.Join(root, "share", "hwaf")
