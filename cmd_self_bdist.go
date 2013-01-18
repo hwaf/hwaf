@@ -1,0 +1,211 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"time"
+
+	"github.com/gonuts/commander"
+	"github.com/gonuts/flag"
+	"github.com/mana-fwk/hwaf/hwaflib"
+)
+
+func hwaf_make_cmd_self_bdist() *commander.Command {
+	cmd := &commander.Command{
+		Run:       hwaf_run_cmd_self_bdist,
+		UsageLine: "bdist [options]",
+		Short:     "create a binary distribution of hwaf itself",
+		Long: `
+self bdist creates a binary distribution of hwaf itself.
+
+ex:
+ $ hwaf self bdist
+ $ hwaf self bdist -version=20130101
+`,
+		Flag: *flag.NewFlagSet("hwaf-self-bdist", flag.ExitOnError),
+	}
+	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.String("version", "", "version of the binary distribution (default: 'time now')")
+
+	return cmd
+}
+
+func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
+	var err error
+	var ctx *hwaflib.Context
+
+	n := "hwaf-self-" + cmd.Name()
+
+	switch len(args) {
+	case 0:
+		// ok
+	default:
+		err = fmt.Errorf("%s: does NOT take any argument", n)
+		handle_err(err)
+	}
+
+	ctx, err = hwaflib.NewContext()
+	handle_err(err)
+	if ctx == nil {
+
+	}
+	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+
+	bdist_name := "hwaf"
+	bdist_vers := cmd.Flag.Lookup("version").Value.Get().(string)
+	bdist_cmtcfg := fmt.Sprintf("%s-%s", runtime.GOOS, runtime.GOARCH)
+
+	if bdist_vers == "" {
+		bdist_vers = time.Now().Format("20060102")
+	}
+
+	dirname := fmt.Sprintf("%s-%s-%s", bdist_name, bdist_vers, bdist_cmtcfg)
+	fname := dirname + ".tar.gz"
+
+	if !quiet {
+		fmt.Printf("%s [%s]...\n", n, fname)
+	}
+
+	tmpdir, err := ioutil.TempDir("", "hwaf-self-bdist-")
+	handle_err(err)
+	defer os.RemoveAll(tmpdir)
+	//fmt.Printf(">>> [%s]\n", tmpdir)
+
+	// 
+	top := filepath.Join(tmpdir, dirname)
+	// create hierarchy of dirs for bdist
+	for _, dir := range []string{
+		"bin",
+		"share",
+		filepath.Join("share", "hwaf"),
+	} {
+		err = os.MkdirAll(filepath.Join(top, dir), 0755)
+		handle_err(err)
+	}
+
+	// add hep-waftools cache
+	hwaf_tools := filepath.Join(top, "share", "hwaf", "tools")
+	git := exec.Command(
+		"git", "clone", "git://github.com/mana-fwk/hep-waftools",
+		hwaf_tools,
+	)
+	git.Dir = tmpdir
+	if !quiet {
+		git.Stdout = os.Stdout
+		git.Stderr = os.Stderr
+	}
+	err = git.Run()
+	handle_err(err)
+	// remove git stuff
+	{
+		files, err := filepath.Glob(filepath.Join(hwaf_tools, ".git*"))
+		handle_err(err)
+		for _, f := range files {
+			err = os.RemoveAll(f)
+			handle_err(err)
+		}
+	}
+
+	// add share/hwaf/hwaf.conf
+	err = ioutil.WriteFile(
+	filepath.Join(top, "share", "hwaf", "hwaf.conf"),
+		[]byte(`# hwaf config file
+[hwaf]
+
+## EOF ##
+`),
+		0644,
+	)
+	handle_err(err)
+
+	// temporary GOPATH - install go-deps
+	gopath := filepath.Join(tmpdir, "gocode")
+	err = os.MkdirAll(gopath, 0755)
+	handle_err(err)
+
+	orig_gopath := os.Getenv("GOPATH")
+	err = os.Setenv("GOPATH", gopath)
+	handle_err(err)
+	defer os.Setenv("GOPATH", orig_gopath)
+
+	for _, gopkg := range []string{
+		"github.com/mana-fwk/hwaf",
+		"github.com/mana-fwk/git-tools/git-archive-all",
+		"github.com/mana-fwk/git-tools/git-rm-submodule",
+		"github.com/mana-fwk/git-tools/git-check-clean",
+		"github.com/mana-fwk/git-tools/git-check-non-tracking",
+		"github.com/mana-fwk/git-tools/git-check-unpushed",
+	} {
+		goget := exec.Command("go", "get", "-v", gopkg)
+		goget.Dir = gopath
+		if !quiet {
+			goget.Stdout = os.Stdout
+			goget.Stderr = os.Stderr
+		}
+		err = goget.Run()
+		handle_err(err)
+
+		// install under /bin
+		dst_fname := filepath.Join(top, "bin", filepath.Base(gopkg))
+		dst, err := os.OpenFile(dst_fname, os.O_WRONLY|os.O_CREATE, 0755)
+		handle_err(err)
+		defer func(dst *os.File){
+			err := dst.Sync()
+			handle_err(err)
+			err = dst.Close()
+			handle_err(err)
+		}(dst)
+
+		src_fname := filepath.Join(gopath, "bin", filepath.Base(gopkg))
+		src, err := os.Open(src_fname)
+		handle_err(err)
+		defer func(src *os.File) {
+			err := src.Close()
+			handle_err(err)
+		}(src)
+
+		_, err = io.Copy(dst, src)
+		handle_err(err)
+	}
+
+	// add waf-bin
+	waf_fname := filepath.Join(top, "bin", "waf")
+	if path_exists(waf_fname) {
+		err = os.Remove(waf_fname)
+		handle_err(err)
+	}
+	waf_dst, err := os.OpenFile(waf_fname, os.O_WRONLY|os.O_CREATE, 0777)
+	handle_err(err)
+	defer func() {
+		err = waf_dst.Sync()
+		handle_err(err)
+		err = waf_dst.Close()
+		handle_err(err)
+	}()
+
+	waf_src, err := os.Open(filepath.Join(
+		gopath, "src", "github.com", "mana-fwk", "hwaf", "waf"),
+	)
+	handle_err(err)
+	defer waf_src.Close()
+	_, err = io.Copy(waf_dst, waf_src)
+	handle_err(err)
+
+	pwd, err := os.Getwd()
+	handle_err(err)
+
+	// package everything up
+	err = _tar_gz(filepath.Join(pwd, fname), top)
+	handle_err(err)
+
+	if !quiet {
+		fmt.Printf("%s [%s]... [ok]\n", n, fname)
+	}
+}
+
+// EOF
