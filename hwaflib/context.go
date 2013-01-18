@@ -137,11 +137,17 @@ func hwaf_root() string {
 	// check if we have the expected structure:
 	//  /top/dir/bin/hwaf (this executable)
 	//          /share/hwaf
-	bin := filepath.Dir(os.Args[0])
-	root := filepath.Dir(bin)
-	share := filepath.Join(root, "share", "hwaf")
-	if path_exists(root) && path_exists(share) {
-		return root
+	bin,err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err == nil {
+		root := filepath.Dir(bin)
+		share := filepath.Join(root, "share", "hwaf")
+		if path_exists(root) && path_exists(share) {
+			return root
+		} else if os.Getenv("HWAF_DEBUG") != "" {
+			fmt.Printf(">>> bin:   %q (%v)\n", bin, path_exists(bin))
+			fmt.Printf(">>> root:  %q (%v)\n", root, path_exists(root))
+			fmt.Printf(">>> share: %q (%v)\n", share, path_exists(share))
+		}
 	}
 
 	return ""
