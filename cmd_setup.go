@@ -9,6 +9,7 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
+	"github.com/mana-fwk/hwaf/hwaflib"
 	gocfg "github.com/sbinet/go-config/config"
 )
 
@@ -114,10 +115,10 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	}
 
 	// fetch a few informations from the first project.info
-	cmtcfg := get_default_cmtcfg()
+	cmtcfg := g_ctx.DefaultCmtcfg()
 	//projvers := time.Now().Format("20060102")
 	if len(projdirs) > 0 {
-		pinfo, err := NewProjectInfo(filepath.Join(projdirs[0], "project.info"))
+		pinfo, err := hwaflib.NewProjectInfo(filepath.Join(projdirs[0], "project.info"))
 		handle_err(err)
 		cmtcfg, err = pinfo.Get("CMTCFG")
 		handle_err(err)

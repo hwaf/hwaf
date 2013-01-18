@@ -14,6 +14,7 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
+	"github.com/mana-fwk/hwaf/hwaflib"
 )
 
 func hwaf_make_cmd_waf_bdist_deb() *commander.Command {
@@ -75,7 +76,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 		Arch      string // DEB architecture (32b/64b)
 	}
 
-	workdir, err := get_workarea_root()
+	workdir, err := g_ctx.Workarea()
 	if err != nil {
 		// not a git repo... assume we are at the root, then...
 		workdir, err = os.Getwd()
@@ -99,7 +100,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 			)
 			handle_err(err)
 		}
-		pinfo, err := NewProjectInfo(pinfo_name)
+		pinfo, err := hwaflib.NewProjectInfo(pinfo_name)
 		handle_err(err)
 		bdist_cmtcfg, err = pinfo.Get("CMTCFG")
 		handle_err(err)

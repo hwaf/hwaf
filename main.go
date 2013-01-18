@@ -30,14 +30,15 @@ hwaf manages hep-waf based applications and libraries.
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
+	"github.com/mana-fwk/hwaf/hwaflib"
 )
 
 var g_cmd *commander.Commander
+var g_ctx *hwaflib.Context
 
 func init() {
 	g_cmd = &commander.Commander{
@@ -80,21 +81,16 @@ func main() {
 		os.Args = append(os.Args, "build", "install")
 	}
 
-	// fiddle with environment to allow locate hep-waftools
-	hwaf_setup_waf_env()
+	var err error
+	g_ctx, err = hwaflib.NewContext()
+	handle_err(err)
 
-	err := g_cmd.Flag.Parse(os.Args[1:])
-	if err != nil {
-		fmt.Printf("**error** %v\n", err)
-		os.Exit(1)
-	}
+	err = g_cmd.Flag.Parse(os.Args[1:])
+	handle_err(err)
 
 	args := g_cmd.Flag.Args()
 	err = g_cmd.Run(args)
-	if err != nil {
-		fmt.Printf("**error** %v\n", err)
-		os.Exit(1)
-	}
+	handle_err(err)
 
 	return
 }

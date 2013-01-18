@@ -66,7 +66,9 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: checkout package [%s]...\n", n, pkguri)
 	}
 
-	cfg := load_local_cfg()
+	cfg, err := g_ctx.LocalCfg()
+	handle_err(err)
+
 	pkgdir := "src"
 	if cfg.HasOption("hwaf-cfg", "cmtpkgs") {
 		pkgdir, err = cfg.String("hwaf-cfg", "cmtpkgs")

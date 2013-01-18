@@ -52,7 +52,9 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: remove package [%s]...\n", n, pkgname)
 	}
 
-	cfg := load_local_cfg()
+	cfg, err := g_ctx.LocalCfg()
+	handle_err(err)
+
 	srcdir := "src"
 	if cfg.HasOption("hwaf-cfg", "cmtpkgs") {
 		srcdir, err = cfg.String("hwaf-cfg", "cmtpkgs")

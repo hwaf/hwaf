@@ -49,7 +49,8 @@ func hwaf_run_cmd_git_rm_submodule(cmd *commander.Command, args []string) {
 	cmtpkgdir := "src"
 
 	if !path_exists(pkgdir) {
-		cfg := load_local_cfg()
+		cfg, err := g_ctx.LocalCfg()
+		handle_err(err)
 		if cfg.HasOption("hwaf-cfg", "cmtpkgs") {
 			cmtpkgdir, err = cfg.String("hwaf-cfg", "cmtpkgs")
 			handle_err(err)

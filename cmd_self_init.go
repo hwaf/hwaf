@@ -48,14 +48,20 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s...\n", n)
 	}
 
-	top := hwaf_root()
+	home := os.Getenv("HOME")
+	if home == "" {
+		err = fmt.Errorf("%s: no ${HOME} environment variable", n)
+		handle_err(err)
+	}
+
+	top := filepath.Join(home, ".config", "hwaf")
 	if !path_exists(top) {
 		err = os.MkdirAll(top, 0700)
 		handle_err(err)
 	}
 
 	// add hep-waftools cache
-	hwaf_tools := filepath.Join(top, "tools")
+	hwaf_tools := filepath.Join(top, "share", "tools")
 	if path_exists(hwaf_tools) {
 		err = os.RemoveAll(hwaf_tools)
 		handle_err(err)

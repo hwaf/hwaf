@@ -12,7 +12,6 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
-	"github.com/mana-fwk/hwaf/hwaflib"
 )
 
 func hwaf_make_cmd_self_bdist() *commander.Command {
@@ -37,7 +36,6 @@ ex:
 
 func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	var err error
-	var ctx *hwaflib.Context
 
 	n := "hwaf-self-" + cmd.Name()
 
@@ -49,11 +47,6 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	ctx, err = hwaflib.NewContext()
-	handle_err(err)
-	if ctx == nil {
-
-	}
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 
 	bdist_name := "hwaf"
@@ -113,7 +106,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 
 	// add share/hwaf/hwaf.conf
 	err = ioutil.WriteFile(
-	filepath.Join(top, "share", "hwaf", "hwaf.conf"),
+		filepath.Join(top, "share", "hwaf", "hwaf.conf"),
 		[]byte(`# hwaf config file
 [hwaf]
 
@@ -154,7 +147,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 		dst_fname := filepath.Join(top, "bin", filepath.Base(gopkg))
 		dst, err := os.OpenFile(dst_fname, os.O_WRONLY|os.O_CREATE, 0755)
 		handle_err(err)
-		defer func(dst *os.File){
+		defer func(dst *os.File) {
 			err := dst.Sync()
 			handle_err(err)
 			err = dst.Close()

@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
@@ -33,15 +31,8 @@ func hwaf_run_cmd_waf_configure(cmd *commander.Command, args []string) {
 	var err error
 	//n := "hwaf-" + cmd.Name()
 
-	top := hwaf_root()
-	waf := filepath.Join(top, "bin", "waf")
-	if !path_exists(waf) {
-		err = fmt.Errorf(
-			"no such file [%s]\nplease re-run 'hwaf self init'\n",
-			waf,
-		)
-		handle_err(err)
-	}
+	waf, err := g_ctx.WafBin()
+	handle_err(err)
 
 	subargs := append([]string{"configure"}, args...)
 	sub := exec.Command(waf, subargs...)
