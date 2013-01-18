@@ -149,10 +149,6 @@ func hwaf_root() string {
 		share := filepath.Join(root, "share", "hwaf")
 		if path_exists(root) && path_exists(share) {
 			return root
-		} else if os.Getenv("HWAF_DEBUG") != "" {
-			fmt.Printf(">>> bin:   %q (%v)\n", bin, path_exists(bin))
-			fmt.Printf(">>> root:  %q (%v)\n", root, path_exists(root))
-			fmt.Printf(">>> share: %q (%v)\n", share, path_exists(share))
 		}
 	}
 
