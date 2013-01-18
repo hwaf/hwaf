@@ -5,11 +5,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
 	//gocfg "github.com/sbinet/go-config/config"
+	_ "github.com/mana-fwk/git-tools/utils"
 )
 
 func hwaf_make_cmd_pkg_rm() *commander.Command {
@@ -68,110 +68,12 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 		}
 	}
 
-	// make sure we get correct collated messages
-	err = os.Setenv("LC_MESSAGES", "C")
-	handle_err(err)
-
-	// check the directory we have been given is a valid submodule
-	git := exec.Command(
-		"git", "ls-files", "--error-unmatch",
-		"--stage",
-		"--",
-		pkg)
-	out, err := git.Output()
-	handle_err(err)
-	if string(out) == "" {
-		err = fmt.Errorf("[%s] is not a valid submodule", pkgname)
-		handle_err(err)
-	}
-
-	// get the full path of the submodule
-	git = exec.Command("git", "ls-files", "--full-name", pkg)
-	out, err = git.Output()
-	handle_err(err)
-	pkg = strings.Trim(string(out), " \n\r")
-
-	// get toplevel directory
-	git = exec.Command("git", "rev-parse", "--show-toplevel")
-	out, err = git.Output()
-	handle_err(err)
-	root := strings.Trim(string(out), " \n\r")
-	err = os.Chdir(root)
-	handle_err(err)
-
-	err = os.Chdir(pkg)
-	handle_err(err)
-
-	// FIXME
-	// for _,tst := range []string{"check-clean", "check-unpushed", "check-non-tracking"} {
-	// 	git = exec.Command("git", tst)
-	// 	if !quiet {
-	// 		git.Stdin = os.Stdin
-	// 		git.Stdout = os.Stdout
-	// 		git.Stderr = os.Stderr
-	// 	}
-	// 	err = git.Run()
-	// 	handle_err(err)
-	// }
-
-	// find the real git-dir
-	git = exec.Command("git", "rev-parse", "--git-dir")
-	out, err = git.Output()
-	handle_err(err)
-	gitdir := string(out)
-
-	err = os.Chdir(root)
-	handle_err(err)
-
-	// ok, start removing now...
-
-	// get submodule url
-	git = exec.Command(
-		"git", "config", "--get",
-		fmt.Sprintf("submodule.%s.url", pkg),
-	)
-	out, err = git.Output()
-	url := strings.Trim(string(out), " \r\n")
-	if err != nil {
-		url = "unknown"
-	}
-
-	// remove config entries
-	exec.Command("git", "config", "-f", ".gitmodules",
-		"--remove-section",
-		fmt.Sprintf("submodule.%s", pkg),
-	).Run()
-	exec.Command("git", "config", "--remove-section",
-		fmt.Sprintf("submodule.%s", pkg),
-	).Run()
-	git = exec.Command("git", "rm", "--cached", pkg)
+	rmcmd := []string{"rm-submodule"}
 	if !quiet {
-		git.Stdin = os.Stdin
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
+		rmcmd = append(rmcmd, "--verbose")
 	}
-	err = git.Run()
-	handle_err(err)
-
-	err = os.RemoveAll(pkg)
-	handle_err(err)
-
-	err = os.RemoveAll(gitdir)
-	handle_err(err)
-
-	// commit changes
-	git = exec.Command("git", "add", ".gitmodules")
-	if !quiet {
-		git.Stdin = os.Stdin
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
-	handle_err(err)
-
-	git = exec.Command("git", "commit", "-m",
-		fmt.Sprintf("removed package [%s] (url: %s)", pkgname, url),
-	)
+	rmcmd = append(rmcmd, pkg)
+	git := exec.Command("git", rmcmd...)
 	if !quiet {
 		git.Stdin = os.Stdin
 		git.Stdout = os.Stdout
