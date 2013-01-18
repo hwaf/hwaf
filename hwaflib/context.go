@@ -151,7 +151,7 @@ func (ctx *Context) init() error {
 	var err error
 	root := hwaf_root()
 	if root == "" {
-		return ErrNoHwafRootDir
+		//return ErrNoHwafRootDir
 	}
 	ctx.Root = root
 
@@ -160,18 +160,19 @@ func (ctx *Context) init() error {
 		return err
 	}
 
-	// first one wins (as we append to the xyzPATH)
-	for _, top := range []string{
-		filepath.Join("${HOME}", ".config", "hwaf"),
-		ctx.Root,
-	} {
-		top = os.ExpandEnv(top)
-		if !path_exists(top) {
-			continue
+	setup_env := func(topdir string) error {
+		topdir = os.ExpandEnv(topdir)
+		if !path_exists(topdir) {
+			return nil
 		}
 		// add hepwaf-tools to the python environment
 		pypath := os.Getenv("PYTHONPATH")
-		hwaftools := filepath.Join(top, "share", "hwaf", "tools")
+		hwaftools := ""
+		if topdir == ctx.Root {
+			hwaftools = filepath.Join(topdir, "share", "hwaf", "tools")
+		} else {
+			hwaftools = filepath.Join(topdir, "tools")
+		}
 		if !path_exists(hwaftools) {
 			return fmt.Errorf("hwaf: no such directory [%s]", hwaftools)
 		}
@@ -184,7 +185,7 @@ func (ctx *Context) init() error {
 
 		// add the git-tools to the environment
 		binpath := os.Getenv("PATH")
-		hwafbin := filepath.Join(top, "bin")
+		hwafbin := filepath.Join(topdir, "bin")
 		if !path_exists(hwafbin) {
 			return fmt.Errorf("hwaf: no such directory [%s]", hwafbin)
 		}
@@ -195,6 +196,21 @@ func (ctx *Context) init() error {
 			binpath = binpath + string(os.PathListSeparator) + hwafbin
 		}
 		os.Setenv("PATH", binpath)
+		return nil
+	}
+
+	// setup environment.
+	// order matters:
+	//   first one wins (as we append to the xyzPATH)
+	err = setup_env(filepath.Join("${HOME}", ".config", "hwaf"))
+	if err != nil {
+		// ok... discard.
+	}
+
+	err = setup_env(ctx.Root)
+	if err != nil {
+		// this one is more critical
+		return err
 	}
 
 	return err
