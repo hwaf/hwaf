@@ -66,7 +66,7 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 	}
 
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
-	cfg_fname := cmd.Flag.Lookup("cfg").Value.Get().(string)
+	//cfg_fname := cmd.Flag.Lookup("cfg").Value.Get().(string)
 
 	sitedir := g_ctx.Sitedir()
 	if sitedir == "" {
@@ -146,9 +146,9 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 	if !quiet {
 		fmt.Printf("%s: asetup workarea [%s]...\n", n, dirname)
 		fmt.Printf("%s: projects=%v\n", n, opts.projdir)
-		if cfg_fname != "" {
-			fmt.Printf("%s: cfg-file=%s\n", n, cfg_fname)
-		}
+		// if cfg_fname != "" {
+		// 	fmt.Printf("%s: cfg-file=%s\n", n, cfg_fname)
+		// }
 	}
 
 	subcmd := exec.Command(
