@@ -44,6 +44,7 @@ func init() {
 	g_cmd = &commander.Commander{
 		Name: os.Args[0],
 		Commands: []*commander.Command{
+			hwaf_make_cmd_asetup(),
 			hwaf_make_cmd_init(),
 			hwaf_make_cmd_setup(),
 			hwaf_make_cmd_version(),

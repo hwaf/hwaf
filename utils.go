@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	//"strconv"
 )
 
@@ -22,6 +23,10 @@ func handle_err(err error) {
 		fmt.Fprintf(os.Stderr, "**error**: %v\n", err.Error())
 		os.Exit(1)
 	}
+}
+
+func is_git_repo(dirname string) bool {
+	return path_exists(filepath.Join(dirname, ".git"))
 }
 
 // EOF

@@ -297,4 +297,8 @@ func (ctx *Context) LocalCfg() (*gocfg.Config, error) {
 	return ctx.lcfg, err
 }
 
+func (ctx *Context) Warn(format string, args ...interface{}) (n int, err error) {
+	return fmt.Fprintf(os.Stderr, format, args...)
+}
+
 // EOF
