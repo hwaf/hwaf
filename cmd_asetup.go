@@ -68,7 +68,7 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 	cfg_fname := cmd.Flag.Lookup("cfg").Value.Get().(string)
 
-	sitedir := os.Getenv("HWAF_SITEDIR")
+	sitedir := g_ctx.Sitedir()
 	if sitedir == "" {
 		sitedir = filepath.Join("", "opt", "sw", "mana")
 		g_ctx.Warn("no $HWAF_SITEDIR env. variable. will use [%s]\n", sitedir)

@@ -30,6 +30,7 @@ func path_exists(name string) bool {
 // Context holds the necessary context informations for a hwaf installation
 type Context struct {
 	Root     string        // top-level directory of the hwaf installation
+	sitedir  string        // top-level directory for s/w installation
 	workarea *string       // work directory for a local checkout
 	gcfg     *gocfg.Config // the global configuration (user>global)
 	lcfg     *gocfg.Config // the local config of a local workarea
@@ -41,6 +42,7 @@ func NewContext() (*Context, error) {
 
 	ctx = &Context{
 		Root:     "",
+		sitedir:  "",
 		workarea: nil,
 		gcfg:     nil,
 		lcfg:     nil,
@@ -62,6 +64,7 @@ func NewContextFrom(workarea string) (*Context, error) {
 	wdir := string(workarea)
 	ctx = &Context{
 		Root:     "",
+		sitedir:  "",
 		workarea: &wdir,
 		gcfg:     nil,
 		lcfg:     nil,
@@ -89,6 +92,10 @@ func (ctx *Context) WafBin() (string, error) {
 		}
 	}
 	return waf, err
+}
+
+func (ctx *Context) Sitedir() string {
+	return ctx.sitedir
 }
 
 func (ctx *Context) Workarea() (string, error) {
@@ -221,6 +228,13 @@ func (ctx *Context) init() error {
 		return err
 	}
 
+	// FIXME: get sitedir from globalcfg and/or localcfg.
+	ctx.sitedir = os.Getenv("HWAF_SITEDIR")
+	if ctx.sitedir == "" {
+		sitedir := filepath.Join("", "opt", "sw")
+		ctx.Warn("no $HWAF_SITEDIR env. variable. will use [%s]\n", sitedir)
+		ctx.sitedir = sitedir
+	}
 	return err
 }
 
