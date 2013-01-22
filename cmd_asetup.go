@@ -10,6 +10,7 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
+	"github.com/mana-fwk/hwaf/platform"
 )
 
 func hwaf_make_cmd_asetup() *commander.Command {
@@ -32,7 +33,7 @@ ex:
 	//cmd.Flag.String("p", "", "List of paths to projects to setup against")
 	//cmd.Flag.String("cfg", "", "Path to a configuration file")
 	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
-
+	cmd.Flag.String("cmtcfg", "", "explicit CMTCFG value to use")
 	return cmd
 }
 
@@ -67,6 +68,7 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 	//cfg_fname := cmd.Flag.Lookup("cfg").Value.Get().(string)
+	cmtcfg := cmd.Flag.Lookup("cmtcfg").Value.Get().(string)
 
 	sitedir := g_ctx.Sitedir()
 	if sitedir == "" {
@@ -83,6 +85,11 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 		projdir string
 		cmtcfg  string
 	}
+
+	pinfos, err := platform.Infos()
+	handle_err(err)
+
+	fmt.Printf("platform: %v\n", pinfos)
 
 	// FIXME: this should be more thought out... and structured!
 	process_asetup := func(asetup []string) (asetup_opts, error) {
@@ -136,6 +143,9 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 		}
 
 		opts.cmtcfg = fmt.Sprintf("%s-%s-%s-%s", hwaf_arch, hwaf_os, hwaf_comp, hwaf_bld)
+		if cmtcfg != "" {
+			opts.cmtcfg = cmtcfg
+		}
 		opts.projdir = filepath.Join(sitedir, projname, version, opts.cmtcfg)
 
 		return opts, err
@@ -153,14 +163,12 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 
 	subcmd := exec.Command(
 		"hwaf", "setup",
+		fmt.Sprintf("-q=%v", quiet),
 		"-p", opts.projdir,
-		"-q", fmt.Sprintf("%v", quiet),
 	)
-	if !quiet {
-		subcmd.Stdin = os.Stdin
-		subcmd.Stdout = os.Stdout
-		subcmd.Stderr = os.Stderr
-	}
+	subcmd.Stdin = os.Stdin
+	subcmd.Stdout = os.Stdout
+	subcmd.Stderr = os.Stderr
 	err = subcmd.Run()
 	handle_err(err)
 
