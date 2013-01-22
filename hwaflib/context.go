@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/mana-fwk/hwaf/platform"
 	gocfg "github.com/sbinet/go-config/config"
 )
 
@@ -122,6 +123,7 @@ func (ctx *Context) Workarea() (string, error) {
 func (ctx *Context) DefaultCmtcfg() string {
 	hwaf_os := runtime.GOOS
 	hwaf_arch := runtime.GOARCH
+	hwaf_comp := "gcc"
 	switch hwaf_arch {
 	case "amd64":
 		hwaf_arch = "x86_64"
@@ -132,7 +134,33 @@ func (ctx *Context) DefaultCmtcfg() string {
 		panic(fmt.Sprintf("unknown architecture [%s]", hwaf_arch))
 	}
 	//FIXME: is 'gcc' a good enough default ?
-	return fmt.Sprintf("%s-%s-gcc-opt", hwaf_arch, hwaf_os)
+	cmtcfg := fmt.Sprintf("%s-%s-%s-opt", hwaf_arch, hwaf_os, hwaf_comp)
+
+	pinfos, err := platform.Infos()
+	if err != nil {
+		return cmtcfg
+	}
+
+	// try harder...
+	switch pinfos.System {
+	case "Linux":
+	case "Darwin":
+		hwaf_rel := strings.Split(pinfos.Release, ".")
+		hwaf_ver := strings.Join(hwaf_rel[:len(hwaf_rel)-1], "")
+		hwaf_os = fmt.Sprintf("darwin%s", hwaf_ver)
+		switch hwaf_ver {
+		case "106":
+			hwaf_comp = "gcc42"
+		case "107":
+			hwaf_comp = "clang41"
+		case "108":
+			hwaf_comp = "clang41"
+		default:
+			panic("unthinkable!")
+		}
+	}
+	cmtcfg = fmt.Sprintf("%s-%s-%s-opt", hwaf_arch, hwaf_os, hwaf_comp)
+	return cmtcfg
 }
 
 func hwaf_root() string {
