@@ -212,12 +212,12 @@ def declare_build_external(
             env[k] = senv[k]
             pass
         pass
-    for k in env.keys():
+    for k in list(env.keys()):
         if not k in os_env_keys:
             del env[k]
     env['EXT_BUNDLED_%s_ROOT'%name.upper()] = install_dir.abspath()
         
-    for k,v in env.iteritems():
+    for k,v in env.items():
         if not isinstance(v, str):
             raise ValueError("invalid env.var: ${%s} = %r" % (k,v))
         
