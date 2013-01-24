@@ -7,7 +7,10 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
+
+	gocfg "github.com/sbinet/go-config/config"
 )
 
 func uname(opts ...string) (string, error) {
@@ -55,58 +58,90 @@ func infos() (Platform, error) {
 	return plat, err
 }
 
-func (p *Platform) init_dist() error {
-	var err error
-
-	distname := strings.ToLower(p.System)
-	distvers := ""
+func parse_dist_files(fnames []string) (distname, distvers string, err error) {
+	distname = ""
+	distvers = ""
 
 	re_release_filename := regexp.MustCompile(`(\w+)[-_](release|version)`)
 	re_lsb_release_version := regexp.MustCompile(`(.+) release ([\d.]+)[^(]*(?:\((.+)\))?`)
-	//re_release_version := regexp.MustCompile(`([^0-9]+)(?: release )?([\d.]+)[^(]*(?:\((.+)\))?`)
+	re_release_version := regexp.MustCompile(`([^0-9]+)(?: release )?([\d.]+)[^(]*(?:\((.+)\))?`)
 
-	switch p.System {
-	case "Linux":
-		distfullname := ""
-		distfile := ""
-		var files []string
-		files, err = filepath.Glob(filepath.Join("/etc", "*"))
+	if !sort.StringsAreSorted(fnames) {
+		sort.Strings(fnames)
+	}
+
+	for _, args := range [][]string{
+		{"/etc/os-release", "ID", "VERSION_ID"},
+		{"/etc/lsb-release", "DISTRIB_ID", "DISTRIB_RELEASE"},
+	} {
+		fname := args[0]
+		id_str := args[1]
+		vers_str := args[2]
+		//fmt.Printf("--> [%s]\n", fname)
+		idx := sort.SearchStrings(fnames, fname)
+		if !(idx < len(fnames) && fnames[idx] == fname) {
+			continue
+		}
+
+		cfg, err := gocfg.ReadDefault(fname)
 		if err != nil {
-			return err
+			//fmt.Printf("++ %v\n", err)
+			continue
 		}
-		for _, fname := range files {
-			m := re_release_filename.FindStringSubmatch(fname)
-			if m == nil {
-				continue
-			}
-			distname = m[1]
-			//fmt.Printf(">>> [%s]\n    [%v] => %q\n", fname, m, distname)
-			distfile = fname
-			break
+
+		d_name, err := cfg.RawString("DEFAULT", id_str)
+		if err == nil {
+			distname = strings.Trim(d_name, `"'`)
+		} else {
+			//fmt.Printf("++ %v\n", err)
+			continue
 		}
-		if distname == "" {
-			return fmt.Errorf("platform: unsupported linux distribution")
+		d_vers, err := cfg.RawString("DEFAULT", vers_str)
+		if err == nil {
+			distvers = strings.Trim(d_vers, `"'`)
+		} else {
+			// distvers is optional...
+
+			//fmt.Printf("++ %v\n", err)
+			//continue
 		}
-		var f *os.File
-		f, err = os.Open(distfile)
-		if err != nil {
-			return err
+		return distname, distvers, nil
+	}
+
+	for _, fname := range fnames {
+		m := re_release_filename.FindStringSubmatch(fname)
+		if m == nil {
+			continue
 		}
+		distname = m[1]
+		//fmt.Printf(">>> [%s]\n    [%v] => %q\n", fname, m, distname)
+		distfile := fname
+
+		f, err2 := os.Open(distfile)
 		defer f.Close()
+		if err2 != nil {
+			continue
+		}
 
 		var line string
-		line, err = bufio.NewReader(f).ReadString('\n')
-		if err != nil {
-			return err
+		line, err2 = bufio.NewReader(f).ReadString('\n')
+		if err2 != nil {
+			continue
 		}
 		//distid := ""
-		m := re_lsb_release_version.FindStringSubmatch(line)
+
+		m = re_lsb_release_version.FindStringSubmatch(line)
 		if m == nil {
-			// pre-LSB. not supported.
-			return fmt.Errorf("platform: unsupported linux distribution")
+			// pre-LSB.
+			m = re_release_version.FindStringSubmatch(line)
+			if m == nil {
+				// not supported.
+				//fmt.Printf("** [%s] wrong format (%v)\n", distfile, strings.Trim(line, " \r\n"))
+				continue
+			}
 		}
 		// LSB format: "distro release x.x (codename)"
-		distfullname = m[1]
+		distfullname := m[1]
 		distvers = m[2]
 		//distid = m[3]
 		//fmt.Printf(">>> %v (%q %q %q)\n", m, distfullname, distvers, distid)
@@ -153,10 +188,34 @@ func (p *Platform) init_dist() error {
 		} else if match(`Fedora.*?`) {
 			distname = "fedora"
 
-		} else if match(``) {
-
 		} else {
 
+		}
+		return distname, distvers, nil
+	}
+	return "", "", fmt.Errorf("platform: unsupported linux distribution")
+}
+
+func (p *Platform) init_dist() error {
+	var err error
+
+	distname := strings.ToLower(p.System)
+	distvers := ""
+
+	switch p.System {
+	case "Linux":
+		var files []string
+		files, err = filepath.Glob(filepath.Join("/etc", "*"))
+		if err != nil {
+			return err
+		}
+		sort.Strings(files)
+		distname, distvers, err = parse_dist_files(files)
+		if err != nil {
+			return err
+		}
+		if distname == "" {
+			return fmt.Errorf("platform: unsupported linux distribution")
 		}
 
 	case "Darwin":
