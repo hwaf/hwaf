@@ -39,7 +39,7 @@ def options(ctx):
 
     ctx.add_option(
         '--local-cfg',
-        default=".hwaf/local.cfg",
+        default=".hwaf/local.conf",
         help="Path to the local config file listing all type of configuration infos")
     return
 
