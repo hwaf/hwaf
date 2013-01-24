@@ -18,6 +18,7 @@ show platform displays the platform informations.
 
 ex:
  $ hwaf show platform
+ Platform{Dist="slc-6.3" System="Linux" Node="voatlas04.cern.ch" Release="2.6.32-279.11.1.el6.x86_64" Version="#1 SMP Tue Oct 16 17:21:52 CEST 2012" Machine="x86_64" Processor="x86_64"}
 `,
 		Flag: *flag.NewFlagSet("hwaf-waf-show-platform", flag.ExitOnError),
 	}
