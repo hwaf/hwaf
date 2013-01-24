@@ -17,6 +17,7 @@ func hwaf_make_cmd_waf_show() *commander.Commander {
 			hwaf_make_cmd_waf_show_project_name(),
 			hwaf_make_cmd_waf_show_project_version(),
 			hwaf_make_cmd_waf_show_pkg_uses(),
+			hwaf_make_cmd_waf_show_setup(),
 		},
 		Flag: flag.NewFlagSet("hwaf-show", flag.ExitOnError),
 	}
