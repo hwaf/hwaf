@@ -1,11 +1,13 @@
 package hwaflib
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -32,6 +34,7 @@ func path_exists(name string) bool {
 type Context struct {
 	Root     string        // top-level directory of the hwaf installation
 	sitedir  string        // top-level directory for s/w installation
+	cmtcfg   string        // current CmtCfg
 	workarea *string       // work directory for a local checkout
 	gcfg     *gocfg.Config // the global configuration (user>global)
 	lcfg     *gocfg.Config // the local config of a local workarea
@@ -44,6 +47,7 @@ func NewContext() (*Context, error) {
 	ctx = &Context{
 		Root:     "",
 		sitedir:  "",
+		cmtcfg:   "",
 		workarea: nil,
 		gcfg:     nil,
 		lcfg:     nil,
@@ -66,6 +70,7 @@ func NewContextFrom(workarea string) (*Context, error) {
 	ctx = &Context{
 		Root:     "",
 		sitedir:  "",
+		cmtcfg:   "",
 		workarea: &wdir,
 		gcfg:     nil,
 		lcfg:     nil,
@@ -97,6 +102,10 @@ func (ctx *Context) WafBin() (string, error) {
 
 func (ctx *Context) Sitedir() string {
 	return ctx.sitedir
+}
+
+func (ctx *Context) Cmtcfg() string {
+	return ctx.cmtcfg
 }
 
 func (ctx *Context) Workarea() (string, error) {
@@ -142,25 +151,87 @@ func (ctx *Context) DefaultCmtcfg() string {
 	}
 
 	// try harder...
+	cmtcfg2, err := ctx.infer_cmtcfg(pinfos, hwaf_arch, hwaf_os, hwaf_comp)
+	if err != nil {
+		return cmtcfg
+	}
+	cmtcfg = cmtcfg2
+	return cmtcfg
+}
+
+func infer_gcc_version() (string, error) {
+	re_gcc_vers := regexp.MustCompile(`.*? \(.*?\) ([\d.]+).*?`)
+	out, err := exec.Command("gcc", "--version").Output()
+	if err != nil {
+		return "", err
+	}
+
+	lines := bytes.Split(out, []byte("\r\n"))
+	line := string(lines[0])
+
+	m := re_gcc_vers.FindStringSubmatch(line)
+	if m == nil {
+		return "", fmt.Errorf("hwaf: could not infer gcc version")
+	}
+
+	//fmt.Printf("gcc: %v\n", m)
+	m = strings.Split(m[1], ".")
+	major := m[0]
+	minor := m[1]
+	vers := fmt.Sprintf("gcc%s%s", major, minor)
+	return vers, nil
+}
+
+func (ctx *Context) infer_cmtcfg(pinfos platform.Platform, hwaf_arch, hwaf_os, hwaf_comp string) (string, error) {
+
+	var err error
+	var cmtcfg string
+
+	hwaf_os = pinfos.DistId()
+
 	switch pinfos.System {
 	case "Linux":
+		hwaf_comp, err = infer_gcc_version()
+		if err != nil {
+			hwaf_comp = "gcc"
+		}
+		switch pinfos.DistName {
+		case "centos", "sl", "slc", "rh", "rhel":
+			rel := strings.Split(pinfos.DistVers, ".")
+			major := rel[0]
+			hwaf_os = pinfos.DistName + major
+
+		case "ubuntu":
+			vers := strings.Replace(pinfos.DistVers, ".", "", -1)
+			hwaf_os = pinfos.DistName + vers
+
+		case "arch":
+			hwaf_os = "archlinux"
+
+		default:
+			ctx.Warn("hwaf: unhandled distribution [%s]", pinfos.DistId())
+			hwaf_os = "linux"
+			hwaf_comp = "gcc"
+		}
+
 	case "Darwin":
-		hwaf_rel := strings.Split(pinfos.Release, ".")
-		hwaf_ver := strings.Join(hwaf_rel[:len(hwaf_rel)-1], "")
-		hwaf_os = fmt.Sprintf("darwin%s", hwaf_ver)
-		switch hwaf_ver {
-		case "106":
+		switch pinfos.DistVers {
+		case "10.6":
 			hwaf_comp = "gcc42"
-		case "107":
+		case "10.7":
 			hwaf_comp = "clang41"
-		case "108":
+		case "10.8":
 			hwaf_comp = "clang41"
 		default:
-			panic("unthinkable!")
+			panic(fmt.Sprintf("hwaf: unhandled distribution [%s]", pinfos.DistId()))
 		}
+
+	default:
+		panic(fmt.Sprintf("hwaf: unknown platform [%s]", pinfos.System))
 	}
+
 	cmtcfg = fmt.Sprintf("%s-%s-%s-opt", hwaf_arch, hwaf_os, hwaf_comp)
-	return cmtcfg
+	return cmtcfg, err
 }
 
 func hwaf_root() string {
@@ -259,9 +330,19 @@ func (ctx *Context) init() error {
 	// FIXME: get sitedir from globalcfg and/or localcfg.
 	ctx.sitedir = os.Getenv("HWAF_SITEDIR")
 	if ctx.sitedir == "" {
-		sitedir := filepath.Join("", "opt", "sw")
-		ctx.Warn("no $HWAF_SITEDIR env. variable. will use [%s]\n", sitedir)
+		sitedir := filepath.Join(string(os.PathSeparator), "opt", "sw")
+		//ctx.Warn("no $HWAF_SITEDIR env. variable. will use [%s]\n", sitedir)
 		ctx.sitedir = sitedir
+	}
+
+	// init cmtcfg
+	// FIXME: also get it from globalcfg/localcfg
+	if ctx.cmtcfg == "" {
+		if cmtcfg := os.Getenv("CMTCFG"); cmtcfg != "" {
+			ctx.cmtcfg = cmtcfg
+		} else {
+			ctx.cmtcfg = ctx.DefaultCmtcfg()
+		}
 	}
 	return err
 }
@@ -275,7 +356,7 @@ func (ctx *Context) GlobalCfg() (*gocfg.Config, error) {
 	gcfg := gocfg.NewDefault()
 	// aggregate all configurations. last one wins.
 	for _, fname := range []string{
-		filepath.Join("", "etc", "hwaf.conf"),
+		filepath.Join(string(os.PathSeparator), "etc", "hwaf.conf"),
 		filepath.Join(ctx.Root, "etc", "hwaf.conf"),
 		filepath.Join("${HOME}", ".config", "hwaf.conf"),
 	} {
