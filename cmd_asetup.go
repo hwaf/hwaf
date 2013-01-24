@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 
 	"github.com/gonuts/commander"
@@ -16,7 +17,7 @@ import (
 func hwaf_make_cmd_asetup() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_asetup,
-		UsageLine: "asetup [options] <workarea>",
+		UsageLine: "asetup [options] <args>",
 		Short:     "setup a workarea with Athena-like defaults",
 		Long: `
 asetup sets up a workarea with Athena-like defaults.
@@ -25,14 +26,24 @@ ex:
  $ mkdir my-work-area && cd my-work-area
  $ hwaf asetup
  $ hwaf asetup mana,20121207
- $ hwaf asetup mana 20121207 32b
- $ hwaf asetup mana 20121207 64b
+ $ hwaf asetup mana 20121207
+ $ hwaf asetup -arch=64    mana 20121207
+ $ hwaf asetup -comp=gcc44 mana 20121207
+ $ hwaf asetup -os=centos6 mana 20121207
+ $ hwaf asetup -type=opt   mana 20121207
+ $ hwaf asetup -cmtcfg=x86_64-slc6-gcc44-opt mana 20121207
+ $ CMTCFG=x86_64-slc6-gcc44-opt \
+   hwaf asetup mana 20121207
 `,
 		Flag: *flag.NewFlagSet("hwaf-setup", flag.ExitOnError),
 	}
 	//cmd.Flag.String("p", "", "List of paths to projects to setup against")
 	//cmd.Flag.String("cfg", "", "Path to a configuration file")
 	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.String("arch", "", "explicit architecture to use (32/64)")
+	cmd.Flag.String("comp", "", "explicit compiler name to use (ex: gcc44, clang32,...)")
+	cmd.Flag.String("os", "", "explicit system name to use (ex: slc6, slc5, centos6, darwin106,...)")
+	cmd.Flag.String("type", "", "explicit build variant to use (ex: opt/dbg)")
 	cmd.Flag.String("cmtcfg", "", "explicit CMTCFG value to use")
 	return cmd
 }
@@ -41,6 +52,15 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
+	if len(args) == 0 {
+		// case where we reuse a previously already asetup'ed workarea
+		_, err = g_ctx.LocalCfg()
+		if err == nil {
+			return
+		}
+		err = fmt.Errorf("%v\n'hwaf asetup' called with no argument in a pristine workarea is NOT valid.", err)
+		handle_err(err)
+	}
 	asetup := make([]string, 0, len(args))
 	for _, arg := range args {
 		subarg := strings.Split(arg, ",")
@@ -68,7 +88,11 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 	//cfg_fname := cmd.Flag.Lookup("cfg").Value.Get().(string)
-	cmtcfg := cmd.Flag.Lookup("cmtcfg").Value.Get().(string)
+	cli_cmtcfg := cmd.Flag.Lookup("cmtcfg").Value.Get().(string)
+	cli_arch := cmd.Flag.Lookup("arch").Value.Get().(string)
+	cli_comp := cmd.Flag.Lookup("comp").Value.Get().(string)
+	cli_os := cmd.Flag.Lookup("os").Value.Get().(string)
+	cli_type := cmd.Flag.Lookup("type").Value.Get().(string)
 
 	sitedir := g_ctx.Sitedir()
 	if sitedir == "" {
@@ -89,16 +113,14 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 	pinfos, err := platform.Infos()
 	handle_err(err)
 
-	fmt.Printf("platform: %v\n", pinfos)
-
 	// FIXME: this should be more thought out... and structured!
 	process_asetup := func(asetup []string) (asetup_opts, error) {
 		var opts asetup_opts
 		var err error
 		unprocessed := make([]string, 0, len(asetup))
 		projname := "mana-core"
-		version := "20121212"
-		hwaf_os := strings.ToLower(runtime.GOOS)
+		version := ""
+		hwaf_os := pinfos.DistId()
 		hwaf_comp := "gcc"
 		hwaf_arch := ""
 		switch runtime.GOARCH {
@@ -142,12 +164,58 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 			err = fmt.Errorf("unprocessed asetup options: %v", unprocessed)
 		}
 
-		opts.cmtcfg = fmt.Sprintf("%s-%s-%s-%s", hwaf_arch, hwaf_os, hwaf_comp, hwaf_bld)
-		if cmtcfg != "" {
-			opts.cmtcfg = cmtcfg
+		// honour CLI args
+		for _, v := range [][]*string{
+			{&cli_arch, &hwaf_arch},
+			{&cli_os, &hwaf_os},
+			{&cli_comp, &hwaf_comp},
+			{&cli_type, &hwaf_bld},
+		} {
+			if *v[0] != "" {
+				*v[1] = *v[0]
+			}
 		}
-		opts.projdir = filepath.Join(sitedir, projname, version, opts.cmtcfg)
 
+		usr_cmtcfg := fmt.Sprintf("%s-%s-%s-%s", hwaf_arch, hwaf_os, hwaf_comp, hwaf_bld)
+		opts.projdir = filepath.Join(sitedir, projname)
+		if version == "" {
+			// get the latest one.
+			var versions []string
+			versions, err = filepath.Glob(filepath.Join(opts.projdir, "*"))
+			if err != nil {
+				return opts, err
+			}
+			sort.Strings(versions)
+			version = versions[len(versions)-1]
+			version, _ = filepath.Abs(version)
+			version = filepath.Base(version)
+		}
+		opts.projdir = filepath.Join(sitedir, projname, version)
+		found := false
+		for _, cmtcfg := range []string{
+			cli_cmtcfg,
+			usr_cmtcfg,
+			g_ctx.Cmtcfg(),
+			g_ctx.DefaultCmtcfg(),
+		} {
+			if cmtcfg == "" {
+				continue
+			}
+			dir := filepath.Join(opts.projdir, cmtcfg)
+			//fmt.Printf("---> [%s]...\n", dir)
+			if !path_exists(dir) {
+				//fmt.Printf("---> [%s]... [err]\n", dir)
+				continue
+			}
+			opts.projdir = dir
+			opts.cmtcfg = cmtcfg
+			//fmt.Printf("---> [%s]... [ok]\n", dir)
+			found = true
+			break
+		}
+		if !found {
+			return opts, fmt.Errorf("hwaf: could not find a suitable project")
+		}
 		return opts, err
 	}
 	opts, err := process_asetup(asetup)
