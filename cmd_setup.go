@@ -100,7 +100,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: create local config...\n", n)
 	}
 
-	lcfg_fname := filepath.Join(".hwaf", "local.cfg")
+	lcfg_fname := filepath.Join(".hwaf", "local.conf")
 	if path_exists(lcfg_fname) {
 		err = os.Remove(lcfg_fname)
 		handle_err(err)
