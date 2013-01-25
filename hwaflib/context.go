@@ -261,6 +261,41 @@ func hwaf_root() string {
 	return ""
 }
 
+func (ctx *Context) load_env_from_cfg(cfg *gocfg.Config) error {
+
+	if !cfg.HasSection("env") {
+		return nil
+	}
+
+	section := "env"
+	options, err := cfg.Options(section)
+	if err != nil {
+		return err
+	}
+	for _, k := range options {
+		v, err := cfg.String(section, k)
+		if err != nil {
+			continue
+		}
+		v = os.ExpandEnv(v)
+
+		vv := os.Getenv(k)
+		if vv != "" && vv != v {
+			// we don't override parent environment!
+			// would be too confusing
+			ctx.Warn(
+				"configuration tries to override env.var [%s] with [%s] (current=%s)\n",
+				k, v, vv,
+			)
+		}
+		err = os.Setenv(k, v)
+		if err != nil {
+			ctx.Warn("problem setting env. var [%s]: %v\n", k, err)
+		}
+	}
+	return nil
+}
+
 func (ctx *Context) init() error {
 	var err error
 	root := hwaf_root()
@@ -269,9 +304,23 @@ func (ctx *Context) init() error {
 	}
 	ctx.Root = root
 
-	_, err = ctx.GlobalCfg()
+	ctx.gcfg, err = ctx.GlobalCfg()
 	if err != nil {
 		return err
+	}
+
+	// configure environment
+	err = ctx.load_env_from_cfg(ctx.gcfg)
+	if err != nil {
+		return fmt.Errorf("hwaf: problem loading environment from global config: %v", err)
+	}
+
+	ctx.lcfg, err = ctx.LocalCfg()
+	if ctx.lcfg != nil {
+		err = ctx.load_env_from_cfg(ctx.lcfg)
+		if err != nil {
+			return fmt.Errorf("hwaf: problem loading environment from local config:\n%v", err)
+		}
 	}
 
 	setup_env := func(topdir string) error {
@@ -344,6 +393,7 @@ func (ctx *Context) init() error {
 			ctx.cmtcfg = ctx.DefaultCmtcfg()
 		}
 	}
+
 	return err
 }
 
