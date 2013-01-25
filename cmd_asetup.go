@@ -12,6 +12,7 @@ import (
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
 	"github.com/mana-fwk/hwaf/platform"
+	gocfg "github.com/sbinet/go-config/config"
 )
 
 func hwaf_make_cmd_asetup() *commander.Command {
@@ -238,6 +239,48 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 	subcmd.Stdout = os.Stdout
 	subcmd.Stderr = os.Stderr
 	err = subcmd.Run()
+	handle_err(err)
+
+	lcfg_fname := filepath.Join(".hwaf", "local.conf")
+	if !path_exists(lcfg_fname) {
+		err = fmt.Errorf("%s: no such file [%s]", n, lcfg_fname)
+		handle_err(err)
+	}
+
+	lcfg, err := gocfg.ReadDefault(lcfg_fname)
+	handle_err(err)
+	section := "env"
+	if !lcfg.HasSection(section) {
+		if !lcfg.AddSection(section) {
+			err = fmt.Errorf("%s: could not create section [%s] in file [%s]",
+				n, section, lcfg_fname)
+			handle_err(err)
+		}
+	}
+	// add a few asetup defaults...
+	for k, v := range map[string]string{
+		"SVNGROUPS": "svn+ssh://svn.cern.ch/reps/atlasgroups",
+		"SVNGRP":    "svn+ssh://svn.cern.ch/reps/atlasgrp",
+		"SVNINST":   "svn+ssh://svn.cern.ch/reps/atlasinst",
+		"SVNOFF":    "svn+ssh://svn.cern.ch/reps/atlasoff",
+		"SVNPERF":   "svn+ssh://svn.cern.ch/reps/atlasperf",
+		"SVNPHYS":   "svn+ssh://svn.cern.ch/reps/atlasphys",
+		"SVNROOT":   "svn+ssh://svn.cern.ch/reps/atlasoff",
+		"SVNUSR":    "svn+ssh://svn.cern.ch/reps/atlasusr",
+	} {
+		if lcfg.HasOption(section, k) {
+			lcfg.RemoveOption(section, k)
+		}
+		ok := lcfg.AddOption(section, k, v)
+		if !ok {
+			err = fmt.Errorf(
+				"%s: could not add option [%s=%q] to file [%s]",
+				n, k, v, lcfg_fname,
+			)
+			handle_err(err)
+		}
+	}
+	err = lcfg.WriteFile(lcfg_fname, 0600, "")
 	handle_err(err)
 
 	if !quiet {
