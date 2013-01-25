@@ -100,22 +100,24 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: create local config...\n", n)
 	}
 
+	var lcfg *gocfg.Config
 	lcfg_fname := filepath.Join(".hwaf", "local.conf")
 	if path_exists(lcfg_fname) {
-		err = os.Remove(lcfg_fname)
+		lcfg, err = gocfg.ReadDefault(lcfg_fname)
 		handle_err(err)
+	} else {
+		lcfg = gocfg.NewDefault()
 	}
 
-	lcfg := gocfg.NewDefault()
 	section := "hwaf-cfg"
-	if !lcfg.AddSection(section) {
+	if !lcfg.HasSection(section) && !lcfg.AddSection(section) {
 		err = fmt.Errorf("%s: could not create section [%s] in file [%s]",
 			n, section, lcfg_fname)
 		handle_err(err)
 	}
 
 	// fetch a few informations from the first project.info
-	cmtcfg := g_ctx.DefaultCmtcfg()
+	cmtcfg := g_ctx.Cmtcfg()
 	//projvers := time.Now().Format("20060102")
 	if len(projdirs) > 0 {
 		pinfo, err := hwaflib.NewProjectInfo(filepath.Join(projdirs[0], "project.info"))
@@ -129,6 +131,9 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 		"cmtpkgs":  "src",
 		"cmtcfg":   cmtcfg,
 	} {
+		if lcfg.HasOption(section, k) {
+			lcfg.RemoveOption(section, k)
+		}
 		if !lcfg.AddOption(section, k, v) {
 			err := fmt.Errorf("%s: could not add option [%s] to section [%s]",
 				n, k, section,
