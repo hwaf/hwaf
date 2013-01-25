@@ -139,7 +139,7 @@ func (ctx *Context) DefaultCmtcfg() string {
 	switch hwaf_arch {
 	case "amd64":
 		hwaf_arch = "x86_64"
-	case "i386":
+	case "386":
 		hwaf_arch = "i686"
 	default:
 		//hwaf_arch = "unknown"
