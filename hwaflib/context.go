@@ -38,6 +38,7 @@ type Context struct {
 	workarea *string       // work directory for a local checkout
 	gcfg     *gocfg.Config // the global configuration (user>global)
 	lcfg     *gocfg.Config // the local config of a local workarea
+	PkgDb    *PackageDb    // a naive database of locally checked out packages
 }
 
 func NewContext() (*Context, error) {
@@ -51,6 +52,7 @@ func NewContext() (*Context, error) {
 		workarea: nil,
 		gcfg:     nil,
 		lcfg:     nil,
+		PkgDb:    nil,
 	}
 
 	err = ctx.init()
@@ -74,6 +76,7 @@ func NewContextFrom(workarea string) (*Context, error) {
 		workarea: &wdir,
 		gcfg:     nil,
 		lcfg:     nil,
+		PkgDb:    nil,
 	}
 
 	err = ctx.init()
@@ -394,6 +397,18 @@ func (ctx *Context) init() error {
 		}
 	}
 
+	// init local pkg db
+	_, _ = ctx.Workarea()
+	if ctx.workarea != nil {
+		fname := filepath.Join(*ctx.workarea, ".hwaf", "pkgdb.json")
+		ctx.PkgDb = NewPackageDb(fname)
+		if path_exists(fname) {
+			err = ctx.PkgDb.Load(fname)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return err
 }
 

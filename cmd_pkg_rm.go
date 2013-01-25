@@ -65,24 +65,61 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 	if !path_exists(pkg) {
 		pkg = filepath.Join(srcdir, pkgname)
 		if !path_exists(pkg) {
-			err = fmt.Errorf("no such package [%s]", pkgname)
+			err = fmt.Errorf("%s: no such package [%s]", n, pkgname)
 			handle_err(err)
 		}
 	}
 
-	rmcmd := []string{"rm-submodule"}
-	if !quiet {
-		rmcmd = append(rmcmd, "--verbose")
+	if !g_ctx.PkgDb.HasPkg(pkg) {
+		err = fmt.Errorf("%s: no such package [%s] in db", n, pkg)
+		handle_err(err)
 	}
-	rmcmd = append(rmcmd, pkg)
-	git := exec.Command("git", rmcmd...)
-	if !quiet {
-		git.Stdin = os.Stdin
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
+
+	vcspkg, err := g_ctx.PkgDb.GetPkg(pkg)
 	handle_err(err)
+
+	switch vcspkg.Type {
+
+	case "git":
+		rmcmd := []string{"rm-submodule"}
+		if !quiet {
+			rmcmd = append(rmcmd, "--verbose")
+		}
+		rmcmd = append(rmcmd, pkg)
+		git := exec.Command("git", rmcmd...)
+		if !quiet {
+			git.Stdin = os.Stdin
+			git.Stdout = os.Stdout
+			git.Stderr = os.Stderr
+		}
+		err = git.Run()
+		handle_err(err)
+
+	case "svn":
+		if path_exists(vcspkg.Path) {
+			err = os.RemoveAll(vcspkg.Path)
+			handle_err(err)
+			path := vcspkg.Path
+			// clean-up dir if empty...
+			for {
+				path = filepath.Dir(path)
+				if path == srcdir {
+					break
+				}
+				content, err := filepath.Glob(filepath.Join(path, "*"))
+				handle_err(err)
+				if len(content) > 0 {
+					break
+				}
+				err = os.RemoveAll(path)
+				handle_err(err)
+			}
+		}
+
+	default:
+		err = fmt.Errorf("%s: VCS of type [%s] is not handled", n, vcspkg.Type)
+		handle_err(err)
+	}
 
 	if !quiet {
 		fmt.Printf("%s: remove package [%s]... [ok]\n", n, pkgname)

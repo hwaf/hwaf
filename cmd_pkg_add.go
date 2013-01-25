@@ -111,7 +111,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	case "svn", "svn+ssh":
 		dir := filepath.Join(pkgdir, pkgname)
 		if !path_exists(filepath.Dir(dir)) {
-			err = os.MkdirAll(filepath.Dir(dir), 0700)
+			err = os.MkdirAll(filepath.Dir(dir), 0755)
 			handle_err(err)
 		}
 		repo := pkguri
@@ -124,6 +124,9 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		}
 		err = vcs.Svn.Create(dir, repo)
 		handle_err(err)
+
+		err = g_ctx.PkgDb.Add("svn", repo, dir)
+		handle_err(err)
 		return
 	}
 
@@ -131,11 +134,11 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: svn repo. doing staging...\n", n)
 		staging := filepath.Join(".git", "hwaf-svn-staging")
 		if !path_exists(staging) {
-			err = os.MkdirAll(staging, 0700)
+			err = os.MkdirAll(staging, 0755)
 			handle_err(err)
 		}
 		_ = os.RemoveAll(filepath.Join(staging, pkgname))
-		err = os.MkdirAll(filepath.Join(staging, pkgname), 0700)
+		err = os.MkdirAll(filepath.Join(staging, pkgname), 0755)
 		handle_err(err)
 		git := exec.Command(
 			"hwaf", "git", "svn-clone", "-verbose", "-revision=1", pkguri,
@@ -188,6 +191,9 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		git.Stderr = os.Stderr
 	}
 	err = git.Run()
+	handle_err(err)
+
+	err = g_ctx.PkgDb.Add("git", pkguri, filepath.Join(pkgdir, pkgname))
 	handle_err(err)
 
 	if !quiet {
