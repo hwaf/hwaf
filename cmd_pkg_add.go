@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
+	"github.com/mana-fwk/hwaf/vcs"
 	//gocfg "github.com/sbinet/go-config/config"
 )
 
@@ -44,7 +46,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	switch len(args) {
 	case 1:
 		pkguri = args[0]
-		pkgname = filepath.Base(args[0])
+		pkgname = ""
 	case 2:
 		pkguri = args[0]
 		pkgname = args[1]
@@ -56,8 +58,38 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	pkguri = os.ExpandEnv(pkguri)
 	//pkguri = filepath.Clean(pkguri)
 
-	pkgname = os.ExpandEnv(pkgname)
-	pkgname = filepath.Clean(pkgname)
+	uri, err := url.Parse(pkguri)
+	handle_err(err)
+	// fmt.Printf(">>> [%v]\n", uri)
+	// fmt.Printf("    Scheme: %q\n", uri.Scheme)
+	// fmt.Printf("    Opaque: %q\n", uri.Opaque)
+	// fmt.Printf("    Host:   %q\n", uri.Host)
+	// fmt.Printf("    Path:   %q\n", uri.Path)
+	// fmt.Printf("    Fragm:  %q\n", uri.Fragment)
+
+	switch pkgname {
+	case "":
+		pkgname = uri.Path
+	default:
+		pkgname = os.ExpandEnv(pkgname)
+		pkgname = filepath.Clean(pkgname)
+	}
+
+	// FIXME: hack. we need a better "plugin architecture" for this...
+	if uri.Scheme == "" && !path_exists(uri.Path) {
+		if svnroot := os.Getenv("SVNROOT"); svnroot != "" {
+			pkguri = svnroot + "/" + pkguri
+			pkguri = os.ExpandEnv(pkguri)
+			uri, err = url.Parse(pkguri)
+			handle_err(err)
+			// fmt.Printf(">>> [%v]\n", uri)
+			// fmt.Printf("    Scheme: %q\n", uri.Scheme)
+			// fmt.Printf("    Opaque: %q\n", uri.Opaque)
+			// fmt.Printf("    Host:   %q\n", uri.Host)
+			// fmt.Printf("    Path:   %q\n", uri.Path)
+			// fmt.Printf("    Fragm:  %q\n", uri.Fragment)
+		}
+	}
 
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 	bname := cmd.Flag.Lookup("b").Value.Get().(string)
@@ -75,7 +107,27 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	if strings.HasPrefix(pkguri, "svn+ssh:/") {
+	switch uri.Scheme {
+	case "svn", "svn+ssh":
+		dir := filepath.Join(pkgdir, pkgname)
+		if !path_exists(filepath.Dir(dir)) {
+			err = os.MkdirAll(filepath.Dir(dir), 0700)
+			handle_err(err)
+		}
+		repo := pkguri
+		if bname != "" {
+			// can't use filepath.Join as it may mess-up the uri.Scheme
+			repo = strings.Join([]string{pkguri, "tags", bname}, "/")
+		} else {
+			// can't use filepath.Join as it may mess-up the uri.Scheme
+			repo = strings.Join([]string{pkguri, "trunk"}, "/")
+		}
+		err = vcs.Svn.Create(dir, repo)
+		handle_err(err)
+		return
+	}
+
+	if strings.HasPrefix(uri.Scheme, "svn") {
 		fmt.Printf("%s: svn repo. doing staging...\n", n)
 		staging := filepath.Join(".git", "hwaf-svn-staging")
 		if !path_exists(staging) {
