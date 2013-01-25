@@ -421,7 +421,7 @@ func (ctx *Context) LocalCfg() (*gocfg.Config, error) {
 }
 
 func (ctx *Context) Warn(format string, args ...interface{}) (n int, err error) {
-	return fmt.Fprintf(os.Stderr, format, args...)
+	return fmt.Fprintf(os.Stderr, "hwaf: "+format, args...)
 }
 
 // EOF
