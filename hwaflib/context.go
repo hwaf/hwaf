@@ -218,14 +218,16 @@ func (ctx *Context) infer_cmtcfg(pinfos platform.Platform, hwaf_arch, hwaf_os, h
 		}
 
 	case "Darwin":
-		switch pinfos.DistVers {
-		case "10.6":
-			hwaf_comp = "gcc42"
-		case "10.7":
+		if strings.HasPrefix(pinfos.DistVers, "10.6") {
+			hwaf_comp, err = infer_gcc_version()
+			if err != nil {
+				hwaf_comp = "gcc"
+			}
+		} else if strings.HasPrefix(pinfos.DistVers, "10.7") {
 			hwaf_comp = "clang41"
-		case "10.8":
+		} else if strings.HasPrefix(pinfos.DistVers, "10.8") {
 			hwaf_comp = "clang41"
-		default:
+		} else {
 			panic(fmt.Sprintf("hwaf: unhandled distribution [%s]", pinfos.DistId()))
 		}
 
