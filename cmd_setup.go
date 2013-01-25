@@ -145,27 +145,34 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	err = lcfg.WriteFile(lcfg_fname, 0600, "")
 	handle_err(err)
 
-	// add local config to git-repo
+	// check whether we need to commit anything...
 	git := exec.Command(
-		"git", "add", lcfg_fname,
+		"git", "check-clean", "-exit-code=1",
 	)
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
 	err = git.Run()
-	handle_err(err)
+	if err != nil {
+		// add local config to git-repo
+		git = exec.Command(
+			"git", "add", lcfg_fname,
+		)
+		if !quiet {
+			git.Stdout = os.Stdout
+			git.Stderr = os.Stderr
+		}
+		err = git.Run()
+		handle_err(err)
 
-	// commit
-	git = exec.Command(
-		"git", "commit", "-m", "adding local config",
-	)
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
+		// commit
+		git = exec.Command(
+			"git", "commit", "-m", "adding local config",
+		)
+		if !quiet {
+			git.Stdout = os.Stdout
+			git.Stderr = os.Stderr
+		}
+		err = git.Run()
+		handle_err(err)
 	}
-	err = git.Run()
-	handle_err(err)
 
 	if !quiet {
 		fmt.Printf("%s: setup workarea [%s]... [ok]\n", n, dirname)
