@@ -218,6 +218,10 @@ func (ctx *Context) infer_cmtcfg(pinfos platform.Platform, hwaf_arch, hwaf_os, h
 		}
 
 	case "Darwin":
+		rel := strings.Split(pinfos.DistVers, ".")
+		major := rel[0]
+		minor := rel[1]
+		hwaf_os = pinfos.DistName + major + minor
 		if strings.HasPrefix(pinfos.DistVers, "10.6") {
 			hwaf_comp, err = infer_gcc_version()
 			if err != nil {
