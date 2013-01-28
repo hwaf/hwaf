@@ -12,6 +12,7 @@ func hwaf_make_cmd_pkg() *commander.Commander {
 		Short: "add, remove or inspect sub-packages",
 		Commands: []*commander.Command{
 			hwaf_make_cmd_pkg_add(),
+			hwaf_make_cmd_pkg_create(),
 			hwaf_make_cmd_pkg_ls(),
 			hwaf_make_cmd_pkg_rm(),
 		},
