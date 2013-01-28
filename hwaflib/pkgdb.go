@@ -68,6 +68,19 @@ func (db *PackageDb) GetPkg(pkgname string) (VcsPackage, error) {
 	return pkg, nil
 }
 
+// Pkgs returns the list of packages this db holds
+func (db *PackageDb) Pkgs() []string {
+	if db == nil || db.db == nil {
+		return []string{}
+	}
+
+	pkgs := make([]string, 0, len(db.db))
+	for k, _ := range db.db {
+		pkgs = append(pkgs, k)
+	}
+	return pkgs
+}
+
 func (db *PackageDb) sync() error {
 	if path_exists(db.fname) {
 		os.RemoveAll(db.fname)
