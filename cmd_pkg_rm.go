@@ -116,10 +116,34 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 			}
 		}
 
+	case "local":
+		if path_exists(vcspkg.Path) {
+			err = os.RemoveAll(vcspkg.Path)
+			handle_err(err)
+			path := vcspkg.Path
+			// clean-up dir if empty...
+			for {
+				path = filepath.Dir(path)
+				if path == srcdir {
+					break
+				}
+				content, err := filepath.Glob(filepath.Join(path, "*"))
+				handle_err(err)
+				if len(content) > 0 {
+					break
+				}
+				err = os.RemoveAll(path)
+				handle_err(err)
+			}
+		}
+
 	default:
 		err = fmt.Errorf("%s: VCS of type [%s] is not handled", n, vcspkg.Type)
 		handle_err(err)
 	}
+
+	err = g_ctx.PkgDb.Remove(pkg)
+	handle_err(err)
 
 	if !quiet {
 		fmt.Printf("%s: remove package [%s]... [ok]\n", n, pkgname)
