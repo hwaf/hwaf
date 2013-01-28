@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/user"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/gonuts/commander"
@@ -24,6 +26,7 @@ ex:
 		Flag: *flag.NewFlagSet("hwaf-pkg-create", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.String("authors", "", "comma-separated list of authors for the new package")
 	return cmd
 }
 
@@ -40,6 +43,29 @@ func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
 	}
 
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	authors := func() []string {
+		authors := cmd.Flag.Lookup("authors").Value.Get().(string)
+		out := make([]string, 0, 1)
+		for _, s := range strings.Split(authors, ",") {
+			s = strings.Trim(s, " ")
+			if s == "" {
+				continue
+			}
+			out = append(out, s)
+		}
+		return out
+	}()
+
+	if len(authors) == 0 {
+		usr, err := user.Current()
+		handle_err(err)
+		//fmt.Printf(">>>>> %v\n", usr)
+		usrname := usr.Name
+		if usrname == "" {
+			usrname = usr.Username
+		}
+		authors = []string{usrname}
+	}
 
 	if !quiet {
 		fmt.Printf("%s: create package [%s]...\n", n, pkgpath)
@@ -96,7 +122,7 @@ import waflib.Logs as msg
 
 PACKAGE = {
     'name': '{{.FullName}}',
-    'author': ['atlas collaboration'], 
+    'author': [{{.Authors | printlst }}], 
 }
 
 def pkg_deps(ctx):
@@ -126,11 +152,30 @@ def build(ctx):
 	pkg := struct {
 		FullName string
 		Name     string
+		Authors  []string
 	}{
 		FullName: pkgpath,
 		Name:     pkgname,
+		Authors:  authors,
 	}
-	tmpl, err := template.New("wscript").Parse(txt)
+	tmpl := template.New("wscript").Funcs(template.FuncMap{
+		"printlst": func(lst []string) string {
+			out := []string{}
+			for idx, s := range lst {
+				s = strings.Trim(s, " ")
+				if s == "" {
+					continue
+				}
+				comma := ","
+				if idx+1 == len(lst) {
+					comma = ""
+				}
+				out = append(out, fmt.Sprintf("%q%s", s, comma))
+			}
+			return strings.Join(out, " ")
+		},
+	})
+	tmpl, err = tmpl.Parse(txt)
 	handle_err(err)
 	err = tmpl.Execute(wscript, &pkg)
 	handle_err(err)
