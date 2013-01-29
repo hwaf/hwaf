@@ -37,7 +37,6 @@ func (db *PackageDb) Load(fname string) error {
 func (db *PackageDb) Add(vcs, pkguri, pkgname string) error {
 	_, has := db.db[pkgname]
 	if has {
-		panic("boo")
 		return fmt.Errorf("hwaf.pkgdb: package [%s] already in db", pkgname)
 	}
 	db.db[pkgname] = VcsPackage{vcs, pkguri, pkgname}
