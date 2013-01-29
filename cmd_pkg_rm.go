@@ -62,13 +62,23 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 	}
 
 	pkg := pkgname
-	if !path_exists(pkg) {
+	if !g_ctx.PkgDb.HasPkg(pkg) {
 		pkg = filepath.Join(srcdir, pkgname)
-		if !path_exists(pkg) {
-			err = fmt.Errorf("%s: no such package [%s]", n, pkgname)
-			handle_err(err)
-		}
 	}
+	if !g_ctx.PkgDb.HasPkg(pkg) {
+		err = fmt.Errorf("%s: no such package [%s] in db", n, pkg)
+		handle_err(err)
+	}
+
+	// people may have already removed it via a simple 'rm -rf foo'...
+	//
+	// if !path_exists(pkg) {
+	// 	pkg = filepath.Join(srcdir, pkgname)
+	// 	if !path_exists(pkg) {
+	// 		err = fmt.Errorf("%s: no such package [%s]", n, pkgname)
+	// 		handle_err(err)
+	// 	}
+	// }
 
 	if !g_ctx.PkgDb.HasPkg(pkg) {
 		err = fmt.Errorf("%s: no such package [%s] in db", n, pkg)

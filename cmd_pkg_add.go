@@ -122,6 +122,12 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 			// can't use filepath.Join as it may mess-up the uri.Scheme
 			repo = strings.Join([]string{pkguri, "trunk"}, "/")
 		}
+
+		if g_ctx.PkgDb.HasPkg(dir) {
+			err = fmt.Errorf("%s: package [%s] already in db.\ndid you forget to run 'hwaf pkg rm %s' ?", n, dir, dir)
+			handle_err(err)
+		}
+
 		err = vcs.Svn.Create(dir, repo)
 		handle_err(err)
 
@@ -151,6 +157,13 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		handle_err(err)
 		fmt.Printf("%s: svn repo. doing staging... [ok]\n", n)
 	}
+
+	dir := filepath.Join(pkgdir, pkgname)
+	if g_ctx.PkgDb.HasPkg(dir) {
+		err = fmt.Errorf("%s: package [%s] already in db.\ndid you forget to run 'hwaf pkg rm %s' ?", n, dir, dir)
+		handle_err(err)
+	}
+
 	git := exec.Command(
 		"git", "submodule", "add",
 		pkguri, filepath.Join(pkgdir, pkgname),
