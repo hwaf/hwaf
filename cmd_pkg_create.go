@@ -132,7 +132,7 @@ def pkg_deps(ctx):
     return
 
 def configure(ctx):
-    msg.debug('[configure package name: '+PACKAGE['name']])
+    msg.debug('[configure] package name: '+PACKAGE['name'])
     return
 
 def build(ctx):
@@ -141,7 +141,7 @@ def build(ctx):
     # ctx.build_complib(
     #    name = '{{.Name}}',
     #    source = 'src/*.cxx src/components/*.cxx',
-    #    use = ['package1', 'library2', ...],
+    #    use = ['lib1', 'lib2', 'ROOT', 'boost', ...],
     # )
     # ctx.install_headers()
     # ctx.build_pymodule(source=['python/*.py'])
