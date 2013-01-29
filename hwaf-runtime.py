@@ -165,7 +165,9 @@ def _hwaf_get_runtime_env(ctx):
         if k in ctx.env.HWAF_RUNTIME_ENVVARS:
             if isinstance(v, (list,tuple)):
                 if len(v) == 1: v = v[0]
-                else:           v = os.pathsep.join(v)
+                else:
+                    if k.endswith('PATH'): v = os.pathsep.join(v)
+                    else:                  v = " ".join(v)
                 pass
             # FIXME: we should have an API to decide...
             if k.endswith('PATH'): _env_prepend(k, v)
