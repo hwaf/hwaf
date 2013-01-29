@@ -267,6 +267,7 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 		"SVNPHYS":   "svn+ssh://svn.cern.ch/reps/atlasphys",
 		"SVNROOT":   "svn+ssh://svn.cern.ch/reps/atlasoff",
 		"SVNUSR":    "svn+ssh://svn.cern.ch/reps/atlasusr",
+		"TestArea":  dirname,
 	} {
 		if lcfg.HasOption(section, k) {
 			lcfg.RemoveOption(section, k)
