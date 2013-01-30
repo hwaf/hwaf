@@ -136,7 +136,7 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 
 		case "local":
 			// local packages are tracked from workarea-git-repo
-			git := exec.Command("git", "rm", vcspkg.Path)
+			git := exec.Command("git", "rm", "-r", vcspkg.Path)
 			if !quiet {
 				git.Stdin = os.Stdin
 				git.Stdout = os.Stdout
