@@ -15,7 +15,7 @@ import (
 func hwaf_make_cmd_pkg_rm() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_pkg_rm,
-		UsageLine: "rm [options] <local-pkg-name>",
+		UsageLine: "rm [options] <local-pkg-name> [<pkg2> [...]]",
 		Short:     "remove a package from the current workarea",
 		Long: `
 rm removes a package from the current workarea.
@@ -23,6 +23,7 @@ rm removes a package from the current workarea.
 ex:
  $ hwaf pkg rm ./src/foo/pkg
  $ hwaf pkg rm Control/AthenaKernel
+ $ hwaf pkg rm Control/AthenaKernel Control/AthenaServices
 `,
 		Flag: *flag.NewFlagSet("hwaf-pkg-rm", flag.ExitOnError),
 	}
