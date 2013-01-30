@@ -50,7 +50,7 @@ func (db *PackageDb) Add(vcs, pkguri, pkgname string) error {
 	exec.Command("git", "add", db.fname).Run()
 	exec.Command(
 		"git", "commit",
-		"-m", fmt.Sprintf("adding package [%s] to %s", pkgname, db.fname),
+		"-m", fmt.Sprintf("adding package [%s] to pkgdb", pkgname),
 	).Run()
 	return nil
 }
@@ -71,7 +71,7 @@ func (db *PackageDb) Remove(pkgname string) error {
 	exec.Command("git", "add", db.fname).Run()
 	exec.Command(
 		"git", "commit",
-		"-m", fmt.Sprintf("removing package [%s] from %s", pkgname, db.fname),
+		"-m", fmt.Sprintf("removing package [%s] from pkgdb", pkgname),
 	).Run()
 	return nil
 }
