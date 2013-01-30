@@ -94,15 +94,10 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	}
 	err = git.Run()
 	handle_err(err)
+
 	// remove git stuff
-	{
-		files, err := filepath.Glob(filepath.Join(hwaf_tools, ".git*"))
-		handle_err(err)
-		for _, f := range files {
-			err = os.RemoveAll(f)
-			handle_err(err)
-		}
-	}
+	err = os.RemoveAll(filepath.Join(hwaf_tools, ".git"))
+	handle_err(err)
 
 	// add share/hwaf/hwaf.conf
 	err = ioutil.WriteFile(
