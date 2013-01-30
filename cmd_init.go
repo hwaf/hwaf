@@ -144,6 +144,21 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	err = git.Run()
 	handle_err(err)
 
+	// add pkgdb
+	err = ioutil.WriteFile(
+		filepath.Join(".hwaf", "pkgdb.json"),
+		nil,
+		0755,
+	)
+	handle_err(err)
+	git = exec.Command("git", "add", filepath.Join(".hwaf", "pkgdb.json"))
+	if !quiet {
+		git.Stdout = os.Stdout
+		git.Stderr = os.Stderr
+	}
+	err = git.Run()
+	handle_err(err)
+
 	// add template wscript
 	if !quiet {
 		fmt.Printf("%s: add top-level wscript...\n", n)
