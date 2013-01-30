@@ -284,6 +284,11 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 	err = lcfg.WriteFile(lcfg_fname, 0600, "")
 	handle_err(err)
 
+	// commit changes to lcfg_fname
+	// FIXME: check if there is an error ?
+	exec.Command("git", "add", lcfg_fname).Run()
+	exec.Command("git", "commit", "-m", "asetup initialization finished").Run()
+
 	if !quiet {
 		fmt.Printf("%s: asetup workarea [%s]... [ok]\n", n, dirname)
 	}
