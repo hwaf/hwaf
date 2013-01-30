@@ -94,7 +94,12 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	if !quiet {
 		fmt.Printf("%s: add .hwaf/tools...\n", n)
 	}
-	hwaf_tools_dir := filepath.Join("${HOME}", ".config", "hwaf", "tools")
+	hwaf_tools_dir := ""
+	if g_ctx.Root != "" {
+		hwaf_tools_dir = filepath.Join(g_ctx.Root, "share", "hwaf", "tools")
+	} else {
+		hwaf_tools_dir = filepath.Join("${HOME}", ".config", "hwaf", "tools")
+	}
 	hwaf_tools_dir = os.ExpandEnv(hwaf_tools_dir)
 	if !path_exists(hwaf_tools_dir) {
 		// first try the r/w url...
