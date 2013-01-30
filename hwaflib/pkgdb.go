@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 )
 
 type VcsPackage struct {
@@ -41,7 +42,17 @@ func (db *PackageDb) Add(vcs, pkguri, pkgname string) error {
 	}
 	db.db[pkgname] = VcsPackage{vcs, pkguri, pkgname}
 
-	return db.sync()
+	err := db.sync()
+	if err != nil {
+		return err
+	}
+	// FIXME: should this return an error ?
+	exec.Command("git", "add", db.fname).Run()
+	exec.Command(
+		"git", "commit",
+		"-m", fmt.Sprintf("adding package [%s]", pkgname),
+	).Run()
+	return nil
 }
 
 func (db *PackageDb) Remove(pkgname string) error {
@@ -51,7 +62,18 @@ func (db *PackageDb) Remove(pkgname string) error {
 	}
 	delete(db.db, pkgname)
 
-	return db.sync()
+	err := db.sync()
+	if err != nil {
+		return err
+	}
+
+	// FIXME: should this return an error ?
+	exec.Command("git", "add", db.fname).Run()
+	exec.Command(
+		"git", "commit",
+		"-m", fmt.Sprintf("removing package [%s]", pkgname),
+	).Run()
+	return nil
 }
 
 func (db *PackageDb) HasPkg(pkgname string) bool {
