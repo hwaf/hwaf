@@ -147,7 +147,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	// add pkgdb
 	err = ioutil.WriteFile(
 		filepath.Join(".hwaf", "pkgdb.json"),
-		nil,
+		[]byte("{}\n"),
 		0755,
 	)
 	handle_err(err)
