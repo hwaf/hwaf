@@ -165,6 +165,7 @@ def build(ctx):
     ctx.load('hwaf-dist',   tooldir=_heptooldir)
     ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
     ctx.load('hwaf-runtime', tooldir=_heptooldir)
+    ctx._hwaf_create_project_hwaf_module()
     ctx._hwaf_load_project_hwaf_module(do_export=False)
     return
 
