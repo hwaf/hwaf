@@ -12,6 +12,7 @@ func hwaf_make_cmd_waf_show() *commander.Commander {
 		Short: "show informations about packages and projects",
 		Commands: []*commander.Command{
 			hwaf_make_cmd_waf_show_cmtcfg(),
+			hwaf_make_cmd_waf_show_flags(),
 			hwaf_make_cmd_waf_show_platform(),
 			hwaf_make_cmd_waf_show_projects(),
 			hwaf_make_cmd_waf_show_project_name(),
