@@ -467,6 +467,7 @@ def _hwaf_get_project_hwaf_module(ctx, fname=None):
         pass
     if not hwaf:
         msg.info("could not find hwaf-module [%s]" % (fname,))
+        return None
         aaa
         ctx.fatal("could not find hwaf-module [%s]" % (fname,))
         pass
@@ -502,6 +503,7 @@ def _hwaf_create_project_hwaf_module(ctx):
 @waflib.Configure.conf
 def _hwaf_load_project_hwaf_module(ctx, fname=None, do_export=False):
     hwaf = ctx._hwaf_get_project_hwaf_module(fname)
+    if not hwaf: return hwaf
     hwaf_fname = hwaf.abspath()
     hwaf_mod_name = osp.basename(hwaf_fname)
     if hwaf_mod_name.endswith(".py"):
