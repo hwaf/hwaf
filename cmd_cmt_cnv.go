@@ -24,8 +24,8 @@ cmt-cnv converts a CMT req-file into a hwaf script.
 ex:
  $ hwaf cmt-cnv ./cmt/requirements
 `,
-		Flag:        *flag.NewFlagSet("hwaf-cmt-cnv", flag.ExitOnError),
-	//CustomFlags: true,
+		Flag: *flag.NewFlagSet("hwaf-cmt-cnv", flag.ExitOnError),
+		//CustomFlags: true,
 	}
 	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
 	return cmd
@@ -129,7 +129,7 @@ func hwaf_run_cmd_cmt_cnv(cmd *commander.Command, args []string) {
 		for _, cmdargs := range [][]string{
 			[]string{"macro_value", fmt.Sprintf("%s_use_linkopts", libname)},
 			[]string{"macro_value", fmt.Sprintf("%slinkopts", libname)},
-		}{
+		} {
 			raw_libs, err := cmt_show(cmdargs...)
 			if err != nil {
 				return nil, err
@@ -190,7 +190,7 @@ func hwaf_run_cmd_cmt_cnv(cmd *commander.Command, args []string) {
 			return "", err
 		}
 		return strings.Trim(out[0], " \t\r\n"), nil
-		}()
+	}()
 	handle_err(err)
 
 	if !quiet {
