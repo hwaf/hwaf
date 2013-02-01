@@ -49,6 +49,8 @@ func init() {
 			hwaf_make_cmd_setup(),
 			hwaf_make_cmd_version(),
 
+			hwaf_make_cmd_cmt_cnv(),
+
 			hwaf_make_cmd_waf(),
 			hwaf_make_cmd_waf_configure(),
 			hwaf_make_cmd_waf_build(),
