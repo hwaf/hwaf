@@ -152,7 +152,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 		src_fname := filepath.Join(gopath, "bin", filepath.Base(gopkg))
 		if !path_exists(src_fname) {
 			// maybe a cross-compilation ?
-			src_fname = filepath.Join(gopath, "bin", runtime.GOARCH, filepath.Base(gopkg))
+			src_fname = filepath.Join(gopath, "bin", runtime.GOOS+"_"+runtime.GOARCH, filepath.Base(gopkg))
 		}
 		src, err := os.Open(src_fname)
 		handle_err(err)
