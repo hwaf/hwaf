@@ -34,6 +34,8 @@ def find_gdb(ctx, **kwargs):
         pass
     ctx.find_program(gdb, var='GDB',**kwargs)
 
+    if not ctx.env.GDB_HOME:
+        ctx.env.GDB_HOME = osp.dirname(osp.dirname(gdb))
     ctx.env.HWAF_FOUND_GDB = 1
     return
 
