@@ -50,6 +50,16 @@ def find_c_compiler(ctx, **kwargs):
         else: ctx.env.append_unique('CCFLAGS', '-O2')
         pass
 
+    if ctx.is_32b():
+        if ctx.is_windows(): pass
+        else: ctx.env.append_unique('CCFLAGS', '-m32')
+        pass
+
+    if ctx.is_64b():
+        if ctx.is_windows(): pass
+        else: ctx.env.append_unique('CCFLAGS', '-m64')
+        pass
+
     if ctx.is_darwin():
         # use ELF .so instead of .dyld...
         linkflags = ctx.env.LINKFLAGS_cshlib[:]
@@ -87,6 +97,16 @@ def find_cxx_compiler(ctx, **kwargs):
         else: ctx.env.append_unique('CXXFLAGS', '-O2')
         pass
 
+    if ctx.is_32b():
+        if ctx.is_windows(): pass
+        else: ctx.env.append_unique('CXXFLAGS', '-m32')
+        pass
+
+    if ctx.is_64b():
+        if ctx.is_windows(): pass
+        else: ctx.env.append_unique('CXXFLAGS', '-m64')
+        pass
+
     if ctx.is_darwin():
         # use ELF .so instead of .dyld...
         linkflags = ctx.env.LINKFLAGS_cxxshlib[:]
@@ -107,6 +127,16 @@ def find_fortran_compiler(ctx, **kwargs):
     #ctx.env.FC = os.environ.get('FC', comp)
     ctx.load('c_config')
     ctx.load('compiler_fc')
+
+    if ctx.is_32b():
+        if ctx.is_windows(): pass
+        else: ctx.env.append_unique('FCFLAGS', '-m32')
+        pass
+
+    if ctx.is_64b():
+        if ctx.is_windows(): pass
+        else: ctx.env.append_unique('FCFLAGS', '-m64')
+        pass
 
     ctx.env.HWAF_FOUND_FORTRAN_COMPILER = 1
     return
