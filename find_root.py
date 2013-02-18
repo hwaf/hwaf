@@ -276,7 +276,9 @@ def merge_dsomap_hook(self, node):
         bld_area = os.path.basename(self.env['BUILD_INSTALL_AREA'])
         bld_node = self.bld.bldnode.find_dir(bld_area)
         out_node = bld_node.make_node('lib').make_node(
-            'project_merged.rootmap')
+            'project_%s_merged.rootmap' %
+            self.bld.hwaf_project_name().replace('-', '_')
+            )
         g_dsomap_merger = self.create_task('merge_dsomap', node, out_node)
         self.bld.install_files(
             '${INSTALL_AREA}/lib',
