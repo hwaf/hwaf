@@ -33,6 +33,23 @@ func hwaf_run_cmd_waf(cmd *commander.Command, args []string) {
 	waf, err := g_ctx.WafBin()
 	handle_err(err)
 
+	if len(args) == 1 && args[0] == "build+install" {
+		sub := exec.Command(waf, "build")
+		sub.Stdin = os.Stdin
+		sub.Stdout = os.Stdout
+		sub.Stderr = os.Stderr
+		err = sub.Run()
+		handle_err(err)
+
+		sub = exec.Command(waf, "install")
+		sub.Stdin = os.Stdin
+		sub.Stdout = os.Stdout
+		sub.Stderr = os.Stderr
+		err = sub.Run()
+		handle_err(err)
+
+		return
+	}
 	subargs := append([]string{}, args...)
 	sub := exec.Command(waf, subargs...)
 	sub.Stdin = os.Stdin
