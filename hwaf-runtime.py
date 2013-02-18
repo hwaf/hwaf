@@ -340,6 +340,7 @@ def hwaf_ishell(ctx):
     shell_cmd = [shell,]
     msg.info("---> shell: %s" % shell)
 
+    shell_alias = '='
     if 'zsh' in os.path.basename(shell):
         env['ZDOTDIR'] = tmpdir
         dotrc_fname = os.path.join(tmpdir, '.zshrc')
@@ -360,6 +361,13 @@ def hwaf_ishell(ctx):
             dotrc_fname,
             '-i',
             ]
+        # FIXME: when c-shells are supported...
+        # c-shells use a space as an alias separation token
+        # in c-shell:
+        #   alias ll 'ls -l'
+        # in s-shell:
+        #   alias ll='ls -l'
+        #shell_alias = ' ' 
     else:
         # default to dash...
         dotrc_fname = os.path.join(tmpdir, '.bashrc')
@@ -373,7 +381,11 @@ def hwaf_ishell(ctx):
 
     ###
 
-
+    hwaf_runtime_aliases = ";\n".join([
+        "alias %s%s'%s'" % (alias[0], shell_alias, alias[1])
+        for alias in ctx.env.HWAF_RUNTIME_ALIASES
+        ])
+    
     dotrc = open(dotrc_fname, 'w')
     dotrc.write(textwrap.dedent(
         '''
@@ -393,6 +405,9 @@ def hwaf_ishell(ctx):
         # customize PS1 so we know we are in a hwaf subshell
         export PS1="[hwaf] ${PS1}"
 
+        # setup aliases
+        %(hwaf_runtime_aliases)s
+        
         echo ":: hwaf environment... [setup]"
         echo ":: hit ^D or exit to go back to the parent shell"
         echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
@@ -402,6 +417,7 @@ def hwaf_ishell(ctx):
             'hwaf_ld_library_path': env['LD_LIBRARY_PATH'],
             'hwaf_dyld_library_path': env['DYLD_LIBRARY_PATH'],
             'hwaf_pythonpath': env['PYTHONPATH'],
+            'hwaf_runtime_aliases': hwaf_runtime_aliases,
             }
         ))
     dotrc.flush()

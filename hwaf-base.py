@@ -459,6 +459,25 @@ def declare_runtime_env(self, k):
     
 ### ------------------------------------------------------------------------
 @conf
+def declare_runtime_alias(self, dst, src):
+    '''
+    declare_runtime_alias declares an alias, alive at runtime.
+    ex:
+      ctx.declare_runtime_alias("athena", "athena.py")
+      ctx.declare_runtime_alias("ll", "ls -l")
+    '''
+    if not self.env.HWAF_RUNTIME_ALIASES:
+        self.env.HWAF_RUNTIME_ALIASES = []
+        pass
+    if msg.verbose:
+        for alias in self.env.HWAF_RUNTIME_ALIASES:
+            k,v = alias
+            if k == dst:
+                raise KeyError("the alias [%s] was already defined (to=%r)" % (k,v))
+    self.env.append_unique('HWAF_RUNTIME_ALIASES', [(dst, src)])
+    
+### ------------------------------------------------------------------------
+@conf
 def hwaf_export_module(self, fname="wscript"):
     '''
     hwaf_export_module registers the ``fname`` file for export.
