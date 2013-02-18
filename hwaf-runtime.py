@@ -125,7 +125,7 @@ def _hwaf_get_runtime_env(ctx):
     import os
     cwd = os.getcwd()
     root = os.path.realpath(ctx.env.PREFIX)
-    root = os.path.realpath(ctx.env.INSTALL_AREA)
+    root = os.path.abspath(os.path.realpath(ctx.env.INSTALL_AREA))
     #msg.info(":::root:::"+root)
     if ctx.env.DESTDIR:
         root = ctx.env.DESTDIR + os.sep + ctx.env.INSTALL_AREA
@@ -170,7 +170,7 @@ def _hwaf_get_runtime_env(ctx):
                     else:                  v = " ".join(v)
                 pass
             # FIXME: we should have an API to decide...
-            if k.endswith('PATH'): _env_prepend(k, v)
+            if k.endswith('PATH'): _env_prepend(k, osp.abspath(v))
             else:                  env[k]=v
             continue
         # reject invalid values (for an environment)
@@ -297,7 +297,7 @@ class IShellContext(waflib.Build.BuildContext):
 def hwaf_ishell(ctx):
     # make sure we build first"
     # waflib.Scripting.run_command('install')
-    
+
     import os
     import tempfile
     import textwrap
@@ -305,7 +305,7 @@ def hwaf_ishell(ctx):
     #env = ctx.env
     cwd = os.getcwd()
     root = os.path.realpath(ctx.options.prefix)
-    root = os.path.realpath(ctx.env['INSTALL_AREA'])
+    root = os.path.abspath(os.path.realpath(ctx.env['INSTALL_AREA']))
     bindir = os.path.join(root, 'bin')
     libdir = os.path.join(root, 'lib')
     pydir  = os.path.join(root, 'python')
