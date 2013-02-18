@@ -144,6 +144,45 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	err = git.Run()
 	handle_err(err)
 
+	// add waf-bin
+	{
+		if !quiet {
+			fmt.Printf("%s: add .hwaf/bin...\n", n)
+		}
+		hwaf_bin_dir := ""
+		if g_ctx.Root != "" {
+			hwaf_bin_dir = filepath.Join(g_ctx.Root, "bin")
+		} else {
+			hwaf_bin_dir = filepath.Join("${HOME}", ".config", "hwaf", "bin")
+		}
+		hwaf_bin_dir = os.ExpandEnv(hwaf_bin_dir)
+		if !path_exists(hwaf_bin_dir) {
+			err = fmt.Errorf("no such hwaf-bin dir [%s]", hwaf_bin_dir)
+			handle_err(err)
+		}
+		src_waf, err := os.Open(filepath.Join(hwaf_bin_dir, "waf"))
+		handle_err(err)
+		defer src_waf.Close()
+
+		if !path_exists(".hwaf/bin") {
+			err = os.MkdirAll(".hwaf/bin", 0700)
+			handle_err(err)
+		}
+
+		waf_bin, err := os.Create(filepath.Join(".hwaf", "bin", "waf"))
+		handle_err(err)
+		defer waf_bin.Close()
+
+		err = waf_bin.Chmod(0755)
+		handle_err(err)
+
+		_, err = io.Copy(waf_bin, src_waf)
+		handle_err(err)
+
+		err = waf_bin.Sync()
+		handle_err(err)
+	}
+
 	// add pkgdb
 	err = ioutil.WriteFile(
 		filepath.Join(".hwaf", "pkgdb.json"),

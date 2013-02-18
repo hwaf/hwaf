@@ -86,21 +86,35 @@ func NewContextFrom(workarea string) (*Context, error) {
 func (ctx *Context) WafBin() (string, error) {
 	var err error
 
-	top := ctx.Root
-	waf := filepath.Join(top, "bin", "waf")
-	if !path_exists(waf) {
-		// try from user .config
-		top = os.ExpandEnv(filepath.Join("${HOME}", ".config", "hwaf"))
-		waf = filepath.Join(top, "bin", "waf")
-		if !path_exists(waf) {
-			err = fmt.Errorf(
-				"no such file [%s]\nplease re-run 'hwaf self init'\n",
-				waf,
-			)
-			return "", err
-		}
+	wrkarea, err := ctx.Workarea()
+	if err != nil {
+		return "", err
 	}
-	return waf, err
+
+	top := filepath.Join(wrkarea, ".hwaf")
+	waf := filepath.Join(top, "bin", "waf")
+	if path_exists(waf) {
+		return waf, nil
+	}
+
+	top = ctx.Root
+	waf = filepath.Join(top, "bin", "waf")
+	if path_exists(waf) {
+		return waf, nil
+	}
+
+	// try from user .config
+	top = os.ExpandEnv(filepath.Join("${HOME}", ".config", "hwaf"))
+	waf = filepath.Join(top, "bin", "waf")
+	if !path_exists(waf) {
+		err = fmt.Errorf(
+			"no such file [%s]\nplease re-run 'hwaf self init'\n",
+			waf,
+		)
+		return "", err
+	}
+
+	return "", fmt.Errorf("could not find 'waf' binary")
 }
 
 func (ctx *Context) Sitedir() string {
