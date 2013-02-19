@@ -122,6 +122,12 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 		projname := "mana-core"
 		version := ""
 		hwaf_os := pinfos.DistId()
+		// fold slX into slcX (ie: all Scientific Linuces are SLCs)
+		if pinfos.DistName == "sl" {
+			rel := strings.Split(pinfos.DistVers, ".")
+			major := rel[0]
+			hwaf_os = pinfos.DistName + major
+		}
 		hwaf_comp := "gcc"
 		hwaf_arch := ""
 		switch runtime.GOARCH {
