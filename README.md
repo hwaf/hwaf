@@ -55,6 +55,7 @@ Usage:
 
 The commands are:
 
+    asetup      setup a workarea with Athena-like defaults
     init        initialize a new workarea
     setup       setup an existing workarea
     version     print version and exit
@@ -68,9 +69,11 @@ The commands are:
     run         run a command with the correct (project) environment
     sdist       create a source distribution from the project or packages
     bdist       create a binary distribution from the project or packages
+    bdist-deb   create a DEB from the local project/packages
     bdist-rpm   create a RPM from the local project/packages
     dump-env    print the environment on STDOUT
 
+    git         hwaf related git tools
     pkg         add, remove or inspect sub-packages
     show        show informations about packages and projects
     pmgr        query, download and install projects
@@ -82,7 +85,6 @@ Additional help topics:
 
 
 Use "hwaf help [topic]" for more information about that topic.
-
 ```
 
 
