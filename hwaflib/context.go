@@ -88,7 +88,7 @@ func (ctx *Context) WafBin() (string, error) {
 
 	wrkarea, err := ctx.Workarea()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("hwaf.WafBin: no workarea (err=%v). try running 'hwaf init .'", err)
 	}
 
 	top := filepath.Join(wrkarea, ".hwaf")
