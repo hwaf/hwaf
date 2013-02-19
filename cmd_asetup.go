@@ -126,7 +126,7 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 		if pinfos.DistName == "sl" {
 			rel := strings.Split(pinfos.DistVers, ".")
 			major := rel[0]
-			hwaf_os = pinfos.DistName + major
+			hwaf_os = "slc" + major
 		}
 		hwaf_comp := "gcc"
 		hwaf_arch := ""
