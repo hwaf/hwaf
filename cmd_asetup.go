@@ -198,25 +198,42 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 			version = filepath.Base(version)
 		}
 		opts.projdir = filepath.Join(sitedir, projname, version)
+
+		// dft_cmtcfg is a variation on DefaultCmtcfg.
+		dft_cmtcfg := fmt.Sprintf(
+			"%s-%s-%s-%s",
+			hwaf_arch,
+			hwaf_os,
+			strings.Split(g_ctx.DefaultCmtcfg(), "-")[2], // compiler
+			hwaf_bld,
+		)
+
 		found := false
 		for _, cmtcfg := range []string{
 			cli_cmtcfg,
 			usr_cmtcfg,
 			g_ctx.Cmtcfg(),
 			g_ctx.DefaultCmtcfg(),
+			dft_cmtcfg,
 		} {
 			if cmtcfg == "" {
 				continue
 			}
 			dir := filepath.Join(opts.projdir, cmtcfg)
-			//fmt.Printf("---> [%s]...\n", dir)
+			if !quiet {
+				fmt.Printf("---> [%s]...\n", dir)
+			}
 			if !path_exists(dir) {
-				//fmt.Printf("---> [%s]... [err]\n", dir)
+				if !quiet {
+					fmt.Printf("---> [%s]... [err]\n", dir)
+				}
 				continue
 			}
 			opts.projdir = dir
 			opts.cmtcfg = cmtcfg
-			//fmt.Printf("---> [%s]... [ok]\n", dir)
+			if !quiet {
+				fmt.Printf("---> [%s]... [ok]\n", dir)
+			}
 			found = true
 			break
 		}
