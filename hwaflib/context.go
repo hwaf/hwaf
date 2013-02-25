@@ -229,7 +229,7 @@ func (ctx *Context) infer_cmtcfg(pinfos platform.Platform, hwaf_arch, hwaf_os, h
 			hwaf_os = "archlinux"
 
 		default:
-			ctx.Warn("hwaf: unhandled distribution [%s]", pinfos.DistId())
+			ctx.Warn("hwaf: unhandled distribution [%s]\n", pinfos.DistId())
 			hwaf_os = "linux"
 			hwaf_comp = "gcc"
 		}
