@@ -530,6 +530,13 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         waflib.Utils.subst_vars('--gccxmlpath=${GCCXML_BINDIR}', o.env),        
         #'--gccxmlpath=',
         ]
+    if 'clang' in o.env.CFG_COMPILER:
+        # FIXME: for the moment, always using gcc is fine
+        #        even in the context of a clang-based toolchain.
+        #        This should be revisited w/ VisualStudio...
+        o.env.append_unique('GCCXML_FLAGS', '--gccxmlopt=--gccxml-compiler gcc')
+        pass
+
     lib_name = "lib%s" % (o.target,) # FIXME !!
     o.env.GENREFLEX_DSOMAP = '--rootmap=%s.dsomap' % lib_name
     o.env.GENREFLEX_DSOMAPLIB = '--rootmap-lib=%s.so' % lib_name
