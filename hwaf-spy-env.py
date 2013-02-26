@@ -56,7 +56,7 @@ if 1:
         ret = _orig_ConfigSet_setitem(self, key, value)
         new_value = self[key]
         try:
-            if old_value != new_value:
+            if old_value != new_value or 1:
                 _orig_ConfigSet_append_value(
                     self,
                     'HWAF_ENV_SPY',
@@ -86,7 +86,7 @@ if 1:
         ret = _orig_ConfigSet_setattr(self, key, value)
         new_value = self[key]
         try:
-            if old_value != new_value:
+            if old_value != new_value or 1:
                 _orig_ConfigSet_append_value(
                     self,
                     'HWAF_ENV_SPY',
@@ -117,7 +117,7 @@ if 1:
         ret = _orig_ConfigSet_append_value(self, var, val)
         new_value = self[var]
         try:
-            if old_value != new_value:
+            if old_value != new_value or 1:
                 _orig_ConfigSet_append_value(
                     self,
                     'HWAF_ENV_SPY',
@@ -148,7 +148,7 @@ if 1:
         ret = _orig_ConfigSet_prepend_value(self, var, val)
         new_value = self[var]
         try:
-            if old_value != new_value:
+            if old_value != new_value or 1:
                 _orig_ConfigSet_append_value(
                     self,
                     'HWAF_ENV_SPY',
@@ -173,13 +173,13 @@ if 1:
         if _tb_stack_filter(stack):
             return _orig_ConfigSet_append_unique(self, var, val)
         
-        print(">>> append_value(%s, %s)..." % (var, stack), file=mylog)
+        print(">>> append_unique(%s, %s)..." % (var, stack), file=mylog)
         mylog.flush()
         old_value = self[var]
         ret = _orig_ConfigSet_append_unique(self, var, val)
         new_value = self[var]
         try:
-            if old_value != new_value:
+            if old_value != new_value or 1:
                 _orig_ConfigSet_append_value(
                     self,
                     'HWAF_ENV_SPY',
