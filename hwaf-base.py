@@ -160,6 +160,7 @@ def configure(ctx):
     msg.info('='*80)
     
     ctx.load('hwaf-spy-env', tooldir=_heptooldir)
+    ctx.hwaf_setup_spy_env()
     return
 
 def build(ctx):

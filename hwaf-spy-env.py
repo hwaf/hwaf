@@ -17,7 +17,8 @@ if not _heptooldir in sys.path: sys.path.append(_heptooldir)
 
 ### ---------------------------------------------------------------------------
 # monkey patch waflib.ConfigSet.ConfigSet to log environment mods
-if 1:
+@conf
+def hwaf_setup_spy_env(ctx):
     import traceback
     import waflib.ConfigSet
     _orig_ConfigSet_setitem = waflib.ConfigSet.ConfigSet.__setitem__
