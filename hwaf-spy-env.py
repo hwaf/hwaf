@@ -42,7 +42,7 @@ def hwaf_setup_spy_env(ctx):
             return True
         return False
     
-    mylog = open('spy.log.txt', 'w')
+    #mylog = open('spy.log.txt', 'w')
     def _new_ConfigSet_setitem(self, key, value):
         if key == 'HWAF_ENV_SPY':
             return _orig_ConfigSet_setitem(self, key, value)
@@ -51,27 +51,23 @@ def hwaf_setup_spy_env(ctx):
         if _tb_stack_filter(stack):
             return _orig_ConfigSet_setitem(self, key, value)
             
-        print(">>> __setitem__(%s, %s)..." % (key, stack), file=mylog)
-        mylog.flush()
+        #print(">>> __setitem__(%s, %s)..." % (key, stack), file=mylog)
+        #mylog.flush()
         old_value = self[key]
         ret = _orig_ConfigSet_setitem(self, key, value)
         new_value = self[key]
-        try:
-            if old_value != new_value or 1:
-                _orig_ConfigSet_append_value(
-                    self,
-                    'HWAF_ENV_SPY',
-                    [{'action': 'set',
-                      'key': key,
-                      'old': old_value,
-                      'new': new_value,
-                      'val': value,
-                      'who': stack[-1],
-                      }]
-                    )
-        except Exception as err:
-            print ("*** error: %s" % err)
-            print (traceback.extract_stack())
+        if old_value != new_value or 1:
+            _orig_ConfigSet_append_value(
+                self,
+                'HWAF_ENV_SPY',
+                [{'action': 'set',
+                  'key': key,
+                  'old': old_value,
+                  'new': new_value,
+                  'val': value,
+                  'who': stack[-1],
+                  }]
+                )
         return ret
     waflib.ConfigSet.ConfigSet.__setitem__ = _new_ConfigSet_setitem
 
@@ -81,27 +77,23 @@ def hwaf_setup_spy_env(ctx):
         stack = traceback.extract_stack()[:-1]
         if _tb_stack_filter(stack):
             return _orig_ConfigSet_setattr(self, key, value)
-        print(">>> __setattr__(%s, %s)..." % (key, stack), file=mylog)
-        mylog.flush()
+        #print(">>> __setattr__(%s, %s)..." % (key, stack), file=mylog)
+        #mylog.flush()
         old_value = self[key]
         ret = _orig_ConfigSet_setattr(self, key, value)
         new_value = self[key]
-        try:
-            if old_value != new_value or 1:
-                _orig_ConfigSet_append_value(
-                    self,
-                    'HWAF_ENV_SPY',
-                    [{'action': 'set',
-                      'key': key,
-                      'old': old_value,
-                      'new': new_value,
-                      'val': value,
-                      'who': stack[-1],
-                      }]
-                    )
-        except Exception as err:
-            print ("*** error: %s" % err)
-            print (traceback.extract_stack())
+        if old_value != new_value or 1:
+            _orig_ConfigSet_append_value(
+                self,
+                'HWAF_ENV_SPY',
+                [{'action': 'set',
+                  'key': key,
+                  'old': old_value,
+                  'new': new_value,
+                  'val': value,
+                  'who': stack[-1],
+                  }]
+                )
         return ret
     waflib.ConfigSet.ConfigSet.__setattr__ = _new_ConfigSet_setattr
 
@@ -112,27 +104,23 @@ def hwaf_setup_spy_env(ctx):
         if _tb_stack_filter(stack):
             return _orig_ConfigSet_append_value(self, var, val)
         
-        print(">>> append_value(%s, %s)..." % (var, stack), file=mylog)
-        mylog.flush()
+        #print(">>> append_value(%s, %s)..." % (var, stack), file=mylog)
+        #mylog.flush()
         old_value = self[var]
         ret = _orig_ConfigSet_append_value(self, var, val)
         new_value = self[var]
-        try:
-            if old_value != new_value or 1:
-                _orig_ConfigSet_append_value(
-                    self,
-                    'HWAF_ENV_SPY',
-                    [{'action': 'append_value',
-                      'key': var,
-                      'old': old_value,
-                      'new': new_value,
-                      'val': val,
-                      'who': stack[-1],
-                      }]
-                    )
-        except Exception as err:
-            print ("*** error: %s" % err)
-            print (traceback.extract_stack())
+        if old_value != new_value or 1:
+            _orig_ConfigSet_append_value(
+                self,
+                'HWAF_ENV_SPY',
+                [{'action': 'append_value',
+                  'key': var,
+                  'old': old_value,
+                  'new': new_value,
+                  'val': val,
+                  'who': stack[-1],
+                  }]
+                )
         return ret
     waflib.ConfigSet.ConfigSet.append_value = _new_ConfigSet_append_value
 
@@ -143,27 +131,23 @@ def hwaf_setup_spy_env(ctx):
         if _tb_stack_filter(stack):
             return _orig_ConfigSet_prepend_value(self, var, val)
         
-        print(">>> prepend_value(%s, %s)..." % (var, stack), file=mylog)
-        mylog.flush()
+        #print(">>> prepend_value(%s, %s)..." % (var, stack), file=mylog)
+        #mylog.flush()
         old_value = self[var]
         ret = _orig_ConfigSet_prepend_value(self, var, val)
         new_value = self[var]
-        try:
-            if old_value != new_value or 1:
-                _orig_ConfigSet_append_value(
-                    self,
-                    'HWAF_ENV_SPY',
-                    [{'action': 'prepend_value',
-                      'key': var,
-                      'old': old_value,
-                      'new': new_value,
-                      'val': val,
-                      'who': stack[-1],
-                      }]
-                    )
-        except Exception as err:
-            print ("*** error: %s" % err)
-            print (traceback.extract_stack())
+        if old_value != new_value or 1:
+            _orig_ConfigSet_append_value(
+                self,
+                'HWAF_ENV_SPY',
+                [{'action': 'prepend_value',
+                  'key': var,
+                  'old': old_value,
+                  'new': new_value,
+                  'val': val,
+                  'who': stack[-1],
+                  }]
+                )
         return ret
     waflib.ConfigSet.ConfigSet.prepend_value = _new_ConfigSet_prepend_value
 
@@ -174,27 +158,23 @@ def hwaf_setup_spy_env(ctx):
         if _tb_stack_filter(stack):
             return _orig_ConfigSet_append_unique(self, var, val)
         
-        print(">>> append_unique(%s, %s)..." % (var, stack), file=mylog)
-        mylog.flush()
+        #print(">>> append_unique(%s, %s)..." % (var, stack), file=mylog)
+        #mylog.flush()
         old_value = self[var]
         ret = _orig_ConfigSet_append_unique(self, var, val)
         new_value = self[var]
-        try:
-            if old_value != new_value or 1:
-                _orig_ConfigSet_append_value(
-                    self,
-                    'HWAF_ENV_SPY',
-                    [{'action': 'append_unique',
-                      'key': var,
-                      'old': old_value,
-                      'new': new_value,
-                      'val': val,
-                      'who': stack[-1],
-                      }]
-                    )
-        except Exception as err:
-            print ("*** error: %s" % err)
-            print (traceback.extract_stack())
+        if old_value != new_value or 1:
+            _orig_ConfigSet_append_value(
+                self,
+                'HWAF_ENV_SPY',
+                [{'action': 'append_unique',
+                  'key': var,
+                  'old': old_value,
+                  'new': new_value,
+                  'val': val,
+                  'who': stack[-1],
+                  }]
+                )
         return ret
     waflib.ConfigSet.ConfigSet.append_unique = _new_ConfigSet_append_unique
 
