@@ -322,6 +322,9 @@ def gen_reflex_dummy(self):
 @extension('.h')
 def gen_reflex_hook(self, node):
     "Bind the .h file extension to the creation of a genreflex instance"
+    if not self.env['GENREFLEX_DSOMAP']:
+        # project with *no* Reflex target...
+        return
     source = node.name
     out_node_dir = self.path.get_bld().make_node(
         "_reflex_dicts").make_node(
