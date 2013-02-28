@@ -28,7 +28,8 @@ def hwaf_setup_spy_env(ctx):
     _orig_ConfigSet_append_unique = waflib.ConfigSet.ConfigSet.append_unique
 
     def _tb_stack_filter(stack):
-        '''keep a
+        '''filter function to only keep interesting stacks
+        (discarding noise from waf/hwaf internals)
         '''
         who = stack[-1]
         fname = who[0]
