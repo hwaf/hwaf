@@ -68,6 +68,7 @@ def configure(ctx):
         pass
 
     if not ctx.env.HWAF_MODULES: ctx.env.HWAF_MODULES = []
+    if not ctx.env.HWAF_ENV_SPY: ctx.env.HWAF_ENV_SPY = []
 
     ctx.load('hwaf-system', tooldir=_heptooldir)
     ctx.load('hwaf-dist',   tooldir=_heptooldir)
@@ -158,6 +159,8 @@ def configure(ctx):
     ctx.msg('njobs-max', waflib.Options.options.jobs)
     msg.info('='*80)
     
+    ctx.load('hwaf-spy-env', tooldir=_heptooldir)
+    ctx.hwaf_setup_spy_env()
     return
 
 def build(ctx):
@@ -165,6 +168,7 @@ def build(ctx):
     ctx.load('hwaf-dist',   tooldir=_heptooldir)
     ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
     ctx.load('hwaf-runtime', tooldir=_heptooldir)
+    ctx.load('hwaf-spy-env', tooldir=_heptooldir)
     ctx._hwaf_create_project_hwaf_module()
     ctx._hwaf_load_project_hwaf_module(do_export=False)
     return
