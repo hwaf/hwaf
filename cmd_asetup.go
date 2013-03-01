@@ -133,7 +133,7 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 		switch runtime.GOARCH {
 		case "amd64":
 			hwaf_arch = "x86_64"
-		case "i386":
+		case "386":
 			hwaf_arch = "i686"
 		default:
 			//hwaf_arch = "unknown"
