@@ -17,6 +17,7 @@ def options(ctx):
 
     ctx.load('hwaf-base', tooldir=_heptooldir)
 
+    ctx.load('boost')
     ctx.add_option(
         '--with-boost',
         default=None,
