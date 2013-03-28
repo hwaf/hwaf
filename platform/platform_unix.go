@@ -62,7 +62,7 @@ func parse_dist_files(fnames []string) (distname, distvers string, err error) {
 	distname = ""
 	distvers = ""
 
-	re_release_filename := regexp.MustCompile(`(\w+)[-_](release|version)`)
+	re_release_filename := regexp.MustCompile(`(\w+)(-release|_version)`)
 	re_lsb_release_version := regexp.MustCompile(`(.+) release ([\d.]+)[^(]*(?:\((.+)\))?`)
 	re_release_version := regexp.MustCompile(`([^0-9]+)(?: release )?([\d.]+)[^(]*(?:\((.+)\))?`)
 
@@ -144,7 +144,7 @@ func parse_dist_files(fnames []string) (distname, distvers string, err error) {
 		distfullname := m[1]
 		distvers = m[2]
 		//distid = m[3]
-		//fmt.Printf(">>> %v (%q %q %q)\n", m, distfullname, distvers, distid)
+		//fmt.Printf(">>> %v (%q %q)\n", m, distfullname, distvers)
 		match := func(pattern string) bool {
 			matched, err := regexp.MatchString(pattern, distfullname)
 			if err != nil {

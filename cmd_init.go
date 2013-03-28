@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"strings"
 
@@ -136,7 +137,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	err = os.Symlink(hwaf_tools_dir, ".hwaf/tools")
 	handle_err(err)
 
-	git = exec.Command("git", "add", ".hwaf/tools")
+	git = exec.Command("git", "add", "-f", ".hwaf/tools")
 	if !quiet {
 		git.Stdout = os.Stdout
 		git.Stderr = os.Stderr
@@ -190,7 +191,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		0755,
 	)
 	handle_err(err)
-	git = exec.Command("git", "add", filepath.Join(".hwaf", "pkgdb.json"))
+	git = exec.Command("git", "add", "-f", filepath.Join(".hwaf", "pkgdb.json"))
 	if !quiet {
 		git.Stdout = os.Stdout
 		git.Stderr = os.Stderr
@@ -271,6 +272,43 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		if !quiet {
 			fmt.Printf("%s: commit workarea...\n", n)
 		}
+		// check if we have enough informations about the user name
+		git = exec.Command("git", "config", "--global", "user.name")
+		if git.Run() != nil {
+			usr, err2 := user.Current()
+			usrname := "nobody"
+			if err2 == nil {
+				if usr.Name != "" {
+					usrname = usr.Name
+				} else {
+					usrname = usr.Username
+				}
+			}
+			g_ctx.Warn("git wasn't properly configured: missing 'user.name' info => setting it to %q\n", usrname)
+			git = exec.Command("git", "config", "user.name", usrname)
+			err = git.Run()
+			handle_err(err)
+		}
+
+		// check if we have enough informations about the user email
+		git = exec.Command("git", "config", "--global", "user.email")
+		if git.Run() != nil {
+			usr, err2 := user.Current()
+			usrmail := usr.Username
+			if err2 != nil {
+				usrmail = "nobody"
+			}
+			hostname, err2 := os.Hostname()
+			if err2 != nil {
+				hostname = "localhost.localdomain"
+			}
+			usrmail = usrmail + "@" + hostname
+			g_ctx.Warn("git wasn't properly configured: missing 'user.email' info => setting it to %q\n", usrmail)
+			git = exec.Command("git", "config", "user.email", usrmail)
+			err = git.Run()
+			handle_err(err)
+		}
+
 		git = exec.Command(
 			"git", "commit", "-m",
 			fmt.Sprintf("init hwaf project [%s]", proj_name),

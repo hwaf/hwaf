@@ -153,7 +153,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	if err != nil {
 		// add local config to git-repo
 		git = exec.Command(
-			"git", "add", lcfg_fname,
+			"git", "add", "-f", lcfg_fname,
 		)
 		if !quiet {
 			git.Stdout = os.Stdout

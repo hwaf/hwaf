@@ -164,12 +164,14 @@ func (ctx *Context) DefaultCmtcfg() string {
 
 	pinfos, err := platform.Infos()
 	if err != nil {
+		//println("*** error:" + err.Error())
 		return cmtcfg
 	}
 
 	// try harder...
 	cmtcfg2, err := ctx.infer_cmtcfg(pinfos, hwaf_arch, hwaf_os, hwaf_comp)
 	if err != nil {
+		//println("*** error:" + err.Error())
 		return cmtcfg
 	}
 	cmtcfg = cmtcfg2
@@ -211,6 +213,7 @@ func (ctx *Context) infer_cmtcfg(pinfos platform.Platform, hwaf_arch, hwaf_os, h
 		hwaf_comp, err = infer_gcc_version()
 		if err != nil {
 			hwaf_comp = "gcc"
+			err = nil
 		}
 		switch pinfos.DistName {
 		case "centos", "sl", "slc", "rh", "rhel":
@@ -226,7 +229,7 @@ func (ctx *Context) infer_cmtcfg(pinfos platform.Platform, hwaf_arch, hwaf_os, h
 			hwaf_os = "archlinux"
 
 		default:
-			ctx.Warn("hwaf: unhandled distribution [%s]", pinfos.DistId())
+			ctx.Warn("hwaf: unhandled distribution [%s]\n", pinfos.DistId())
 			hwaf_os = "linux"
 			hwaf_comp = "gcc"
 		}
