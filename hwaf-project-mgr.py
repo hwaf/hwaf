@@ -709,7 +709,7 @@ def _hwaf_build_pkg_deps(ctx, pkgdir=None):
         return
     #ctx.msg("pkg-dir", pkgdir.abspath())
 
-    pkgs = ctx.hwaf_find_subpackages(pkgdir.name)
+    pkgs = ctx.hwaf_find_subpackages(pkgdir.path_from(ctx.path))
     #ctx.msg("local packages", str(len(pkgs)))
     for pkg in pkgs:
         #msg.info(" %s" % pkg.path_from(pkgdir))
@@ -760,7 +760,7 @@ class PkgList(waflib.Configure.ConfigurationContext):
         pkgdir = ctx.path.find_dir(cmtpkgs)
         assert pkgdir, "no such directory: [%s]" % cmtpkgs
         msg.info("pkg-dir: %s" % pkgdir.abspath())
-        pkgs = ctx.hwaf_find_subpackages(pkgdir.name)
+        pkgs = ctx.hwaf_find_subpackages(pkgdir.path_from(ctx.path))
         for pkg in pkgs:
             msg.info(" %s" % pkg.path_from(pkgdir))
             pass
