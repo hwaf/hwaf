@@ -52,7 +52,7 @@ def find_boost(ctx, **kwargs):
     boost_libs = '''\
     chrono date_time filesystem graph iostreams
     math_c99 math_c99f math_tr1 math_tr1f
-    prg_exec_monitor program_options 
+    prg_exec_monitor program_options
     random regex serialization
     signals system thread 
     unit_test_framework wave wserialization
@@ -69,7 +69,10 @@ def find_boost(ctx, **kwargs):
         uselib_store='boost',
         **kwargs)
 
-    for libname in boost_libs.split():
+    ## hack for boost_python...
+    ctx.env['LIB_boost'] = ctx.env['LIB_boost'] + ['boost_python']
+    
+    for libname in boost_libs.split() + ['python',]:
         libname = libname.strip()
         for n in ('INCLUDES',
                   'LIBPATH',
