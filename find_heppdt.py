@@ -40,7 +40,7 @@ def find_heppdt(ctx, **kwargs):
     # find heppdt
     ctx.check_with(
         ctx.check,
-        "HepPDT",
+        "heppdt",
         features='cxx cxxprogram',
         header_name="HepPDT/Version.hh",
         lib='HepPDT',
@@ -76,7 +76,7 @@ def find_heppdt(ctx, **kwargs):
     # find heppid
     ctx.check_with(
         ctx.check,
-        "HepPID",
+        "heppdt", # yes... heppdt. re-use the same path for heppid
         features='cxx cxxprogram',
         header_name="HepPID/Version.hh",
         lib='HepPID',
