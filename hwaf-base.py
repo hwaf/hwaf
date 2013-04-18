@@ -226,11 +226,15 @@ def find_at(ctx, check, what, where, **kwargs):
     os_env = dict(os.environ)
     pkgp = os.getenv("PKG_CONFIG_PATH", "")
     try:
+        WHAT = what.upper()
         ctx.env.stash()
-        ctx.env[what + "_HOME"] = where
+        ctx.env[WHAT + "_HOME"] = where
         incdir = osp.join(where, "include")
         bindir = osp.join(where, "bin")
         libdir = osp.join(where, "lib")
+        incdir = getattr(ctx.options, 'with_%s_includes' % what, incdir)
+        libdir = getattr(ctx.options, 'with_%s_libs' % what, libdir)
+        
         ctx.env.append_value('PATH',  bindir)
         ctx.env.append_value('RPATH', libdir)
         ctx.env.append_value('LD_LIBRARY_PATH', libdir)
@@ -302,7 +306,7 @@ def check_with(ctx, check, what, *args, **kwargs):
     for path in [abspath(p) for p in paths if p]:
         ctx.in_msg = 0
         ctx.to_log("Checking for %s in %s" % (what, path))
-        if ctx.find_at(check, WHAT, path, **kwargs):
+        if ctx.find_at(check, what, path, **kwargs):
             #print ">> found %s at %s" % (what, path)
             ctx.in_msg = 0
             ctx.msg("Found %s at" % what, path, color="WHITE")
@@ -385,17 +389,26 @@ def read_cfg(ctx, fname):
     
     # pkg-level config
     for section in cfg.sections():
+        #print "*** section=[%s]..." % section
         if not hasattr(ctx.options, 'with_%s' % section):
             continue
         v = getattr(ctx.options, 'with_%s' % section)
+        #print "*** section=[%s]... >> %s" % (section, v)
         if not (v == None):
             # user provided a value from command-line
             continue
-        if not cfg.has_option(section, 'path'):
-            # no useful info
-            continue
-        v = cfg.get(section, 'path')
-        setattr(ctx.options, 'with_%s' % section, v)
+        if cfg.has_option(section, 'path'):
+            v = cfg.get(section, 'path')
+            setattr(ctx.options, 'with_%s' % section, v)
+            pass
+        if cfg.has_option(section, 'includes'):
+            v = cfg.get(section, 'includes')
+            setattr(ctx.options, 'with_%s_includes' % section, v)
+            pass
+        if cfg.has_option(section, 'libs'):
+            v = cfg.get(section, 'libs')
+            setattr(ctx.options, 'with_%s_libs' % section, v)
+            pass
         pass
     return True
 
