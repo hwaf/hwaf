@@ -38,18 +38,22 @@ def find_gccxml(ctx, **kwargs):
         pass
 
 
+    # find gccxml
+    gccxml_bin = "gccxml"
     path_list = []
     if getattr(ctx.options, 'with_gccxml', None):
+        gccxml_bin = osp.join(ctx.options.with_gccxml, "bin", "gccxml")
         path_list.append(
             osp.join(ctx.options.with_gccxml, "bin")
             )
         pass
-
+    kwargs['path_list']=path_list
+    
     ctx.find_program(
-        "gccxml",
+        gccxml_bin,
         var="GCCXML",
-        path_list=path_list,
         **kwargs)
+    gccxml_bin = ctx.env['GCCXML']
     
     version="N/A"
     cmd = [ctx.env.GCCXML, "--version"]
