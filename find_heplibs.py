@@ -22,7 +22,7 @@ _heptools = (
     'gsl',
     'hepmc',
     'heppdt',
-    'lcgcmt',
+    'lcg',
     'lcg_cool',
     'lcg_coral',
     'lcg_pool',
