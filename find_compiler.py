@@ -17,6 +17,22 @@ def options(ctx):
     ctx.load('compiler_c')
     ctx.load('compiler_cxx')
     ctx.load('compiler_fc')
+
+    ctx.add_option(
+        '--with-c-compiler',
+        default=None,
+        help="path to a C compiler")
+
+    ctx.add_option(
+        '--with-cxx-compiler',
+        default=None,
+        help="path to a C++ compiler")
+
+    ctx.add_option(
+        '--with-fortran-compiler',
+        default=None,
+        help="path to a FORTRAN compiler")
+
     return
 
 ### ---------------------------------------------------------------------------
@@ -41,7 +57,12 @@ def find_c_compiler(ctx, **kwargs):
             break
         pass
 
-    ctx.env.CC = os.environ.get('CC', comp)
+    if ctx.options.with_c_compiler:
+        ctx.env.CC = ctx.options.with_c_compiler
+    else:
+        ctx.env.CC = os.environ.get('CC', comp)
+        pass
+    
     ctx.load('c_config')
     ctx.load('compiler_c')
 
@@ -89,7 +110,12 @@ def find_cxx_compiler(ctx, **kwargs):
             break
         pass
 
-    ctx.env.CXX = os.environ.get('CXX', comp)
+    if ctx.options.with_cxx_compiler:
+        ctx.env.CXX = ctx.options.with_cxx_compiler
+    else:
+        ctx.env.CXX = os.environ.get('CXX', comp)
+        pass
+    
     ctx.load('c_config')
     ctx.load('compiler_cxx')
     if ctx.is_opt():
@@ -124,7 +150,11 @@ def find_fortran_compiler(ctx, **kwargs):
     if ctx.env.HWAF_FOUND_FORTRAN_COMPILER:
         return
 
-    #ctx.env.FC = os.environ.get('FC', comp)
+    # if ctx.options.with_fortran_compiler:
+    #     ctx.env.FC = ctx.options.with_fortran_compiler
+    # else:
+    #     ctx.env.FC = os.environ.get('FC', comp)
+    #     pass
     ctx.load('c_config')
     ctx.load('compiler_fc')
 
