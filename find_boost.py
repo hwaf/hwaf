@@ -74,7 +74,10 @@ def find_boost(ctx, **kwargs):
         **kwargs)
 
     ## hack for boost_python...
-    ctx.env['LIB_boost'] = ctx.env['LIB_boost'] + ['boost_python']
+    boost_lib_tmpl = [lib for lib in ctx.env['LIB_boost']
+                      if 'boost_chrono' in lib][0]
+    boost_python = boost_lib_tmpl.replace('boost_chrono', 'boost_python')
+    ctx.env['LIB_boost'] = ctx.env['LIB_boost'] + [boost_python]
     
     for libname in boost_libs.split() + ['python',]:
         libname = libname.strip()
