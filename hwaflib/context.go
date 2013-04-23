@@ -479,7 +479,7 @@ func (ctx *Context) GlobalCfg() (*gocfg.Config, error) {
 					return nil, err
 				}
 				if !gcfg.AddOption(section, option, v) {
-					err = fmt.Errorf("hwaf: could nit add option [%s] in section [%s] in global config (value=%s)", option, section, v)
+					err = fmt.Errorf("hwaf: could not add option [%s] in section [%s] in global config (value=%s)", option, section, v)
 					return nil, err
 				}
 			}
