@@ -117,9 +117,13 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
+	dir := filepath.Join(pkgdir, pkgname)
+	if filepath.IsAbs(pkgname) {
+		dir = pkgname
+	}
+
 	switch uri.Scheme {
 	case "svn", "svn+ssh":
-		dir := filepath.Join(pkgdir, pkgname)
 		if !path_exists(filepath.Dir(dir)) {
 			err = os.MkdirAll(filepath.Dir(dir), 0755)
 			handle_err(err)
@@ -146,77 +150,28 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		return
 	}
 
-	if strings.HasPrefix(uri.Scheme, "svn") {
-		fmt.Printf("%s: svn repo. doing staging...\n", n)
-		staging := filepath.Join(".git", "hwaf-svn-staging")
-		if !path_exists(staging) {
-			err = os.MkdirAll(staging, 0755)
-			handle_err(err)
-		}
-		_ = os.RemoveAll(filepath.Join(staging, pkgname))
-		err = os.MkdirAll(filepath.Join(staging, pkgname), 0755)
-		handle_err(err)
-		git := exec.Command(
-			"hwaf", "git", "svn-clone", "-verbose", "-revision=1", pkguri,
-		)
-		git.Dir = filepath.Join(staging, pkgname)
-		err = git.Run()
-		handle_err(err)
-
-		pkguri, err = filepath.Abs(filepath.Join(staging, pkgname))
-		handle_err(err)
-		fmt.Printf("%s: svn repo. doing staging... [ok]\n", n)
-	}
-
-	dir := filepath.Join(pkgdir, pkgname)
 	if g_ctx.PkgDb.HasPkg(dir) {
 		err = fmt.Errorf("%s: package [%s] already in db.\ndid you forget to run 'hwaf pkg rm %s' ?", n, dir, dir)
 		handle_err(err)
 	}
 
-	git := exec.Command(
-		"git", "submodule", "add",
-		pkguri, filepath.Join(pkgdir, pkgname),
-	)
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
-	handle_err(err)
-
-	git = exec.Command(
-		"git", "submodule", "update",
-		"--init", "--recursive",
-	)
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
+	err = vcs.Git.Create(dir, pkguri)
 	handle_err(err)
 
 	if bname != "" {
-		git = exec.Command(
+		git := exec.Command(
 			"git", "checkout", bname,
 		)
-		git.Dir = filepath.Join(pkgdir, pkgname)
+		git.Dir = dir
+		if !quiet {
+			git.Stdout = os.Stdout
+			git.Stderr = os.Stderr
+		}
 		err = git.Run()
 		handle_err(err)
 	}
 
-	git = exec.Command(
-		"git", "commit", "-m",
-		fmt.Sprintf("adding package [%s]", pkgname),
-	)
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
-	handle_err(err)
-
-	err = g_ctx.PkgDb.Add("git", pkguri, filepath.Join(pkgdir, pkgname))
+	err = g_ctx.PkgDb.Add("git", pkguri, dir)
 	handle_err(err)
 
 	if !quiet {
