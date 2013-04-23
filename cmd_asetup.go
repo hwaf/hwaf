@@ -272,7 +272,7 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 
 	lcfg, err := gocfg.ReadDefault(lcfg_fname)
 	handle_err(err)
-	section := "env"
+	section := "hwaf-env"
 	if !lcfg.HasSection(section) {
 		if !lcfg.AddSection(section) {
 			err = fmt.Errorf("%s: could not create section [%s] in file [%s]",

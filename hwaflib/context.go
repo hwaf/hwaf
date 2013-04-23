@@ -289,11 +289,11 @@ func hwaf_root() string {
 
 func (ctx *Context) load_env_from_cfg(cfg *gocfg.Config) error {
 
-	if !cfg.HasSection("env") {
+	if !cfg.HasSection("hwaf-env") {
 		return nil
 	}
 
-	section := "env"
+	section := "hwaf-env"
 	options, err := cfg.Options(section)
 	if err != nil {
 		return err
