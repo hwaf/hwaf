@@ -78,6 +78,11 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 		}
 	}
 
+	if cfg_fname != "" && !path_exists(cfg_fname) {
+		err = fmt.Errorf("configuration file [%s] does not exist (or is not readable)", cfg_fname)
+		handle_err(err)
+	}
+
 	for _, projdir := range projdirs {
 		if !path_exists(projdir) {
 			err = fmt.Errorf("no such directory: [%s]", projdir)
@@ -104,11 +109,18 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 
 	var lcfg *gocfg.Config
 	lcfg_fname := filepath.Join(".hwaf", "local.conf")
-	if path_exists(lcfg_fname) {
-		lcfg, err = gocfg.ReadDefault(lcfg_fname)
+
+	// if the user provided a configuration file use that as a default
+	if cfg_fname != "" && path_exists(cfg_fname) {
+		lcfg, err = gocfg.ReadDefault(cfg_fname)
 		handle_err(err)
 	} else {
-		lcfg = gocfg.NewDefault()
+		if path_exists(lcfg_fname) {
+			lcfg, err = gocfg.ReadDefault(lcfg_fname)
+			handle_err(err)
+		} else {
+			lcfg = gocfg.NewDefault()
+		}
 	}
 
 	section := "hwaf-cfg"
