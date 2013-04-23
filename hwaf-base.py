@@ -407,12 +407,8 @@ def read_cfg(ctx, fname):
     # env-level config
     if cfg.has_section('hwaf-env'):
         for k in cfg.options('hwaf-env'):
-            # NOTE: the options in hwaf-env are given in arbitrary order
-            # assume this has been sorted out byt 'hwaf env' first...
-            # ctx.env[k] = waflib.Utils.subst_vars(cfg.get('hwaf-env', k),
-            #                                      ctx.env)
+            # FIXME: make sure variable interpolation works at some point
             ctx.env[k] = cfg.get('hwaf-env', k)
-            print ">>>",repr(ctx.env[k]), os.environ[k]
             pass
         pass
     
