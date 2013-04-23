@@ -88,6 +88,16 @@ Use "hwaf help [topic]" for more information about that topic.
 ```
 
 
+## Installation
 
+Once one has the ``Go`` toolchain installed (see
+(here)[http://golang.org/doc/install.html] for instructions),
+installing ``hwaf`` is as simple as:
+
+```sh
+$ go get github.com/mana-fwk/git-tools/...
+$ go get github.com/mana-fwk/hwaf
+$ hwaf self init
+```
 
 
