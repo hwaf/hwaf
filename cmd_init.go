@@ -30,7 +30,6 @@ ex:
 		Flag: *flag.NewFlagSet("hwaf-init", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
-	cmd.Flag.String("name", "", "workarea/project name (default: directory-name)")
 	return cmd
 }
 
@@ -53,14 +52,13 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	dirname = filepath.Clean(dirname)
 
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
-	proj_name := cmd.Flag.Lookup("name").Value.Get().(string)
-	if proj_name == "" {
-		proj_name = filepath.Base(dirname)
-	}
+	proj_name := dirname
 	if proj_name == "." {
 		pwd, err := os.Getwd()
 		handle_err(err)
 		proj_name = filepath.Base(pwd)
+	} else {
+		proj_name = filepath.Base(dirname)
 	}
 
 	if !quiet {
