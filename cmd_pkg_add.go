@@ -58,8 +58,12 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	pkguri = os.ExpandEnv(pkguri)
 
 	// FIXME: shouldn't this be refactorized ?
-	if strings.HasPrefix(pkguri, "git@") {
-		pkguri = "git+ssh://" + pkguri
+	if strings.HasPrefix(pkguri, "git@github.com:") {
+		pkguri = strings.Replace(
+			pkguri,
+			"git@github.com:",
+			"git+ssh://git@github.com/",
+			1)
 	}
 
 	//pkguri = filepath.Clean(pkguri)
