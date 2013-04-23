@@ -158,7 +158,20 @@ def configure(ctx):
     ctx.msg('install-area', ctx.env.INSTALL_AREA)
     ctx.msg('njobs-max', waflib.Options.options.jobs)
     msg.info('='*80)
-    
+
+    # environment has been bootstrapped
+    # loop back over ctx.options.xyz in case some environment variables
+    # need to be expanded
+    opts = [o for o in dir(ctx.options)]
+    for k in opts:
+        v = getattr(ctx.options, k)
+        if v == None or not isinstance(v, type("")):
+            continue
+        v = waflib.Utils.subst_vars(v, ctx.env)
+        setattr(ctx.options, k, v)
+        pass
+
+    # loading the tool which logs the environment modifications
     ctx.load('hwaf-spy-env', tooldir=_heptooldir)
     ctx.hwaf_setup_spy_env()
     return
@@ -216,13 +229,15 @@ def hwaf_find_suboptions(directory='.'):
 ### ---------------------------------------------------------------------------
 @conf
 def find_at(ctx, check, what, where, **kwargs):
-    if not osp.exists(where):
-        return False
 
     def _subst(v):
         v = waflib.Utils.subst_vars(v, ctx.env)
         return v
-    
+
+    where = _subst(where)
+    if not osp.exists(where):
+        return False
+
     os_env = dict(os.environ)
     pkgp = os.getenv("PKG_CONFIG_PATH", "")
     try:
@@ -294,7 +309,7 @@ def check_with(ctx, check, what, *args, **kwargs):
     # adds 'extra_paths' and other defaults...
     kwargs = ctx._findbase_setup(kwargs)
 
-    with_dir = getattr(ctx.options, "with_" + what, None)
+    with_dir = getattr(ctx.options, "with_" + what, None)    
     env_dir = os.environ.get(what.upper() + "_HOME", None)
     paths = [with_dir, env_dir] + kwargs.pop("extra_paths", [])
     
@@ -304,6 +319,7 @@ def check_with(ctx, check, what, *args, **kwargs):
         waflib.Utils.to_list(kwargs["uselib_store"])
 
     for path in [abspath(p) for p in paths if p]:
+        path = waflib.Utils.subst_vars(path, ctx.env)
         ctx.in_msg = 0
         ctx.to_log("Checking for %s in %s" % (what, path))
         if ctx.find_at(check, what, path, **kwargs):
@@ -369,6 +385,7 @@ def read_cfg(ctx, fname):
     try: from ConfigParser import SafeConfigParser as CfgParser
     except ImportError: from configparser import ConfigParser as CfgParser
     cfg = CfgParser()
+    cfg.optionxform = str
     cfg.read([fname])
     # top-level config
     if cfg.has_section('hwaf-cfg'):
@@ -385,6 +402,18 @@ def read_cfg(ctx, fname):
                     #ctx.msg(k, v)
                     pass
                 pass
+        pass
+
+    # env-level config
+    if cfg.has_section('hwaf-env'):
+        for k in cfg.options('hwaf-env'):
+            # NOTE: the options in hwaf-env are given in arbitrary order
+            # assume this has been sorted out byt 'hwaf env' first...
+            # ctx.env[k] = waflib.Utils.subst_vars(cfg.get('hwaf-env', k),
+            #                                      ctx.env)
+            ctx.env[k] = cfg.get('hwaf-env', k)
+            print ">>>",repr(ctx.env[k]), os.environ[k]
+            pass
         pass
     
     # pkg-level config
