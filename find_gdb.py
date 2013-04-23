@@ -28,8 +28,9 @@ def find_gdb(ctx, **kwargs):
     # find gdb executable
     gdb = "gdb"
     if getattr(ctx.options, 'with_gdb', None):
-        gdb = osp.abspath(
-            osp.join(ctx.options.with_gdb, "bin", "gdb")
+        topdir = ctx.options.with_gdb
+        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        gdb = osp.abspath(osp.join(topdir, "bin", "gdb")
             )
         pass
     ctx.find_program(gdb, var='GDB',**kwargs)

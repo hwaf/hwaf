@@ -39,9 +39,9 @@ def find_valgrind(ctx, **kwargs):
 
     path_list = []
     if getattr(ctx.options, 'with_valgrind', None):
-        path_list.append(
-            osp.join(ctx.options.with_valgrind, "bin")
-            )
+        topdir = ctx.options.with_valgrind
+        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        path_list.append(osp.join(topdir, "bin"))
         pass
 
     kwargs['mandatory']=kwargs.get('mandatory', False)

@@ -64,9 +64,11 @@ def find_root(ctx, **kwargs):
     root_cfg = "root-config"
     path_list = []
     if getattr(ctx.options, 'with_root', None):
-        root_cfg = osp.join(ctx.options.with_root, "bin", "root-config")
+        topdir = ctx.options.with_root
+        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        root_cfg = osp.join(topdir, "bin", "root-config")
         path_list.append(
-            osp.join(ctx.options.with_root, "bin")
+            osp.join(topdir, "bin")
             )
         pass
 

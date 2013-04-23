@@ -41,9 +41,9 @@ def find_cmake(ctx, **kwargs):
 
     path_list = []
     if getattr(ctx.options, 'with_cmake', None):
-        path_list.append(
-            osp.join(ctx.options.with_cmake, "bin")
-            )
+        topdir = ctx.options.with_cmake
+        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        path_list.append(osp.join(topdir, "bin"))
         pass
 
     ctx.find_program(

@@ -39,9 +39,9 @@ def find_sqlite(ctx, **kwargs):
 
     path_list = []
     if getattr(ctx.options, 'with_sqlite', None):
-        path_list.append(
-            osp.join(ctx.options.with_sqlite, "bin")
-            )
+        topdir = ctx.options.with_sqlite
+        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        path_list.append(osp.join(topdir, "bin"))
         pass
 
     kwargs['mandatory']=kwargs.get('mandatory', False)

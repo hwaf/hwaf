@@ -64,7 +64,9 @@ def find_boost(ctx, **kwargs):
 
     # get include/lib-dir from command-line or from API
     kwargs['includes'] = getattr(ctx.options, 'with_boost_includes', kwargs.get('includes', None))
+    kwargs['includes'] = waflib.Utils.subst_vars(kwargs['includes'], ctx.env)
     kwargs['libs'] = getattr(ctx.options, 'with_boost_libs', kwargs.get('libs', None))
+    kwargs['libs'] = waflib.Utils.subst_vars(kwargs['libs'], ctx.env)
     
     ctx.check_with(
         ctx.check_boost,
