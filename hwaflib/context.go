@@ -11,8 +11,8 @@ import (
 	"runtime"
 	"strings"
 
+	gocfg "github.com/gonuts/config"
 	"github.com/mana-fwk/hwaf/platform"
-	gocfg "github.com/sbinet/go-config/config"
 )
 
 var (

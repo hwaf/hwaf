@@ -8,7 +8,7 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
-	//gocfg "github.com/sbinet/go-config/config"
+	//gocfg "github.com/gonuts/config"
 	_ "github.com/mana-fwk/git-tools/utils"
 )
 

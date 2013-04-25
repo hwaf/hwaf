@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	gocfg "github.com/sbinet/go-config/config"
+	gocfg "github.com/gonuts/config"
 )
 
 func uname(opts ...string) (string, error) {

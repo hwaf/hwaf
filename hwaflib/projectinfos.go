@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	gocfg "github.com/sbinet/go-config/config"
+	gocfg "github.com/gonuts/config"
 )
 
 type ProjectInfo struct {

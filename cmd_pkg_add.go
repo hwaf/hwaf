@@ -11,7 +11,7 @@ import (
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
 	"github.com/mana-fwk/hwaf/vcs"
-	//gocfg "github.com/sbinet/go-config/config"
+	//gocfg "github.com/gonuts/config"
 )
 
 func hwaf_make_cmd_pkg_add() *commander.Command {

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
-	//gocfg "github.com/sbinet/go-config/config"
+	//gocfg "github.com/gonuts/config"
 )
 
 func hwaf_make_cmd_self() *commander.Commander {
