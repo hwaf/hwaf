@@ -15,6 +15,9 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 # add this directory to sys.path to ease the loading of other hepwaf tools
 if not _heptooldir in sys.path: sys.path.append(_heptooldir)
 
+WSCRIPT_FILE = 'wscript'
+HSCRIPT_FILE = 'hbuild.yml'
+
 ### ---------------------------------------------------------------------------
 def options(ctx):
     if 'darwin' in sys.platform:
@@ -210,10 +213,12 @@ def hwaf_find_subpackages(self, directory='.'):
     for d in dirs:
         #msg.debug ("##> %s (type: %s)" % (d.abspath(), type(d)))
         node = d
-        if node and node.ant_glob('wscript'):
-            #msg.debug ("##> %s" % d.srcpath())
-            srcs.append(d)
-            pass
+        if node:
+            if node.ant_glob(WSCRIPT_FILE):
+                # msg.debug ("##> %s" % d.srcpath())
+                srcs.append(d)
+            elif node.ant_glob(HSCRIPT_FILE):
+                srcs.append(d)
         pass
     return srcs
 
@@ -221,7 +226,7 @@ def hwaf_find_subpackages(self, directory='.'):
 def hwaf_find_suboptions(directory='.'):
     pkgs = []
     for root, dirs, files in os.walk(directory):
-        if 'wscript' in files:
+        if WSCRIPT_FILE in files or HSCRIPT_FILE in files:
             pkgs.append(root)
             continue
     return pkgs
@@ -520,7 +525,7 @@ def declare_runtime_alias(self, dst, src):
     
 ### ------------------------------------------------------------------------
 @conf
-def hwaf_export_module(self, fname="wscript"):
+def hwaf_export_module(self, fname=WSCRIPT_FILE):
     '''
     hwaf_export_module registers the ``fname`` file for export.
     it will be installed in the ${PREFIX}/share/hwaf directory to be picked
