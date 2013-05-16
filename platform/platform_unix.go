@@ -70,44 +70,6 @@ func parse_dist_files(fnames []string) (distname, distvers string, err error) {
 		sort.Strings(fnames)
 	}
 
-	for _, args := range [][]string{
-		{"/etc/os-release", "ID", "VERSION_ID"},
-		{"/etc/lsb-release", "DISTRIB_ID", "DISTRIB_RELEASE"},
-	} {
-		fname := args[0]
-		id_str := args[1]
-		vers_str := args[2]
-		//fmt.Printf("--> [%s]\n", fname)
-		idx := sort.SearchStrings(fnames, fname)
-		if !(idx < len(fnames) && fnames[idx] == fname) {
-			continue
-		}
-
-		cfg, err := gocfg.ReadDefault(fname)
-		if err != nil {
-			//fmt.Printf("++ %v\n", err)
-			continue
-		}
-
-		d_name, err := cfg.RawString("DEFAULT", id_str)
-		if err == nil {
-			distname = strings.Trim(d_name, `"'`)
-		} else {
-			//fmt.Printf("++ %v\n", err)
-			continue
-		}
-		d_vers, err := cfg.RawString("DEFAULT", vers_str)
-		if err == nil {
-			distvers = strings.Trim(d_vers, `"'`)
-		} else {
-			// distvers is optional...
-
-			//fmt.Printf("++ %v\n", err)
-			//continue
-		}
-		return distname, distvers, nil
-	}
-
 	for _, fname := range fnames {
 		m := re_release_filename.FindStringSubmatch(fname)
 		if m == nil {
@@ -189,10 +151,51 @@ func parse_dist_files(fnames []string) (distname, distvers string, err error) {
 			distname = "fedora"
 
 		} else {
+			// not a supported distribution ?
+			continue
+		}
+		//fmt.Printf("dist=%q distvers=%v\n", distname, distvers)
+		return distname, distvers, nil
+	}
 
+	for _, args := range [][]string{
+		{"/etc/os-release", "ID", "VERSION_ID"},
+		{"/etc/lsb-release", "DISTRIB_ID", "DISTRIB_RELEASE"},
+	} {
+		fname := args[0]
+		id_str := args[1]
+		vers_str := args[2]
+		//fmt.Printf("--> [%s]\n", fname)
+		idx := sort.SearchStrings(fnames, fname)
+		if !(idx < len(fnames) && fnames[idx] == fname) {
+			continue
+		}
+
+		cfg, err := gocfg.ReadDefault(fname)
+		if err != nil {
+			//fmt.Printf("++ %v\n", err)
+			continue
+		}
+
+		d_name, err := cfg.RawString("DEFAULT", id_str)
+		if err == nil {
+			distname = strings.Trim(d_name, `"'`)
+		} else {
+			//fmt.Printf("++ %v\n", err)
+			continue
+		}
+		d_vers, err := cfg.RawString("DEFAULT", vers_str)
+		if err == nil {
+			distvers = strings.Trim(d_vers, `"'`)
+		} else {
+			// distvers is optional...
+
+			//fmt.Printf("++ %v\n", err)
+			//continue
 		}
 		return distname, distvers, nil
 	}
+
 	return "", "", fmt.Errorf("platform: unsupported linux distribution")
 }
 
