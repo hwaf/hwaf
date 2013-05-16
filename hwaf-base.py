@@ -213,12 +213,9 @@ def hwaf_find_subpackages(self, directory='.'):
     for d in dirs:
         #msg.debug ("##> %s (type: %s)" % (d.abspath(), type(d)))
         node = d
-        if node:
-            if node.ant_glob(WSCRIPT_FILE):
-                # msg.debug ("##> %s" % d.srcpath())
-                srcs.append(d)
-            elif node.ant_glob(HSCRIPT_FILE):
-                srcs.append(d)
+        if node and (node.ant_glob(WSCRIPT_FILE) or
+                     node.ant_glob(HSCRIPT_FILE)):
+            srcs.append(d)
         pass
     return srcs
 
