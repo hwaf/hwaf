@@ -1,7 +1,5 @@
 package main
 
-// FIXME: all of this should go away once we migrate to go-1.1
-
 import (
 	"archive/tar"
 	"compress/gzip"
@@ -34,7 +32,7 @@ func _tar_gz(targ, workdir string) error {
 		if strings.HasPrefix(name, "/") {
 			name = name[1:]
 		}
-		target, err := os.Readlink(path)
+		target, _ := os.Readlink(path)
 		if err != nil {
 			return err
 		}
