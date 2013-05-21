@@ -28,20 +28,16 @@ func _tar_gz(targ, workdir string) error {
 			return err
 
 		}
-		name := path[len(workdir):]
+		name := path
 
-		// Chop of any leading / from filename, leftover from removing workdir.
+		// make name "relative"
 		if strings.HasPrefix(name, "/") {
 			name = name[1:]
 		}
-		// // prepend prefix, if any
-		// if prefix != "" {
-		// 	name = filepath.Join(prefix, name)
-		// }
-		target, _ := os.Readlink(path)
-		// if err != nil {
-		// 	return err
-		// }
+		target, err := os.Readlink(path)
+		if err != nil {
+			return err
+		}
 		hdr, err := tar.FileInfoHeader(fi, target)
 		if err != nil {
 			return err
@@ -63,7 +59,8 @@ func _tar_gz(targ, workdir string) error {
 		if err != nil {
 			return fmt.Errorf("Error writing file %q: %v", name, err)
 		}
-		if fi.IsDir() {
+		// handle directories and symlinks
+		if hdr.Size <= 0 {
 			return nil
 		}
 		r, err := os.Open(path)
