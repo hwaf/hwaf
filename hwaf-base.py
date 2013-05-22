@@ -16,7 +16,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 if not _heptooldir in sys.path: sys.path.append(_heptooldir)
 
 WSCRIPT_FILE = 'wscript'
-HSCRIPT_FILE = 'hbuild.yml'
+HSCRIPT_FILE = 'hscript.yml'
 
 ### ---------------------------------------------------------------------------
 def options(ctx):
