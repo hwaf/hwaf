@@ -10,7 +10,7 @@ import (
 	"github.com/gonuts/commander"
 	gocfg "github.com/gonuts/config"
 	"github.com/gonuts/flag"
-	"github.com/mana-fwk/hwaf/hwaflib"
+	"github.com/hwaf/hwaf/hwaflib"
 )
 
 func hwaf_make_cmd_setup() *commander.Command {

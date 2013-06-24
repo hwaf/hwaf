@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	gocfg "github.com/gonuts/config"
-	"github.com/mana-fwk/hwaf/platform"
+	"github.com/hwaf/hwaf/platform"
 )
 
 var (

@@ -34,7 +34,7 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
-	"github.com/mana-fwk/hwaf/hwaflib"
+	"github.com/hwaf/hwaf/hwaflib"
 )
 
 var g_cmd *commander.Commander

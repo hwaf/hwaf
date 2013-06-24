@@ -12,7 +12,7 @@ import (
 	"github.com/gonuts/commander"
 	gocfg "github.com/gonuts/config"
 	"github.com/gonuts/flag"
-	"github.com/mana-fwk/hwaf/platform"
+	"github.com/hwaf/hwaf/platform"
 )
 
 func hwaf_make_cmd_asetup() *commander.Command {

@@ -10,7 +10,7 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
-	"github.com/mana-fwk/hwaf/vcs"
+	"github.com/hwaf/hwaf/vcs"
 	//gocfg "github.com/gonuts/config"
 )
 

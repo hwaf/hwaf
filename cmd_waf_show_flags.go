@@ -6,7 +6,7 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
-	"github.com/mana-fwk/hwaf/hwaflib"
+	"github.com/hwaf/hwaf/hwaflib"
 )
 
 func hwaf_make_cmd_waf_show_flags() *commander.Command {

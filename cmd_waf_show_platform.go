@@ -5,7 +5,7 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
-	"github.com/mana-fwk/hwaf/platform"
+	"github.com/hwaf/hwaf/platform"
 )
 
 func hwaf_make_cmd_waf_show_platform() *commander.Command {
