@@ -69,7 +69,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	defer os.RemoveAll(tmpdir)
 	//fmt.Printf(">>> [%s]\n", tmpdir)
 
-	// 
+	//
 	top := filepath.Join(tmpdir, dirname)
 	// create hierarchy of dirs for bdist
 	for _, dir := range []string{

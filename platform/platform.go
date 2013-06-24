@@ -1,8 +1,8 @@
 // Package platform provides informations about the current platform:
-//   - kernel name, 
-//   - node name, 
-//   - kernel release, 
-//   - kernel version, 
+//   - kernel name,
+//   - node name,
+//   - kernel release,
+//   - kernel version,
 //   - machine and
 //   - processor
 package platform
