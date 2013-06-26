@@ -277,6 +277,9 @@ def merge_dsomap_hook(self, node):
         import os
         bld_area = os.path.basename(self.env['BUILD_INSTALL_AREA'])
         bld_node = self.bld.bldnode.find_dir(bld_area)
+        if not bld_node:
+            bld_node = self.bld.bldnode.make_node(bld_area)
+            
         out_node = bld_node.make_node('lib').make_node(
             'project_%s_merged.rootmap' %
             self.bld.hwaf_project_name().replace('-', '_')
