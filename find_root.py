@@ -578,7 +578,7 @@ def build_rootcint_dict(self, name, source, target, **kw):
     del _src
 
     kw['target'] = target
-    includes = kw.get('includes', [])
+    includes = waflib.Utils.to_list(kw.get('includes', []))
     tgtdir = self.bldnode.find_or_declare(target).parent.abspath()
     kw['includes'] = [
         self.path.abspath(),
@@ -587,7 +587,7 @@ def build_rootcint_dict(self, name, source, target, **kw):
         ] + includes
     self.env.append_unique('INCPATHS', tgtdir)
     
-    defines = kw.get('defines', [])
+    defines = waflib.Utils.to_list(kw.get('defines', []))
     defines.insert(0, 'R__ACCESS_IN_SYMBOL=1')
     kw['defines'] = defines
     
