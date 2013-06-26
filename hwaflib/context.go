@@ -370,6 +370,32 @@ func (ctx *Context) init() error {
 		} else {
 			pypath = pypath + string(os.PathListSeparator) + hwaftools
 		}
+
+		// detect the python version we are running
+		py_version := "2"
+		{
+			py := os.Getenv("PYTHON")
+			if py == "" {
+				py = "python"
+			}
+			cmd := exec.Command(
+				py,
+				"-c", "import sys; print (sys.version_info.major)",
+			)
+			bout, err := cmd.Output()
+			if err != nil {
+				return fmt.Errorf("hwaf: could not detect python version: %v", err)
+			}
+			py_version = strings.Trim(string(bout), " \r\n")
+			if py_version == "" {
+				py_version = "2"
+			}
+		}
+		py_dir := "py" + py_version
+		if path_exists(filepath.Join(hwaftools, py_dir)) {
+			pypath = pypath + string(os.PathListSeparator) + filepath.Join(hwaftools, py_dir)
+			pypath = pypath + string(os.PathListSeparator) + filepath.Join(hwaftools, py_dir, "yaml")
+		}
 		os.Setenv("PYTHONPATH", pypath)
 
 		// add the git-tools to the environment
