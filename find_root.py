@@ -464,7 +464,10 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
     linkflags = self.env.SHLINKFLAGS + linkflags
     kw['linkflags'] = linkflags
     
-    kw['includes'] = kw.get('includes',[])
+    kw['includes'] = waflib.Utils.to_list(kw.get('includes',[]))
+    bld_install_area = self.root.find_node(self.env['BUILD_INSTALL_AREA'])
+    kw['includes'].append(bld_install_area.parent.abspath())
+    
     ## src_node = self.path.find_dir('src')
     ## if src_node:
     ##     kw['includes'].append(src_node.abspath())
