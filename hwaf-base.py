@@ -52,6 +52,7 @@ def options(ctx):
     ctx.load('hwaf-dist',   tooldir=_heptooldir)
     ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
     ctx.load('hwaf-runtime', tooldir=_heptooldir)
+    ctx.load('hwaf-rules', tooldir=_heptooldir)
 
     pkgdir = 'src'
     if osp.exists(pkgdir):
@@ -77,6 +78,7 @@ def configure(ctx):
     ctx.load('hwaf-dist',   tooldir=_heptooldir)
     ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
     ctx.load('hwaf-runtime', tooldir=_heptooldir)
+    ctx.load('hwaf-rules', tooldir=_heptooldir)
 
     # register a couple of runtime environment variables
     ctx.declare_runtime_env('PATH')
@@ -184,6 +186,7 @@ def build(ctx):
     ctx.load('hwaf-dist',   tooldir=_heptooldir)
     ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
     ctx.load('hwaf-runtime', tooldir=_heptooldir)
+    ctx.load('hwaf-rules', tooldir=_heptooldir)
     ctx.load('hwaf-spy-env', tooldir=_heptooldir)
     ctx._hwaf_create_project_hwaf_module()
     ctx._hwaf_load_project_hwaf_module(do_export=False)
