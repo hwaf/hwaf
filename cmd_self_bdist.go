@@ -84,7 +84,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	// add hep-waftools cache
 	hwaf_tools := filepath.Join(top, "share", "hwaf", "tools")
 	git := exec.Command(
-		"git", "clone", "git://github.com/mana-fwk/hep-waftools",
+		"git", "clone", "git://github.com/hwaf/hep-waftools",
 		hwaf_tools,
 	)
 	git.Dir = tmpdir
@@ -122,12 +122,12 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	defer os.Setenv("GOPATH", orig_gopath)
 
 	for _, gopkg := range []string{
-		"github.com/mana-fwk/hwaf",
-		"github.com/mana-fwk/git-tools/git-archive-all",
-		"github.com/mana-fwk/git-tools/git-rm-submodule",
-		"github.com/mana-fwk/git-tools/git-check-clean",
-		"github.com/mana-fwk/git-tools/git-check-non-tracking",
-		"github.com/mana-fwk/git-tools/git-check-unpushed",
+		"github.com/hwaf/hwaf",
+		"github.com/hwaf/git-tools/git-archive-all",
+		"github.com/hwaf/git-tools/git-rm-submodule",
+		"github.com/hwaf/git-tools/git-check-clean",
+		"github.com/hwaf/git-tools/git-check-non-tracking",
+		"github.com/hwaf/git-tools/git-check-unpushed",
 	} {
 		goget := exec.Command("go", "get", "-v", gopkg)
 		goget.Dir = gopath
@@ -181,7 +181,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	}()
 
 	waf_src, err := os.Open(filepath.Join(
-		gopath, "src", "github.com", "mana-fwk", "hwaf", "waf"),
+		gopath, "src", "github.com", "hwaf", "hwaf", "waf"),
 	)
 	handle_err(err)
 	defer waf_src.Close()

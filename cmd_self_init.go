@@ -68,7 +68,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 	}
 	// first try the r/w url...
 	git := exec.Command(
-		"git", "clone", "git@github.com:mana-fwk/hep-waftools",
+		"git", "clone", "git@github.com:hwaf/hep-waftools",
 		hwaf_tools,
 	)
 	// if !quiet {
@@ -78,7 +78,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 
 	if git.Run() != nil {
 		git := exec.Command(
-			"git", "clone", "git://github.com/mana-fwk/hep-waftools",
+			"git", "clone", "git://github.com/hwaf/hep-waftools",
 			hwaf_tools,
 		)
 		if !quiet {
@@ -111,7 +111,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}()
 
-	resp, err := http.Get("https://github.com/mana-fwk/hwaf/raw/master/waf")
+	resp, err := http.Get("https://github.com/hwaf/hwaf/raw/master/waf")
 	handle_err(err)
 	defer resp.Body.Close()
 	_, err = io.Copy(waf, resp.Body)

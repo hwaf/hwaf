@@ -61,7 +61,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 		handle_err(err)
 		gopaths := strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator))
 		gopath := ""
-		hwafpkg := filepath.Join("github.com", "mana-fwk", "hwaf")
+		hwafpkg := filepath.Join("github.com", "hwaf", "hwaf")
 		for _, v := range gopaths {
 			if path_exists(filepath.Join(v, "src", hwafpkg)) {
 				gopath = v
@@ -80,8 +80,8 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 			handle_err(err)
 			// first try r/w repository
 			git := exec.Command(
-				"git", "clone", "git@github.com:mana-fwk/hwaf",
-				"github.com/mana-fwk/hwaf",
+				"git", "clone", "git@github.com:hwaf/hwaf",
+				"github.com/hwaf/hwaf",
 			)
 
 			if !quiet {
@@ -92,8 +92,8 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 			if git.Run() != nil {
 				git := exec.Command(
 					"git", "clone",
-					"git://github.com/mana-fwk/hwaf",
-					"github.com/mana-fwk/hwaf",
+					"git://github.com/hwaf/hwaf",
+					"github.com/hwaf/hwaf",
 				)
 				if !quiet {
 					git.Stdout = os.Stdout
