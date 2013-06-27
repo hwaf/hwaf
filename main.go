@@ -83,7 +83,10 @@ func main() {
 	}
 
 	var err error
-	g_ctx, err = hwaflib.NewContext()
+	pwd, err := os.Getwd()
+	handle_err(err)
+
+	g_ctx, err = hwaflib.NewContextFrom(pwd)
 	handle_err(err)
 
 	err = g_cmd.Flag.Parse(os.Args[1:])
