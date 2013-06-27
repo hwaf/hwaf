@@ -1,7 +1,6 @@
 package main_test
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
