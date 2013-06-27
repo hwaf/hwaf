@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"os/user"
 	"path/filepath"
 	"strings"
 
@@ -77,19 +76,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	err = os.Chdir(dirname)
 	handle_err(err)
 
-	// init a git repository in dirname
-	if !quiet {
-		fmt.Printf("%s: initialize git workarea repository...\n", n)
-	}
-	git := exec.Command("git", "init", ".")
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
-	handle_err(err)
-
-	// add hep-waf-tools
+	// setup hep-waf-tools
 	if !quiet {
 		fmt.Printf("%s: add .hwaf/tools...\n", n)
 	}
@@ -102,7 +89,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	hwaf_tools_dir = os.ExpandEnv(hwaf_tools_dir)
 	if !path_exists(hwaf_tools_dir) {
 		// first try the r/w url...
-		git = exec.Command(
+		git := exec.Command(
 			"git", "clone", "git@github.com:hwaf/hep-waftools",
 			hwaf_tools_dir,
 		)
@@ -133,14 +120,6 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 	err = os.Symlink(hwaf_tools_dir, ".hwaf/tools")
-	handle_err(err)
-
-	git = exec.Command("git", "add", "-f", ".hwaf/tools")
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
 	handle_err(err)
 
 	// add waf-bin
@@ -189,13 +168,6 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		0755,
 	)
 	handle_err(err)
-	git = exec.Command("git", "add", "-f", filepath.Join(".hwaf", "pkgdb.json"))
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
-	handle_err(err)
 
 	// add template wscript
 	if !quiet {
@@ -227,95 +199,9 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		handle_err(wscript.Close())
 	}
 
-	git = exec.Command("git", "add", "wscript")
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
-	handle_err(err)
-
 	// create 'src' directory
 	if !path_exists("src") {
 		err = os.MkdirAll("src", 0700)
-		handle_err(err)
-	}
-
-	// add a default .gitignore
-	gitignore_tmpl, err := os.Open(".hwaf/tools/.gitignore")
-	handle_err(err)
-	defer gitignore_tmpl.Close()
-
-	gitignore, err := os.Create(".gitignore")
-	handle_err(err)
-	defer gitignore.Close()
-
-	_, err = io.Copy(gitignore, gitignore_tmpl)
-	handle_err(err)
-	handle_err(gitignore.Sync())
-	handle_err(gitignore.Close())
-
-	git = exec.Command("git", "add", ".gitignore")
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
-	handle_err(err)
-
-	// check whether we need to commit
-	err = exec.Command("git", "diff", "--exit-code", "--quiet", "HEAD").Run()
-	if err != nil {
-		// commit
-		if !quiet {
-			fmt.Printf("%s: commit workarea...\n", n)
-		}
-		// check if we have enough informations about the user name
-		git = exec.Command("git", "config", "--global", "user.name")
-		if git.Run() != nil {
-			usr, err2 := user.Current()
-			usrname := "nobody"
-			if err2 == nil {
-				if usr.Name != "" {
-					usrname = usr.Name
-				} else {
-					usrname = usr.Username
-				}
-			}
-			g_ctx.Warn("git wasn't properly configured: missing 'user.name' info => setting it to %q\n", usrname)
-			git = exec.Command("git", "config", "user.name", usrname)
-			err = git.Run()
-			handle_err(err)
-		}
-
-		// check if we have enough informations about the user email
-		git = exec.Command("git", "config", "--global", "user.email")
-		if git.Run() != nil {
-			usr, err2 := user.Current()
-			usrmail := usr.Username
-			if err2 != nil {
-				usrmail = "nobody"
-			}
-			hostname, err2 := os.Hostname()
-			if err2 != nil {
-				hostname = "localhost.localdomain"
-			}
-			usrmail = usrmail + "@" + hostname
-			g_ctx.Warn("git wasn't properly configured: missing 'user.email' info => setting it to %q\n", usrmail)
-			git = exec.Command("git", "config", "user.email", usrmail)
-			err = git.Run()
-			handle_err(err)
-		}
-
-		git = exec.Command(
-			"git", "commit", "-m",
-			fmt.Sprintf("init hwaf project [%s]", proj_name),
-		)
-		if !quiet {
-			git.Stdout = os.Stdout
-			git.Stderr = os.Stderr
-		}
-		err = git.Run()
 		handle_err(err)
 	}
 
