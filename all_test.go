@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 )
 
@@ -31,12 +32,10 @@ func (cmd *logcmd) LastCmd() string {
 func (cmd *logcmd) Run(bin string, args ...string) error {
 	cmd_line := ""
 	{
-		cargs := make([]interface{}, 1, len(args)+1)
+		cargs := make([]string, 1, len(args)+1)
 		cargs[0] = bin
-		for _, arg := range args {
-			cargs = append(cargs, arg)
-		}
-		cmd_line = fmt.Sprintf("%v", cargs...)
+		cargs = append(cargs, args...)
+		cmd_line = strings.Join(cargs, " ")
 	}
 	cmd.cmds = append(cmd.cmds, cmd_line)
 	c := exec.Command(bin, args...)
