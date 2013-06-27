@@ -1,6 +1,8 @@
 hwaf
 ====
 
+[![Build Status](https://drone.io/github.com/hwaf/hwaf/status.png)](https://drone.io/github.com/hwaf/hwaf/latest)
+
 ``hwaf`` is a set of commands to ease developing against and with
 ``waf`` based projects, in High Energy Physics software.
 
