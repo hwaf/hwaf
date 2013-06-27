@@ -380,7 +380,7 @@ func (ctx *Context) init() error {
 			}
 			cmd := exec.Command(
 				py,
-				"-c", "import sys; print (sys.version_info.major)",
+				"-c", "import sys; print (sys.version_info[0])",
 			)
 			bout, err := cmd.Output()
 			if err != nil {
