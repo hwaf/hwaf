@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/gonuts/commander"
@@ -90,24 +89,7 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 
 		switch vcspkg.Type {
 
-		case "git":
-			rmcmd := []string{"rm-submodule"}
-			if !quiet {
-				rmcmd = append(rmcmd, "--verbose")
-			}
-			rmcmd = append(rmcmd, pkg)
-			git := exec.Command("git", rmcmd...)
-			if !quiet {
-				git.Stdin = os.Stdin
-				git.Stdout = os.Stdout
-				git.Stderr = os.Stderr
-			}
-			err = git.Run()
-			if err != nil {
-				return err
-			}
-
-		case "svn":
+		case "svn", "git":
 			if path_exists(vcspkg.Path) {
 				err = os.RemoveAll(vcspkg.Path)
 				if err != nil {
@@ -135,25 +117,6 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 			}
 
 		case "local":
-			// local packages are tracked from workarea-git-repo
-			git := exec.Command("git", "rm", "-r", vcspkg.Path)
-			if !quiet {
-				git.Stdin = os.Stdin
-				git.Stdout = os.Stdout
-				git.Stderr = os.Stderr
-			}
-			err = git.Run()
-			if err != nil {
-				return err
-			}
-			git = exec.Command(
-				"git", "commit", "-m",
-				fmt.Sprintf("removed local package [%s]", vcspkg.Path),
-			)
-			err = git.Run()
-			if err != nil {
-				return err
-			}
 			if path_exists(vcspkg.Path) {
 				err = os.RemoveAll(vcspkg.Path)
 				if err != nil {

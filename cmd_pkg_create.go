@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -182,30 +181,6 @@ def build(ctx):
 	handle_err(err)
 
 	err = g_ctx.PkgDb.Add("local", "", dir)
-	handle_err(err)
-
-	// add the package to the git workarea-repo
-	git := exec.Command(
-		"git", "add", dir,
-	)
-	git.Stdin = os.Stdin
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
-	handle_err(err)
-
-	git = exec.Command(
-		"git",
-		"commit", "-m", fmt.Sprintf("adding new package [%s]", pkgpath),
-	)
-	git.Stdin = os.Stdin
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
 	handle_err(err)
 
 	if !quiet {
