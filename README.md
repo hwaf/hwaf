@@ -97,8 +97,7 @@ Once one has the ``Go`` toolchain installed (see
 installing ``hwaf`` is as simple as:
 
 ```sh
-$ go get github.com/mana-fwk/git-tools/...
-$ go get github.com/mana-fwk/hwaf
+$ go get github.com/hwaf/hwaf
 $ hwaf self init
 ```
 
