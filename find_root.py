@@ -346,7 +346,7 @@ def gen_reflex_hook(self, node):
 
 # classes ---
 class gen_reflex(waflib.Task.Task):
-    vars = ['GENREFLEX', 'DEFINES', 'GCCXML_FLAGS', 'CPPFLAGS', 'INCLUDES']
+    vars = ['GENREFLEX', 'GENREFLEX_SELECTION', 'DEFINES', 'GCCXML_FLAGS', 'CPPFLAGS', 'INCLUDES']
     color= 'BLUE'
     run_str = '${GENREFLEX} ${SRC} -s ${GENREFLEX_SELECTION} -o ${TGT[0].abspath()} ${GCCXML_FLAGS} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} ${GENREFLEX_DSOMAP} ${GENREFLEX_DSOMAPLIB}'
     ext_in = ['.h',]
