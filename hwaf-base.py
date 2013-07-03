@@ -503,7 +503,8 @@ def declare_runtime_env(self, k):
         if v and isinstance(v, (list,tuple)) and len(v) != 1:
             raise KeyError("env[%s]=%s" % (k,v))
     self.env.append_unique('HWAF_RUNTIME_ENVVARS', k)
-    
+    return
+
 ### ------------------------------------------------------------------------
 @conf
 def declare_runtime_alias(self, dst, src):
@@ -522,7 +523,108 @@ def declare_runtime_alias(self, dst, src):
             if k == dst:
                 raise KeyError("the alias [%s] was already defined (to=%r)" % (k,v))
     self.env.append_unique('HWAF_RUNTIME_ALIASES', [(dst, src)])
-    
+    return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_declare_macro(self, name, value):
+    '''
+    hwaf_declare_macro declares a macro with name `name` and value `value`
+    @param name: a string
+    @param value: a string or a list of 1-dict {hwaf-tag:"value"}
+           hwaf-tag can be a simple string or a tuple of strings.
+    '''
+    ## FIXME
+    return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_macro_prepend(self, name, value):
+    '''
+    hwaf_macro_prepend prepends a value `value` to a macro named `name`
+    @param name: a string
+    @param value: a string or a list of 1-dict {hwaf-tag:"value"}
+           hwaf-tag can be a simple string or a tuple of strings.
+    '''
+    ## FIXME
+    return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_macro_append(self, name, value):
+    '''
+    hwaf_macro_append appends a value `value` to a macro named `name`
+    @param name: a string
+    @param value: a string or a list of 1-dict {hwaf-tag:"value"}
+           hwaf-tag can be a simple string or a tuple of strings.
+    '''
+    ## FIXME
+    return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_macro_remove(self, name, value):
+    '''
+    hwaf_macro_remove removes a value `value` to a macro named `name`
+    @param name: a string
+    @param value: a string or a list of 1-dict {hwaf-tag:"value"}
+           hwaf-tag can be a simple string or a tuple of strings.
+    '''
+    ## FIXME
+    return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_declare_tag(self, name, content):
+    '''
+    hwaf_declare_tag declares a tag with name `name` and `content`,
+    a list of strings defining the associated content of that tag.
+    @param name: a string
+    @param content: a string or a list of strings
+
+    e.x:
+      ctx.hwaf_declare_tag("x86_64-slc6-gcc46-dbg",
+                           content=["x86_64", "x86_64-slc6", "linux", "slc6", "gcc"])
+    '''
+    ## FIXME
+    return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_path_prepend(self, name, value):
+    '''
+    hwaf_path_prepend prepends a value `value` to a path named `name`
+    @param name: a string
+    @param value: a string or a list of 1-dict {hwaf-tag:"value"}
+           hwaf-tag can be a simple string or a tuple of strings.
+    '''
+    ## FIXME
+    return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_path_append(self, name, value):
+    '''
+    hwaf_path_append appends a value `value` to a path named `name`
+    @param name: a string
+    @param value: a string or a list of 1-dict {hwaf-tag:"value"}
+           hwaf-tag can be a simple string or a tuple of strings.
+    '''
+    ## FIXME
+    return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_path_remove(self, name, value):
+    '''
+    hwaf_path_remove removes a value `value` to a path named `name`
+    @param name: a string
+    @param value: a string or a list of 1-dict {hwaf-tag:"value"}
+           hwaf-tag can be a simple string or a tuple of strings.
+    '''
+    ## FIXME
+    return
+
 ### ------------------------------------------------------------------------
 @conf
 def hwaf_export_module(self, fname=WSCRIPT_FILE):
