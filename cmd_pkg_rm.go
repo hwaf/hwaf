@@ -23,10 +23,12 @@ ex:
  $ hwaf pkg rm ./src/foo/pkg
  $ hwaf pkg rm Control/AthenaKernel
  $ hwaf pkg rm Control/AthenaKernel Control/AthenaServices
+ $ hwaf pkg rm -f Control/AthenaKernel
 `,
 		Flag: *flag.NewFlagSet("hwaf-pkg-rm", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("f", false, "force removing the package (from disk and from internal db)")
 
 	return cmd
 }
@@ -41,6 +43,7 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 	}
 
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	force := cmd.Flag.Lookup("f").Value.Get().(bool)
 
 	cfg, err := g_ctx.LocalCfg()
 	handle_err(err)
@@ -69,17 +72,14 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 		}
 
 		// people may have already removed it via a simple 'rm -rf foo'...
-		//
-		// if !path_exists(pkg) {
-		// 	pkg = filepath.Join(srcdir, pkgname)
-		// 	if !path_exists(pkg) {
-		// 		err = fmt.Errorf("%s: no such package [%s]", n, pkgname)
-		// 		handle_err(err)
-		// 	}
-		// }
-
-		if !g_ctx.PkgDb.HasPkg(pkg) {
-			return fmt.Errorf("%s: no such package [%s] in db", n, pkg)
+		if !path_exists(pkg) && !force {
+			err = fmt.Errorf(
+				`%s: no such package [%s]
+%s: did you remove it by hand ? (re-try with 'hwaf pkg rm -f %s')`,
+				n, pkgname,
+				n, pkgname,
+			)
+			return err
 		}
 
 		vcspkg, err := g_ctx.PkgDb.GetPkg(pkg)
@@ -149,7 +149,9 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 
 		err = g_ctx.PkgDb.Remove(pkg)
 		if err != nil {
-			return err
+			if !force {
+				return err
+			}
 		}
 
 		if !quiet {
@@ -158,9 +160,19 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 		return nil
 	}
 
+	errs := []error{}
 	for _, pkgname := range args {
 		err := do_rm(pkgname)
-		handle_err(err)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if len(errs) > 0 {
+		for _, err := range errs {
+			fmt.Printf("%s\n", err.Error())
+		}
+		handle_err(errs[0])
 	}
 }
 
