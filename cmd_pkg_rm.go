@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
@@ -172,7 +173,20 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 		for _, err := range errs {
 			fmt.Printf("%s\n", err.Error())
 		}
-		handle_err(errs[0])
+		npkgs := ""
+		if len(args) > 1 {
+			npkgs = "s"
+		}
+		sargs := make([]string, len(args))
+		for i, s := range args {
+			sargs[i] = fmt.Sprintf("%q", s)
+		}
+		handle_err(
+			fmt.Errorf(
+				"removing package%s %s failed.",
+				npkgs, strings.Join(sargs, ", "),
+			),
+		)
 	}
 }
 
