@@ -349,11 +349,16 @@ class gen_reflex(waflib.Task.Task):
     vars = ['GENREFLEX', 'GENREFLEX_SELECTION', 'DEFINES', 'GCCXML_FLAGS', 'CPPFLAGS', 'INCLUDES']
     color= 'BLUE'
     run_str = '${GENREFLEX} ${SRC} -s ${GENREFLEX_SELECTION} -o ${TGT[0].abspath()} ${GCCXML_FLAGS} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} ${GENREFLEX_DSOMAP} ${GENREFLEX_DSOMAPLIB}'
-    ext_in = ['.h',]
+    ext_in = ['.h']
     ext_out= ['.cxx', '.dsomap']
     reentrant = True
     shell = False
     #shell = True
+
+    def scan(self):
+        selfile = self.env['GENREFLEX_SELECTION']
+        node = self.generator.bld.root.find_resource(selfile)
+        return ([node], waflib.Utils.h_file(node.abspath()))
 
     def exec_command(self, cmd, **kw):
         cwd_node = self.outputs[0].parent
@@ -450,13 +455,8 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
     # extract package name
     PACKAGE_NAME = self._get_pkg_name()
 
-    source = waflib.Utils.to_list(source)[0]
-    src_node = self.path.find_resource(source)
-    if not src_node:
-        # maybe in 'src' ?
-        src_node = self.path.find_dir('src').find_resource(source)
-        if src_node:
-            source = os.path.join('src',source)
+    source = self._cmt_get_srcs_lst(source)
+    src_node = source[0]
             
     kw = dict(kw)
 
@@ -531,6 +531,7 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         libpath = self.env.LD_LIBRARY_PATH + [self.path.get_bld().abspath()],
         defines=defines,
         install_path='${INSTALL_AREA}/lib',
+        depends_on=[self.path.find_resource(selection_file)],
         **kw
         )
     o.env.GENREFLEX = self.env['GENREFLEX']
