@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"sort"
 )
 
 type VcsPackage struct {
@@ -99,6 +100,7 @@ func (db *PackageDb) Pkgs() []string {
 	for k, _ := range db.db {
 		pkgs = append(pkgs, k)
 	}
+	sort.Strings(pkgs)
 	return pkgs
 }
 
