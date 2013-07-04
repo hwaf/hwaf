@@ -174,6 +174,18 @@ func TestPkgCoRm(t *testing.T) {
 		t.Fatalf("hwaf pkg co should have FAILED!")
 	}
 
+	// test adding a different package under the same name
+	err = hwaf.Run("hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-aa", "pkg-settings")
+	if err == nil {
+		t.Fatalf("hwaf pkg co should have FAILED!")
+	}
+
+	// test adding the same package under a different name
+	err = hwaf.Run("hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-settings", "pkg-settings-new")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
 	// test removing the package "by hand"
 	err = os.RemoveAll(filepath.Join(workdir, "src", "pkg-settings"))
 	if err != nil {
