@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"os/exec"
@@ -29,11 +31,13 @@ ex:
  $ hwaf pkg co git://github.com/mana-fwk/mana-core-athenakernel Control/AthenaKernel
  $ hwaf pkg co -b=rel/mana git://github.com/mana-fwk/mana-core-athenakernel Control/AthenaKernel
  $ hwaf pkg co -b=AthenaKernel-00-00-01 svn+ssh://svn.cern.ch/reps/atlasoff/Control/AthenaKernel Control/AthenaKernel
+ $ hwaf pkg co -f=list.of.pkgs.txt
 `,
 		Flag: *flag.NewFlagSet("hwaf-pkg-co", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
 	cmd.Flag.String("b", "", "branch to checkout (default=master)")
+	cmd.Flag.String("f", "", "path to a file holding a list of packages to retrieve")
 
 	return cmd
 }
@@ -51,6 +55,59 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		pkguri = args[0]
 		pkgname = args[1]
 	default:
+		fname := cmd.Flag.Lookup("f").Value.Get().(string)
+		if fname != "" {
+			f, err := os.Open(fname)
+			if err != nil {
+				handle_err(err)
+			}
+			pkgs := [][]string{}
+			scnr := bufio.NewScanner(f)
+			for scnr.Scan() {
+				line := scnr.Text()
+				tokens := strings.Split(line, " ")
+				pkg := []string{}
+				for _, tok := range tokens {
+					tok = strings.Trim(tok, " \t")
+					if tok != "" {
+						pkg = append(pkg, tok)
+					}
+				}
+				if len(pkg) > 0 {
+					pkgs = append(pkgs, pkg)
+				}
+			}
+			err = scnr.Err()
+			if err != nil && err != io.EOF {
+				handle_err(err)
+			}
+			quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+			for _, pkg := range pkgs {
+				args := []string{"pkg", "co"}
+				if !quiet {
+					args = append(args, "-q=0")
+				}
+				switch len(pkg) {
+				case 1:
+					args = append(args, pkg[0])
+				case 2:
+					args = append(args, "-b="+pkg[1], pkg[0])
+				case 3:
+					args = append(args, "-b="+pkg[1], pkg[0], pkg[2])
+				default:
+					err = fmt.Errorf("%s: invalid number of pkg-co arguments (expected [1-3], got=%d) args=%v", n, len(pkg), pkg)
+					handle_err(err)
+				}
+				cmd := exec.Command("hwaf", args...)
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+				cmd.Stdin = os.Stdin
+				err = cmd.Run()
+				handle_err(err)
+			}
+			return
+		}
+
 		err = fmt.Errorf("%s: you need to give a package URL", n)
 		handle_err(err)
 	}
