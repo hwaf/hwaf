@@ -67,15 +67,17 @@ type Build_t struct {
 type Targets_t []Target_t
 
 type Target_t struct {
-	Name       string
-	Features   string
-	Source     []Value
-	Use        []Value
-	Defines    []Value
-	CxxFlags   []Value
-	CcFlags    []Value
-	ShlibFlags []Value
-	StlibFlags []Value
+	Name           string
+	Features       string
+	Source         []Value
+	Use            []Value
+	Defines        []Value
+	CxxFlags       []Value
+	CcFlags        []Value
+	ShlibFlags     []Value
+	StlibFlags     []Value
+	Includes       []Value
+	ExportIncludes []Value
 }
 
 type KeyValue struct {
