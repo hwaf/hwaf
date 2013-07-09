@@ -72,8 +72,8 @@ type Target_t struct {
 	Source         []Value
 	Use            []Value
 	Defines        []Value
-	CxxFlags       []Value
 	CFlags         []Value
+	CxxFlags       []Value
 	LinkFlags      []Value
 	ShlibFlags     []Value
 	StlibFlags     []Value
