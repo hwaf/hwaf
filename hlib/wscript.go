@@ -20,12 +20,13 @@ type Package_t struct {
 }
 
 type Dep_t struct {
-	Name string
+	Name    string
 	Version string
-	Type DepType
+	Type    DepType
 }
 
 type DepType int
+
 const (
 	PublicDep DepType = iota << 1
 	PrivateDep
@@ -33,21 +34,22 @@ const (
 )
 
 type Visibility int
+
 const (
-	Local Visibility = 0
+	Local    Visibility = 0
 	Exported Visibility = 1
 )
 
 type Options_t struct {
-	Tools []string
+	Tools    []string
 	HwafCall []string
-	Stmts []Stmt
+	Stmts    []Stmt
 }
 
 type Configure_t struct {
-	Tools []string
+	Tools    []string
 	HwafCall []string
-	Env   Env_t
+	Env      Env_t
 	//Tags  []Value
 	Stmts []Stmt
 }
@@ -55,36 +57,36 @@ type Configure_t struct {
 type Env_t map[string]Value
 
 type Build_t struct {
-	Tools   []string
+	Tools    []string
 	HwafCall []string
-	Targets Targets_t
-	Stmts   []Stmt
-	Env Env_t
+	Targets  Targets_t
+	Stmts    []Stmt
+	Env      Env_t
 }
 
 type Targets_t []Target_t
 
 type Target_t struct {
-	Name     string
-	Features string
-	Source   []Value
-	Use      []Value
-	Defines  []Value
-	CxxFlags []Value
-	CcFlags []Value
+	Name       string
+	Features   string
+	Source     []Value
+	Use        []Value
+	Defines    []Value
+	CxxFlags   []Value
+	CcFlags    []Value
 	ShlibFlags []Value
 	StlibFlags []Value
 }
 
 type KeyValue struct {
-	Tag string
+	Tag   string
 	Value []string
 }
 
 type Value struct {
-	Name string
+	Name    string
 	Default []string
-	Set []KeyValue
+	Set     []KeyValue
 }
 
 //
@@ -136,7 +138,7 @@ func (stmt *MacroAppendStmt) is_stmt() {
 
 // TagStmt defines a new CMT tag with name Name and content Content
 type TagStmt struct {
-	Name string
+	Name    string
 	Content []string
 }
 
