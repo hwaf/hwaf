@@ -74,8 +74,10 @@ type Target_t struct {
 	Defines        []Value
 	CxxFlags       []Value
 	CFlags         []Value
+	LinkFlags      []Value
 	ShlibFlags     []Value
 	StlibFlags     []Value
+	RPath          []Value
 	Includes       []Value
 	ExportIncludes []Value
 }
