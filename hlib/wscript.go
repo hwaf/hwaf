@@ -73,7 +73,7 @@ type Target_t struct {
 	Use            []Value
 	Defines        []Value
 	CxxFlags       []Value
-	CcFlags        []Value
+	CFlags         []Value
 	ShlibFlags     []Value
 	StlibFlags     []Value
 	Includes       []Value
