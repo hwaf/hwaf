@@ -270,7 +270,7 @@ def pkg_deps(ctx):
 def configure(ctx):
     ctx.load('find_python')
     ctx.load('find_boost')
-    ctx.find_boost(lib='filesystem')
+    ctx.find_boost(lib='filesystem system')
     ctx.start_msg("was Boost found ?")
     ctx.end_msg(ctx.env.HWAF_FOUND_BOOST)
     if ctx.env.HWAF_FOUND_BOOST:
@@ -297,6 +297,12 @@ def build(ctx):
 		err := hwaf.Run(cmd[0], cmd[1:]...)
 		if err != nil {
 			hwaf.Display()
+			cfglog := filepath.Join(workdir, "__build__", "config.log")
+			cfg, err2 := os.Open(cfglog)
+			if err2 == nil {
+				defer cfg.Close()
+				io.Copy(os.Stderr, cfg)
+			}
 			t.Fatalf("cmd %v failed: %v", cmd, err)
 		}
 	}
