@@ -268,6 +268,7 @@ def pkg_deps(ctx):
     return
 
 def configure(ctx):
+    ctx.load('find_python')
     ctx.load('find_boost')
     ctx.find_boost(lib='chrono filesystem system')
     ctx.start_msg("was Boost found ?")
