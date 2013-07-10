@@ -30,7 +30,15 @@ def configure(ctx):
 
 @conf
 def find_boost(ctx, **kwargs):
-    
+    '''
+    find_boost instructs hwaf to find a boost installation.
+    keyword arguments are the same than of the waflib.extras.boost.check_boost
+    function (see @waflib.extras.boost.)
+    Relevant keyword args:
+      "lib":      list of boost libraries to check
+      "includes": path to the boost includes
+      "libs":     path to boost libraries
+    '''
     ctx.load('hwaf-base', tooldir=_heptooldir)
 
     if not ctx.env.HWAF_FOUND_C_COMPILER:
@@ -42,6 +50,7 @@ def find_boost(ctx, **kwargs):
         pass
 
     if not ctx.env.HWAF_FOUND_PYTHON:
+        ctx.load('find_python')
         ctx.find_python()
         pass
 
@@ -57,15 +66,16 @@ def find_boost(ctx, **kwargs):
         pass
     
     ctx.load('boost')
-    boost_libs = '''\
+    boost_libs = kwargs.get('lib', '''\
     chrono date_time filesystem graph iostreams
     math_c99 math_c99f math_tr1 math_tr1f
     prg_exec_monitor program_options
     random regex serialization
     signals system thread 
     unit_test_framework wave wserialization
-    '''
-
+    ''')
+    kwargs['lib'] = boost_libs
+    
     kwargs['mt'] = kwargs.get('mt', False)
     kwargs['static'] = kwargs.get('static', False)
     kwargs['use'] = waflib.Utils.to_list(kwargs.get('use', [])) + ['python']
@@ -73,18 +83,20 @@ def find_boost(ctx, **kwargs):
     # get include/lib-dir from command-line or from API
     kwargs['includes'] = getattr(ctx.options, 'with_boost_includes', kwargs.get('includes', None))
     kwargs['libs'] = getattr(ctx.options, 'with_boost_libs', kwargs.get('libs', None))
+
+    # override default for uselib_store (default="BOOST")
+    kwargs['uselib_store'] = "boost"
     
     ctx.check_with(
         ctx.check_boost,
         "boost",
-        lib=boost_libs,
-        uselib_store='boost',
         **kwargs)
 
     ## hack for boost_python...
+    _boost_lib_name = boost_libs.split()[0]
     boost_lib_tmpl = [lib for lib in ctx.env['LIB_boost']
-                      if 'boost_chrono' in lib][0]
-    boost_python = boost_lib_tmpl.replace('boost_chrono', 'boost_python')
+                      if _boost_lib_name in lib][0]
+    boost_python = boost_lib_tmpl.replace(_boost_lib_name, 'boost_python')
     ctx.env['LIB_boost'] = ctx.env['LIB_boost'] + [boost_python]
     
     for libname in boost_libs.split() + ['python',]:
