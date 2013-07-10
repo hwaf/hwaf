@@ -211,6 +211,97 @@ func TestPkgCoRm(t *testing.T) {
 
 }
 
+func TestHwafBoost(t *testing.T) {
+	workdir, err := ioutil.TempDir("", "hwaf-test-")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer os.RemoveAll(workdir)
+
+	err = os.Chdir(workdir)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	hwaf, err := newlogger("hwaf.log")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer hwaf.Close()
+
+	for _, cmd := range [][]string{
+		{"hwaf", "init", "-q=0", "."},
+		{"hwaf", "setup", "-q=0"},
+		{"hwaf", "pkg", "create", "-q=0", "mypkg"},
+		{"hwaf", "pkg", "ls"},
+	} {
+		err := hwaf.Run(cmd[0], cmd[1:]...)
+		if err != nil {
+			hwaf.Display()
+			t.Fatalf("cmd %v failed: %v", cmd, err)
+		}
+	}
+
+	mypkgdir := filepath.Join("src", "mypkg")
+
+	// create src/mytools/mypkg/wscript file
+	ff, err := os.Create(filepath.Join(mypkgdir, "wscript"))
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	_, err = ff.WriteString(
+		`
+# -*- python -*-
+# automatically generated wscript
+
+import waflib.Logs as msg
+
+PACKAGE = {
+    'name': 'mypkg',
+    'author': ["Sebastien Binet"], 
+}
+
+def pkg_deps(ctx):
+    # put your package dependencies here.
+    # e.g.:
+    # ctx.use_pkg('AtlasPolicy')
+    return
+
+def configure(ctx):
+    ctx.load('find_boost')
+    ctx.find_boost(lib='chrono filesystem system')
+    ctx.start_msg("was Boost found ?")
+    ctx.end_msg(ctx.env.HWAF_FOUND_BOOST)
+    if ctx.env.HWAF_FOUND_BOOST:
+        ctx.start_msg("boost version")
+        ctx.end_msg(ctx.env.BOOST_VERSION)
+    else:
+        msg.fatal("Boost could not be found")
+
+def build(ctx):
+    return
+
+`)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	ff.Sync()
+	ff.Close()
+
+	for _, cmd := range [][]string{
+		{"hwaf", "configure"},
+		{"hwaf"},
+	} {
+		err := hwaf.Run(cmd[0], cmd[1:]...)
+		if err != nil {
+			hwaf.Display()
+			t.Fatalf("cmd %v failed: %v", cmd, err)
+		}
+	}
+
+}
+
 func TestHwafTuto(t *testing.T) {
 	workdir, err := ioutil.TempDir("", "hwaf-test-")
 	if err != nil {
