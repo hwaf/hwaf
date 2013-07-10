@@ -84,6 +84,17 @@ def find_boost(ctx, **kwargs):
     kwargs['includes'] = getattr(ctx.options, 'with_boost_includes', kwargs.get('includes', None))
     kwargs['libs'] = getattr(ctx.options, 'with_boost_libs', kwargs.get('libs', None))
 
+    # waflib.boost only checks under /usr/lib
+    # for machines where dual-libs (32/64) are installed, also inject:
+    if ctx.is_64b():
+        libpath = waflib.Utils.to_list(kwargs['libs'])
+        if not libpath: libpath = []
+        kwargs['libs'] = libpath + [
+            '/usr/lib64', '/usr/local/lib64', '/opt/local/lib64',
+            '/sw/lib64', '/lib64',
+            ]
+        pass
+    
     # override default for uselib_store (default="BOOST")
     kwargs['uselib_store'] = "boost"
     
