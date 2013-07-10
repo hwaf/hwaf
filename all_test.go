@@ -270,7 +270,7 @@ def pkg_deps(ctx):
 def configure(ctx):
     ctx.load('find_python')
     ctx.load('find_boost')
-    ctx.find_boost(lib='chrono filesystem system')
+    ctx.find_boost(lib='filesystem')
     ctx.start_msg("was Boost found ?")
     ctx.end_msg(ctx.env.HWAF_FOUND_BOOST)
     if ctx.env.HWAF_FOUND_BOOST:
