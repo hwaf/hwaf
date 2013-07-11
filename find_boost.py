@@ -135,7 +135,8 @@ def find_boost(ctx, **kwargs):
     _boost_lib_name = boost_libs.split()[0]
     boost_lib_tmpl = [lib for lib in ctx.env['LIB_boost']
                       if _boost_lib_name in lib][0]
-    boost_python = boost_lib_tmpl.replace(_boost_lib_name, 'boost_python')
+    boost_python = boost_lib_tmpl.replace("boost_"+_boost_lib_name,
+                                          'boost_python')
     ctx.env['LIB_boost'] = ctx.env['LIB_boost'] + [boost_python]
     
     for libname in boost_libs.split() + ['python',]:
