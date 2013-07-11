@@ -94,7 +94,16 @@ def find_boost(ctx, **kwargs):
             '/sw/lib64', '/lib64',
             ]
         pass
-    
+    # clean-up non existing directories
+    libdirs = []
+    for dirname in waflib.Utils.to_list(kwargs['libs']):
+        dirname = waflib.Utils.subst_vars(dirname, ctx.env)
+        d = ctx.root.find_dir(dirname)
+        if not d: continue
+        libdirs.append(dirname)
+        pass
+    kwargs['libs'] = libdirs[:]
+
     # override default for uselib_store (default="BOOST")
     kwargs['uselib_store'] = "boost"
     
