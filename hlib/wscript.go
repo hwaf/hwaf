@@ -13,11 +13,15 @@ type Stmt interface {
 
 type Package_t struct {
 	Name     string
-	Authors  []string
-	Managers []string
-	Version  string
+	Authors  []Author
+	Managers []Manager
+	Version  Version
 	Deps     []Dep_t
 }
+
+type Author string
+type Manager string
+type Version string
 
 type Dep_t struct {
 	Name    string
@@ -88,9 +92,8 @@ type KeyValue struct {
 }
 
 type Value struct {
-	Name    string
-	Default []string
-	Set     []KeyValue
+	Name string
+	Set  []KeyValue // first item is the "default"
 }
 
 //
