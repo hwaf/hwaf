@@ -186,7 +186,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 			handle_err(err)
 		}
 		repo := pkguri
-		if bname != "" {
+		if bname != "" && bname != "trunk" {
 			// can't use filepath.Join as it may mess-up the uri.Scheme
 			repo = strings.Join([]string{pkguri, "tags", bname}, "/")
 		} else {
