@@ -262,8 +262,12 @@ def find_at(ctx, check, what, where, **kwargs):
         incdir = getattr(ctx.options, 'with_%s_includes' % what, incdir)
         libdir = getattr(ctx.options, 'with_%s_libs' % what, libdir)
 
-        if isinstance(incdir, (list, tuple)): incdir=incdir[0]
-        if isinstance(libdir, (list, tuple)): libdir=libdir[0]
+        if isinstance(incdir, (list, tuple)):
+            if len(incdir)>0: incdir=incdir[0]
+            else:             incdir=osp.join(where, "include")
+        if isinstance(libdir, (list, tuple)):
+            if len(libdir)>0: libdir=libdir[0]
+            else:             libdir=osp.join(where, "lib")
         
         ctx.env.prepend_value('PATH',  bindir)
         ctx.env.prepend_value('RPATH', libdir)
