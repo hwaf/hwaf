@@ -84,6 +84,10 @@ def find_boost(ctx, **kwargs):
     kwargs['includes'] = getattr(ctx.options, 'with_boost_includes', kwargs.get('includes', None))
     kwargs['libs'] = getattr(ctx.options, 'with_boost_libs', kwargs.get('libs', None))
 
+    # rationalize types
+    if kwargs['libs'] is None: kwargs['libs'] = []
+    if kwargs['includes'] is None: kwargs['includes'] = []
+
     # waflib.boost only checks under /usr/lib
     # for machines where dual-libs (32/64) are installed, also inject:
     if ctx.is_64b():
