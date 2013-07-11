@@ -512,6 +512,61 @@ def build(ctx):
 
 }
 
+func TestHwafBoostTestPkg(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode. (needs CERN-ROOT)")
+	}
+
+	workdir, err := ioutil.TempDir("", "hwaf-test-")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer os.RemoveAll(workdir)
+
+	err = os.Chdir(workdir)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	hwaf, err := newlogger("hwaf.log")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer hwaf.Close()
+
+	for _, cmd := range [][]string{
+		{"hwaf", "init", "-q=0", "."},
+		{"hwaf", "setup", "-q=0"},
+		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-settings", "pkg-settings"},
+		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-boost-tests", "boost-tests"},
+		{"hwaf", "pkg", "ls"},
+		{"hwaf", "configure"},
+		{"hwaf"},
+		{"hwaf", "run", "test-hwaf-boost-filesystem.exe", "wscript"},
+	} {
+		err := hwaf.Run(cmd[0], cmd[1:]...)
+		if err != nil {
+			hwaf.Display()
+			t.Fatalf("cmd %v failed: %v", cmd, err)
+		}
+	}
+
+	os.RemoveAll("__build__")
+
+	for _, cmd := range [][]string{
+		{"hwaf", "configure", "--with-boost=/boo"},
+		{"hwaf"},
+		{"hwaf", "run", "test-hwaf-boost-filesystem.exe", "wscript"},
+	} {
+		err := hwaf.Run(cmd[0], cmd[1:]...)
+		if err != nil {
+			hwaf.Display()
+			t.Fatalf("cmd %v failed: %v", cmd, err)
+		}
+	}
+
+}
+
 func TestHwafTuto(t *testing.T) {
 	workdir, err := ioutil.TempDir("", "hwaf-test-")
 	if err != nil {
