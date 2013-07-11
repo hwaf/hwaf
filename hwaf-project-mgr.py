@@ -686,10 +686,11 @@ def hwaf_find_pkg(self, pkgname, projname=None):
             return pkg
         except KeyError:
             pass
+    from pprint import pformat
     errmsg = "no such package [%s] in any of the projects\n%s" % \
-             (pkgname, self.hwaf_projects())
+             (pkgname, pformat(self.hwaf_projects()))
     msg.error(errmsg)
-    raise KeyError(errmsg)
+    raise KeyError("no such package [%s]" % pkgname)
 
 @waflib.Configure.conf
 def hwaf_pkg_dirs(self, projname=None):
@@ -725,7 +726,11 @@ def _hwaf_build_pkg_deps(ctx, pkgdir=None):
         for ppkg in deps:
             if ppkg in pkglist:
                 continue
-            process_pkg(ppkg, pkg)
+            try:
+                process_pkg(ppkg, pkg)
+            except KeyError:
+                ctx.fatal('package [%s] depends on *UNKNOWN* package [%s]' %
+                          (pkg, ppkg,))
         if not (pkg in pkglist):
             if not ctx.hwaf_has_pkg(pkg):
                 ctx.fatal('package [%s] depends on *UNKNOWN* package [%s]' %
