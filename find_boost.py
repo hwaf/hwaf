@@ -132,31 +132,33 @@ def find_boost(ctx, **kwargs):
         **kwargs)
 
     ## hack for boost_python...
-    _boost_lib_name = boost_libs.split()[0]
-    boost_lib_tmpl = [lib for lib in ctx.env['LIB_boost']
-                      if _boost_lib_name in lib][0]
-    boost_python = boost_lib_tmpl.replace("boost_"+_boost_lib_name,
-                                          'boost_python')
-    ctx.env['LIB_boost'] = ctx.env['LIB_boost'] + [boost_python]
+    _boost_libs_list = waflib.Utils.to_list(boost_libs)
+    if _boost_libs_list:
+        _boost_lib_name = _boost_libs_list[0]
+        boost_lib_tmpl = [lib for lib in ctx.env['LIB_boost']
+                          if _boost_lib_name in lib][0]
+        boost_python = boost_lib_tmpl.replace("boost_"+_boost_lib_name,
+                                              'boost_python')
+        ctx.env['LIB_boost'] = ctx.env['LIB_boost'] + [boost_python]
     
-    for libname in boost_libs.split() + ['python',]:
-        libname = libname.strip()
-        for n in ('INCLUDES',
-                  'LIBPATH',
-                  'LINKFLAGS'):
-            ctx.env['%s_boost-%s'%(n,libname)] = ctx.env['%s_boost'%n][:]
-        lib = []
-        for i in ctx.env['LIB_boost']:
-            if i.startswith("boost_%s-"%libname):
-                lib.append(i)
-                break
-            if i == "boost_%s"%libname:
-                lib.append(i)
-                break
-        else:
-            msg.warn("could not find a linkopt for [boost_%s] among: %s" %
-                     (libname,ctx.env['LIB_boost']))
-        ctx.env['LIB_boost-%s'%libname] = lib[:]
+        for libname in _boost_libs_list + ['python',]:
+            libname = libname.strip()
+            for n in ('INCLUDES',
+                      'LIBPATH',
+                      'LINKFLAGS'):
+                ctx.env['%s_boost-%s'%(n,libname)] = ctx.env['%s_boost'%n][:]
+            lib = []
+            for i in ctx.env['LIB_boost']:
+                if i.startswith("boost_%s-"%libname):
+                    lib.append(i)
+                    break
+                if i == "boost_%s"%libname:
+                    lib.append(i)
+                    break
+            else:
+                msg.warn("could not find a linkopt for [boost_%s] among: %s" %
+                         (libname,ctx.env['LIB_boost']))
+            ctx.env['LIB_boost-%s'%libname] = lib[:]
 
     # register the boost module
     import sys
