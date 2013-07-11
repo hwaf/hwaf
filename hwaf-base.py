@@ -265,17 +265,17 @@ def find_at(ctx, check, what, where, **kwargs):
         if isinstance(incdir, (list, tuple)): incdir=incdir[0]
         if isinstance(libdir, (list, tuple)): libdir=libdir[0]
         
-        ctx.env.append_value('PATH',  bindir)
-        ctx.env.append_value('RPATH', libdir)
-        ctx.env.append_value('LD_LIBRARY_PATH', libdir)
+        ctx.env.prepend_value('PATH',  bindir)
+        ctx.env.prepend_value('RPATH', libdir)
+        ctx.env.prepend_value('LD_LIBRARY_PATH', libdir)
         os_keys = ("PATH", "RPATH", "LD_LIBRARY_PATH")
         if ctx.is_darwin():
             os_keys += ("DYLD_LIBRARY_PATH",)
-            ctx.env.append_value('DYLD_LIBRARY_PATH', libdir)
+            ctx.env.prepend_value('DYLD_LIBRARY_PATH', libdir)
             os.environ['DYLD_LIBRARY_PATH'] = os.sep.join(ctx.env['DYLD_LIBRARY_PATH'])
             pass
         pkgconf_path = osp.join(where, "lib/pkgconfig")
-        ctx.env.append_value('PKG_CONFIG_PATH', pkgconf_path)
+        ctx.env.prepend_value('PKG_CONFIG_PATH', pkgconf_path)
         ctx.to_log("Pkg config path: %s" % ctx.env.PKG_CONFIG_PATH)
 
         for kk in os_keys:
