@@ -448,7 +448,7 @@ def hwaf_ishell(ctx):
         signame = None
         if retval < 0: # signal?
             import signal
-            for name, val in vars(signal).iteritems():
+            for name, val in vars(signal).items():
                 if len(name) > 3 and name[:3] == 'SIG' and name[3] != '_':
                     if val == -retval:
                         signame = name
