@@ -267,6 +267,9 @@ def pkg_deps(ctx):
     # ctx.use_pkg('AtlasPolicy')
     return
 
+def options(ctx):
+    ctx.load('find_boost')
+
 def configure(ctx):
     ctx.load('find_python')
     ctx.load('find_boost')
@@ -292,6 +295,25 @@ def build(ctx):
 
 	for _, cmd := range [][]string{
 		{"hwaf", "configure"},
+		{"hwaf"},
+	} {
+		err := hwaf.Run(cmd[0], cmd[1:]...)
+		if err != nil {
+			hwaf.Display()
+			cfglog := filepath.Join(workdir, "__build__", "config.log")
+			cfg, err2 := os.Open(cfglog)
+			if err2 == nil {
+				defer cfg.Close()
+				io.Copy(os.Stderr, cfg)
+			}
+			t.Fatalf("cmd %v failed: %v", cmd, err)
+		}
+	}
+
+	// test bogus --boost-libs path
+	os.RemoveAll(filepath.Join(workdir, "__build__"))
+	for _, cmd := range [][]string{
+		{"hwaf", "configure", "--boost-libs=/bar"},
 		{"hwaf"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
