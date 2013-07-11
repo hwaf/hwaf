@@ -129,10 +129,16 @@ def find_boost(ctx, **kwargs):
     # set with_boost_xxx variables for 'check_with' benefit
     setattr(ctx.options, 'with_boost_includes', kwargs['includes'])
     setattr(ctx.options, 'with_boost_libs',     kwargs['libs'])
-    setattr(ctx.options, 'with_boost',
-            getattr(ctx.options, 'with_boost') or
-            osp.dirname(kwargs['libs'][0])
-            )
+    def _get_with_boost():
+        o = getattr(ctx.options, 'with_boost', [])
+        if o:
+            return o
+        libs = waflib.Utils.to_list(kwargs.get('libs', []))
+        if libs and len(libs)>0:
+            return osp.dirname(libs[0])
+        return None
+    setattr(ctx.options, 'with_boost', _get_with_boost())
+
     ctx.check_with(
         ctx.check_boost,
         "boost",
