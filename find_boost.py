@@ -87,12 +87,13 @@ def find_boost(ctx, **kwargs):
     # waflib.boost only checks under /usr/lib
     # for machines where dual-libs (32/64) are installed, also inject:
     if ctx.is_64b():
-        libpath = waflib.Utils.to_list(kwargs['libs'])
-        if not libpath: libpath = []
-        kwargs['libs'] = libpath + [
+        libpath = [
             '/usr/lib64', '/usr/local/lib64', '/opt/local/lib64',
             '/sw/lib64', '/lib64',
             ]
+        import waflib.extras.boost as _mod
+        if _mod.BOOST_LIBS[0] != libpath[0]:
+            _mod.BOOST_LIBS = libpath + _mod.BOOST_LIBS
         pass
     # clean-up non existing directories
     libdirs = []
@@ -103,6 +104,20 @@ def find_boost(ctx, **kwargs):
         libdirs.append(dirname)
         pass
     kwargs['libs'] = libdirs[:]
+
+    # also clean-up non existing directories in options.boost_{includes,libs}
+    for k in ('boost_includes', 'boost_libs'):
+        v = getattr(ctx.options, k, None)
+        if not v: continue
+        dirs = []
+        for dirname in waflib.Utils.to_list(v):
+            dirname = waflib.Utils.subst_vars(dirname, ctx.env)
+            d = ctx.root.find_dir(dirname)
+            if not d: continue
+            dirs.append(dirname)
+            pass
+        setattr(ctx.options, k, dirs)
+        pass
 
     # override default for uselib_store (default="BOOST")
     kwargs['uselib_store'] = "boost"
