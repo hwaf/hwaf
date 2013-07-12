@@ -143,6 +143,13 @@ type MacroAppendStmt struct {
 func (stmt *MacroAppendStmt) is_stmt() {
 }
 
+type MacroRemoveStmt struct {
+	Value Value
+}
+
+func (stmt *MacroRemoveStmt) is_stmt() {
+}
+
 // TagStmt defines a new CMT tag with name Name and content Content
 type TagStmt struct {
 	Name    string
@@ -187,6 +194,7 @@ var _ Stmt = (*PathPrependStmt)(nil)
 var _ Stmt = (*PathRemoveStmt)(nil)
 var _ Stmt = (*MacroStmt)(nil)
 var _ Stmt = (*MacroAppendStmt)(nil)
+var _ Stmt = (*MacroRemoveStmt)(nil)
 var _ Stmt = (*TagStmt)(nil)
 var _ Stmt = (*IncludeDirsStmt)(nil)
 var _ Stmt = (*IncludePathStmt)(nil)
