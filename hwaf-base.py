@@ -605,9 +605,9 @@ def hwaf_declare_tag(self, name, content):
 
 ### ------------------------------------------------------------------------
 @conf
-def hwaf_path(self, name, value):
+def hwaf_declare_path(self, name, value):
     '''
-    hwaf_path declares a path `name` with value `value`
+    hwaf_declare_path declares a path `name` with value `value`
     @param name: a string
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
