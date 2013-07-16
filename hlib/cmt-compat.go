@@ -47,6 +47,13 @@ type MacroAppendStmt struct {
 func (stmt *MacroAppendStmt) is_stmt() {
 }
 
+type MacroPrependStmt struct {
+	Value Value
+}
+
+func (stmt *MacroPrependStmt) is_stmt() {
+}
+
 type MacroRemoveStmt struct {
 	Value Value
 }
@@ -106,7 +113,8 @@ func (stmt *ActionStmt) is_stmt() {
 }
 
 type ApplyPatternStmt struct {
-	Value Value
+	Name string
+	Args []string
 }
 
 func (stmt *ApplyPatternStmt) is_stmt() {
@@ -119,6 +127,13 @@ type IgnorePatternStmt struct {
 func (stmt *IgnorePatternStmt) is_stmt() {
 }
 
+type MakeFragmentStmt struct {
+	Name string
+}
+
+func (stmt *MakeFragmentStmt) is_stmt() {
+}
+
 // test interfaces
 var _ Stmt = (*PathStmt)(nil)
 var _ Stmt = (*PathAppendStmt)(nil)
@@ -126,6 +141,7 @@ var _ Stmt = (*PathPrependStmt)(nil)
 var _ Stmt = (*PathRemoveStmt)(nil)
 var _ Stmt = (*MacroStmt)(nil)
 var _ Stmt = (*MacroAppendStmt)(nil)
+var _ Stmt = (*MacroPrependStmt)(nil)
 var _ Stmt = (*MacroRemoveStmt)(nil)
 var _ Stmt = (*TagStmt)(nil)
 var _ Stmt = (*ApplyTagStmt)(nil)
@@ -136,5 +152,6 @@ var _ Stmt = (*AliasStmt)(nil)
 var _ Stmt = (*ApplyPatternStmt)(nil)
 var _ Stmt = (*IgnorePatternStmt)(nil)
 var _ Stmt = (*ActionStmt)(nil)
+var _ Stmt = (*MakeFragmentStmt)(nil)
 
 // EOF
