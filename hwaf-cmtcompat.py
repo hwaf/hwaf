@@ -22,7 +22,7 @@ def _cmt_get_srcs_lst(self, source):
     if isinstance(source, (list, tuple)):
         src = []
         for s in source:
-            src.extend(_get_srcs_lst(self, s))
+            src.extend(self._cmt_get_srcs_lst(s))
         return src
     elif not isinstance(source, type('')):
         ## a waflib.Node ?
