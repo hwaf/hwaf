@@ -32,10 +32,15 @@ type Dep_t struct {
 type DepType int
 
 const (
-	PublicDep DepType = iota << 1
+	UnknownDep DepType = 1 << iota
+	PublicDep
 	PrivateDep
 	RuntimeDep
 )
+
+func (d DepType) HasMask(mask DepType) bool {
+	return bool((d & mask) != 0)
+}
 
 type Visibility int
 
