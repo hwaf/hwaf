@@ -58,8 +58,7 @@ def pkg_deps(ctx):
 
 ### ---------------------------------------------------------------------------
 def options(ctx):
-    {{range .Tools}}ctx.load("{{.}}")
-    {{end}}
+    {{with .Tools}}{{. | gen_wscript_tools}}{{end}}
     return # options
 `,
 		wscript.Options,
@@ -75,8 +74,7 @@ def options(ctx):
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
-    {{range .Tools}}ctx.load("{{.}}"); ctx.{{.}}()
-    {{end}}
+    {{with .Tools}}{{. | gen_wscript_tools}}{{end}}
     {{.Env | gen_wscript_env}}
     {{range .Stmts}}##{{. | gen_wscript_stmts}}
     {{end}}
@@ -95,8 +93,7 @@ def configure(ctx):
 
 ### ---------------------------------------------------------------------------
 def build(ctx):
-    {{range .Tools}}ctx.load("{{.}}"); ctx.{{.}}()
-    {{end}}
+    {{with .Tools}}{{. | gen_wscript_tools}}{{end}}
     {{with .Targets}}{{. | gen_wscript_targets}}{{end}}
     {{range .Stmts}}##{{. | gen_wscript_stmts}}
     {{end}}
@@ -133,6 +130,7 @@ func w_tmpl(w io.Writer, text string, data interface{}) error {
 			return "[" + strings.Join(str, ", ") + "]"
 		},
 		"gen_wscript_pkg_deps": gen_wscript_pkg_deps,
+		"gen_wscript_tools":    gen_wscript_tools,
 		"gen_wscript_env":      gen_wscript_env,
 		"gen_wscript_stmts":    gen_wscript_stmts,
 		"gen_wscript_targets":  gen_wscript_targets,
@@ -287,6 +285,28 @@ func gen_wscript_pkg_deps(pkg Package_t) string {
 		}
 	} else {
 		str = append(str, "## no runtime dependencies")
+	}
+
+	// reindent:
+	for i, s := range str[1:] {
+		str[i+1] = indent + s
+	}
+
+	return strings.Join(str, "\n")
+}
+
+func gen_wscript_tools(tools []string) string {
+	const indent = "    "
+	str := []string{""}
+
+	for _, tool := range tools {
+		str = append(
+			str,
+			fmt.Sprintf("ctx.load(%q)", tool),
+			fmt.Sprintf("try: ctx.%s()", tool),
+			"except AttributeError: pass",
+			"",
+		)
 	}
 
 	// reindent:
