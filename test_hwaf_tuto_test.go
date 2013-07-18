@@ -239,8 +239,9 @@ package: {
 }
 
 options: {}
+
 configure: {
-    tools: [find_python],
+    tools: [find_python, compiler_cxx],
     env: {
         MYPATH: "/tmp",
         PYTHONPATH: "${INSTALL_AREA}/python:${PYTHONPATH}",
