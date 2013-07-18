@@ -807,4 +807,23 @@ def _get_pkg_version_defines(self):
     #msg.debug("*** %s %r" % (pkg_name, pkg_vers))
     return pkg_defines
 
+### ------------------------------------------------------------------------
+@conf
+def hwaf_build(self, *k, **kw):
+    '''
+    hwaf_build wraps the Build.BuildContext.__call__ method.
+
+    e.x:
+      ctx.hwaf_build(
+         features = "cxx cxxshlib",
+         name = "mylib",
+         source = "src/*.cxx",
+      )
+    '''
+    ## FIXME:
+    return self(*k, **kw)
+
+import waflib.Build
+waflib.Build.BuildContext.hwaf_build = hwaf_build
+
 ## EOF ##
