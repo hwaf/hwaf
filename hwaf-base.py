@@ -598,8 +598,46 @@ def hwaf_declare_tag(self, name, content):
       ctx.hwaf_declare_tag("x86_64-slc6-gcc46-dbg",
                            content=["x86_64", "x86_64-slc6", "linux", "slc6", "gcc"])
     '''
-    ## FIXME
+    self.env['HWAF_TAGS'][name] = content
     return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_apply_tag(self, name):
+    '''
+    hwaf_apply_tag activates a tag with name `name`
+    @param name: a string
+
+    e.x:
+      ctx.hwaf_apply_tag("x86_64-slc6-gcc46-dbg")
+    '''
+    try:
+        content = self.env['HWAF_TAGS']
+        self.env.append_unique('HWAF_ACTIVE_TAGS', [name])
+        self.env.append_unique('HWAF_ACTIVE_TAGS', content)
+    except KeyError:
+        raise waflib.Errors.WafError("no such tag (%s) in HWAF_TAGS" % name)
+    pass
+
+### ------------------------------------------------------------------------
+@conf
+def _hwaf_select_value(self, value):
+    '''
+    hwaf_select_value selects a value from the dict `value` corresponding
+    to the set of currently live tags.
+    '''
+    tags = self.env['HWAF_ACTIVE_TAGS']
+    default = None
+    for d in value:
+        v = list((k,v) for k,v in d.items())[0]
+        #msg.debug('list= %s' % (v,))
+        if v[0] in tags:
+            return waflib.subst_vars(v[1], self.env)
+        if v[0] == "default":
+            default = v[1]
+        pass
+    msg.info('select default value: %s' % (value,))
+    return waflib.Utils.subst_vars(default, self.env)
 
 ### ------------------------------------------------------------------------
 @conf
@@ -610,7 +648,9 @@ def hwaf_declare_path(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
-    ## FIXME
+    value = self._hwaf_select_value(value)
+    self.env[name] = value
+    self.declare_runtime_env(name)
     return
 
 ### ------------------------------------------------------------------------
@@ -622,7 +662,8 @@ def hwaf_path_prepend(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
-    ## FIXME
+    value = self._hwaf_select_value(value)
+    self.env.prepend_value(name, value)
     return
 
 ### ------------------------------------------------------------------------
@@ -634,7 +675,8 @@ def hwaf_path_append(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
-    ## FIXME
+    value = self._hwaf_select_value(value)
+    self.env.append_value(name, value)
     return
 
 ### ------------------------------------------------------------------------
@@ -646,7 +688,16 @@ def hwaf_path_remove(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
-    ## FIXME
+    remove = self._hwaf_select_value(value)
+    cur_val = waflib.Utils.to_list(self.env[name])
+    new_val = []
+    for x in cur_val:
+        ## FIXME: what are the CMT semantics ?
+        if x == remove:
+            continue
+        new_val.append(x)
+        pass
+    self.env[name] = new_val
     return
 
 ### ------------------------------------------------------------------------
@@ -830,7 +881,9 @@ def _hwaf(self, *k, **kw):
     ctx = self
     for x in features:
         try:
+            #msg.info("--- trying [%s] ---..." % x)
             ctx = getattr(self, x)
+            #msg.info("--- trying [%s] ---... [ok]" % x)
             return ctx(*k, **kw)
         except AttributeError:
             ctx = self

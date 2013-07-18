@@ -103,6 +103,9 @@ def configure(ctx):
     waflib.Context.g_module.VERSION = projvers
     ctx.env.HWAF_PROJECT_VERSION = projvers
     
+    if not ctx.env.HWAF_TAGS:        ctx.env['HWAF_TAGS'] = {}
+    if not ctx.env.HWAF_ACTIVE_TAGS: ctx.env['HWAF_ACTIVE_TAGS'] = []
+
     cmtpkgs = os.environ.get('CMTPKGS', None)
     if not cmtpkgs and ctx.options.cmtpkgs:
         cmtpkgs = ctx.options.cmtpkgs
