@@ -247,6 +247,59 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 		}
 		// FIXME:
 		//  handle 'env' section
+		if _, ok := cfg["env"]; ok {
+			env := waf_get_yaml_map(cfg["env"])
+			for k, iv := range env {
+				switch v := iv.(type) {
+				case string:
+					if strings.HasSuffix(v, fmt.Sprintf(":${%s}", k)) {
+						// gamble: path_append
+						str := v[:len(v)-len(fmt.Sprintf(":${%s}", k))]
+						stmt := hlib.PathAppendStmt{
+							Value: hlib.Value{
+								Name: k,
+								Set: []hlib.KeyValue{
+									{Tag: "default", Value: []string{str}},
+								},
+							},
+						}
+						wcfg.Stmts = append(
+							wcfg.Stmts,
+							&stmt,
+						)
+					} else if strings.HasPrefix(v, fmt.Sprintf("${%s}:", k)) {
+						// gamble: path_prepend
+						str := v[len(fmt.Sprintf("${%s}:", k)):]
+						stmt := hlib.PathPrependStmt{
+							Value: hlib.Value{
+								Name: k,
+								Set: []hlib.KeyValue{
+									{Tag: "default", Value: []string{str}},
+								},
+							},
+						}
+						wcfg.Stmts = append(
+							wcfg.Stmts,
+							&stmt,
+						)
+					} else {
+						// gamble declare_path
+						stmt := hlib.PathStmt{
+							Value: hlib.Value{
+								Name: k,
+								Set: []hlib.KeyValue{
+									{Tag: "default", Value: []string{v}},
+								},
+							},
+						}
+						wcfg.Stmts = append(
+							wcfg.Stmts,
+							&stmt,
+						)
+					}
+				}
+			}
+		}
 		//  handle 'tag' section
 		//  handle 'export-tools' section ?
 
@@ -336,6 +389,11 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 					return nil, fmt.Errorf("inconsistency in target [%s] declaration: name=%q but key=%q", n, nn, wtgt.Name)
 				}
 				delete(tgt, "name")
+			}
+
+			if _, ok := tgt["target"]; ok {
+				wtgt.Target = tgt["target"].(string)
+				delete(tgt, "target")
 			}
 
 			cnvmap := map[string]*[]hlib.Value{

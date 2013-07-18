@@ -79,6 +79,7 @@ type Target_t struct {
 	Name           string
 	Features       []string
 	Source         []Value
+	Target         string
 	Use            []Value
 	Defines        []Value
 	CFlags         []Value

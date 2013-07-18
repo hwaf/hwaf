@@ -75,7 +75,10 @@ def options(ctx):
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
-    {{range .Tools}}ctx.load("{{.}}")
+    {{range .Tools}}ctx.load("{{.}}"); ctx.{{.}}()
+    {{end}}
+    {{.Env | gen_wscript_env}}
+    {{range .Stmts}}##{{. | gen_wscript_stmts}}
     {{end}}
     return # configure
 `,
@@ -92,9 +95,11 @@ def configure(ctx):
 
 ### ---------------------------------------------------------------------------
 def build(ctx):
-    {{range .Tools}}ctx.load("{{.}}")
+    {{range .Tools}}ctx.load("{{.}}"); ctx.{{.}}()
     {{end}}
     {{with .Targets}}{{. | gen_wscript_targets}}{{end}}
+    {{range .Stmts}}##{{. | gen_wscript_stmts}}
+    {{end}}
     return # build
 `,
 		wscript.Build,
@@ -128,10 +133,74 @@ func w_tmpl(w io.Writer, text string, data interface{}) error {
 			return "[" + strings.Join(str, ", ") + "]"
 		},
 		"gen_wscript_pkg_deps": gen_wscript_pkg_deps,
+		"gen_wscript_env":      gen_wscript_env,
+		"gen_wscript_stmts":    gen_wscript_stmts,
 		"gen_wscript_targets":  gen_wscript_targets,
 	})
 	template.Must(t.Parse(text))
 	return t.Execute(w, data)
+}
+
+func w_gen_taglist(tags string) []string {
+	str := make([]string, 0, strings.Count(tags, "&"))
+	for _, v := range strings.Split(tags, "&") {
+		v = strings.Trim(v, " ")
+		if len(v) > 0 {
+			str = append(str, v)
+		}
+	}
+	return str
+}
+
+func w_gen_valdict_switch_str(indent string, values [][2]string) string {
+	o := make([]string, 0, len(values))
+	o = append(o, "(")
+	for _, v := range values {
+		tags := w_gen_taglist(v[0])
+		key_fmt := "(%s)"
+		if strings.Count(v[0], "&") <= 0 {
+			key_fmt = "%s"
+		}
+		val_fmt := "%s"
+		if strings.Count(v[1], ",") > 0 {
+			val_fmt = "[%s]"
+		}
+		if len(v[1]) == 0 {
+			val_fmt = "%q"
+		}
+
+		o = append(o,
+			fmt.Sprintf(
+				"%s  {%s: %s},",
+				indent,
+				fmt.Sprintf(key_fmt, w_py_strlist(tags)),
+				fmt.Sprintf(val_fmt, v[1]),
+			),
+		)
+	}
+	o = append(o, indent+")")
+	return strings.Join(o, "\n")
+}
+
+func w_py_hlib_value(indent string, fctname string, x Value) []string {
+	str := make([]string, 0)
+
+	values := make([][2]string, 0, len(x.Set))
+	for _, v := range x.Set {
+		k := v.Tag
+		values = append(values, [2]string{k, w_py_strlist(v.Value)})
+	}
+	str = append(
+		str,
+		fmt.Sprintf(
+			"ctx.%s(%q, %s)",
+			fctname,
+			x.Name,
+			w_gen_valdict_switch_str(indent, values),
+		),
+	)
+
+	return str
 }
 
 func w_py_strlist(str []string) string {
@@ -228,6 +297,124 @@ func gen_wscript_pkg_deps(pkg Package_t) string {
 	return strings.Join(str, "\n")
 }
 
+func gen_wscript_env(env Env_t) string {
+	const indent = "    "
+	var str []string
+
+	str = append(str, "## environment -- begin")
+	for k, _ := range env {
+		str = append(str, fmt.Sprintf("ctx.hwaf_declare_runtime_env(%q)", k))
+		// 	switch len(values) {
+		// 	case 0:
+		// 	case 1:
+		// 		if len(values.Set) > 1 {
+		// 			// str = append(
+		// 			// 	str,
+		// 			// 	fmt.Sprintf("%s: {"),
+		// 			// )
+		// 		} else {
+		// 			kvs := values.Set[0]
+		// 			for k, v := range kvs {
+
+		// 			}
+		// 		}
+		// 	default:
+		// 	}
+	}
+	str = append(str, "## environment -- end")
+
+	// reindent:
+	for i, s := range str[1:] {
+		str[i+1] = indent + s
+	}
+
+	return strings.Join(str, "\n")
+}
+
+func gen_wscript_stmts(stmt Stmt) string {
+	const indent = "    "
+	var str []string
+	switch x := stmt.(type) {
+	case *MacroStmt:
+		str = []string{fmt.Sprintf("## macro %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_declare_macro", x.Value)...,
+		)
+
+	case *MacroAppendStmt:
+		str = []string{fmt.Sprintf("## macro_append %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_macro_append", x.Value)...,
+		)
+
+	case *MacroPrependStmt:
+		str = []string{fmt.Sprintf("## macro_prepend %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_macro_prepend", x.Value)...,
+		)
+
+	case *MacroRemoveStmt:
+		str = []string{fmt.Sprintf("## macro_remove %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_macro_remove", x.Value)...,
+		)
+
+	case *TagStmt:
+		str = []string{fmt.Sprintf("## tag %v", stmt)}
+		values := w_py_strlist(x.Content)
+		str = append(str,
+			"ctx.hwaf_declare_tag(",
+			fmt.Sprintf("%s%q,", indent, x.Name),
+			fmt.Sprintf("%scontent=[%s]", indent, values),
+			")",
+		)
+
+	case *PathStmt:
+		str = []string{fmt.Sprintf("## path %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_declare_path", x.Value)...,
+		)
+
+	case *PathAppendStmt:
+		str = []string{fmt.Sprintf("## path_append %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_path_append", x.Value)...,
+		)
+
+	case *PathPrependStmt:
+		str = []string{fmt.Sprintf("## path_prepend %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_path_prepend", x.Value)...,
+		)
+
+	case *PathRemoveStmt:
+		str = []string{fmt.Sprintf("## path_remove %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_path_remove", x.Value)...,
+		)
+
+	//case *ApplyPatternStmt:
+
+	default:
+		str = []string{fmt.Sprintf("### **** statement %T (%v)", stmt, stmt)}
+	}
+
+	// reindent:
+	for i, s := range str[1:] {
+		str[i+1] = indent + s
+	}
+
+	return strings.Join(str, "\n")
+}
+
 func gen_wscript_targets(tgts Targets_t) string {
 	const indent = "    "
 	var str []string
@@ -247,10 +434,15 @@ func gen_wscript_targets(tgts Targets_t) string {
 		}
 		srcs := cnv_values(tgt.Source)
 		features := strings.Join(tgt.Features, " ")
+		target_name := tgt.Target
+		if target_name == "" {
+			target_name = tgt.Name
+		}
 		str = append(str,
 			"ctx(",
 			fmt.Sprintf("%sfeatures = %q,", indent, features),
 			fmt.Sprintf("%sname     = %q,", indent, tgt.Name),
+			fmt.Sprintf("%starget   = %q,", indent, target_name),
 			fmt.Sprintf("%ssource   = [%s],", indent, w_py_strlist(srcs)),
 		)
 
