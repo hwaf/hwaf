@@ -430,10 +430,21 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 
 func waf_gen_hvalue_from(name string, data interface{}) hlib.Value {
 	value := hlib.Value{Name: name}
+
+	_add_to_value := func(v *hlib.Value, kv hlib.KeyValue) {
+		for i, kkv := range v.Set {
+			if kkv.Tag == kv.Tag {
+				v.Set[i].Value = append(v.Set[i].Value, kv.Value...)
+				return
+			}
+		}
+		v.Set = append(v.Set, kv)
+	}
+
 	switch data := data.(type) {
 	case string:
-		value.Set = append(
-			value.Set,
+		_add_to_value(
+			&value,
 			hlib.KeyValue{
 				Tag:   "default",
 				Value: []string{data},
@@ -443,8 +454,8 @@ func waf_gen_hvalue_from(name string, data interface{}) hlib.Value {
 	case []string:
 		v := make([]string, len(data))
 		copy(v, data)
-		value.Set = append(
-			value.Set,
+		_add_to_value(
+			&value,
 			hlib.KeyValue{
 				Tag:   "default",
 				Value: v,
@@ -455,8 +466,8 @@ func waf_gen_hvalue_from(name string, data interface{}) hlib.Value {
 		for _, v := range data {
 			switch data := v.(type) {
 			case string:
-				value.Set = append(
-					value.Set,
+				_add_to_value(
+					&value,
 					hlib.KeyValue{
 						Tag:   "default",
 						Value: []string{data},
@@ -466,8 +477,8 @@ func waf_gen_hvalue_from(name string, data interface{}) hlib.Value {
 			case []string:
 				v := make([]string, len(data))
 				copy(v, data)
-				value.Set = append(
-					value.Set,
+				_add_to_value(
+					&value,
 					hlib.KeyValue{
 						Tag:   "default",
 						Value: v,
