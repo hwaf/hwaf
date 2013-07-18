@@ -349,6 +349,7 @@ sys.stdout.flush()
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
 		if err != nil {
+			hwaf.Run("cat", "src/mytools/mypkg/wscript")
 			hwaf.Display()
 			t.Fatalf("cmd %v failed: %v", cmd, err)
 		}
