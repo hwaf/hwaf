@@ -186,6 +186,170 @@ sys.stdout.flush()
 	}
 }
 
+func TestHwafTutoHscript(t *testing.T) {
+	workdir, err := ioutil.TempDir("", "hwaf-test-")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer os.RemoveAll(workdir)
+
+	err = os.Chdir(workdir)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	hwaf, err := newlogger("hwaf.log")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer hwaf.Close()
+
+	for _, cmd := range [][]string{
+		{"hwaf", "init", "-q=0", "."},
+		{"hwaf", "setup", "-q=0"},
+		{"hwaf", "pkg", "create", "-q=0", "mytools/mypkg"},
+		{"/bin/rm", "-f", "src/mytools/mypkg/wscript"},
+		{"hwaf", "pkg", "ls"},
+	} {
+		err := hwaf.Run(cmd[0], cmd[1:]...)
+		if err != nil {
+			hwaf.Display()
+			t.Fatalf("cmd %v failed: %v", cmd, err)
+		}
+	}
+
+	mypkgdir := filepath.Join("src", "mytools", "mypkg")
+
+	// create src/mytools/mypkg/wscript file
+	ff, err := os.Create(filepath.Join(mypkgdir, "hscript.yml"))
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	_, err = ff.WriteString(
+		`
+# -*- yml -*-
+
+package: {
+    name: mytools/mypkg,
+    authors: "Sebastien Binet",
+    deps: {
+        public: [],
+    },
+}
+
+options: {}
+configure: {
+    tools: [find_clhep, find_python],
+    env: {
+        PYTHONPATH: "${INSTALL_AREA}/python:${PYTHONPATH}",
+    },
+}
+
+build: {
+
+    cxx-hello-world: {
+        features: "cxx cxxshlib",
+        source:   "src/mypkgtool.cxx",
+        target:   "hello-world",
+    },
+
+    py-hello: {
+        features: "py",
+        source:   [python/pyhello.py, python/__init__.py],
+        install_path: "${INSTALL_AREA}/python/mypkg",
+        use:          "cxx-hello-world",
+    },
+}
+`)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	ff.Sync()
+	ff.Close()
+
+	ff, err = os.Create(filepath.Join(mypkgdir, "src", "mypkgtool.cxx"))
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	_, err = ff.WriteString(`
+#include <cmath>
+
+extern "C" {
+  
+float
+calc_hypot(float x, float y) 
+{
+  return std::sqrt(x*x + y*y);
+}
+
+}
+
+// EOF
+`)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	ff.Sync()
+	ff.Close()
+
+	err = os.MkdirAll(filepath.Join(mypkgdir, "python"), 0777)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	ff, err = os.Create(filepath.Join(mypkgdir, "python", "__init__.py"))
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	ff.Close()
+
+	ff, err = os.Create(filepath.Join(mypkgdir, "python", "pyhello.py"))
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	_, err = ff.WriteString(`
+import ctypes
+lib = ctypes.cdll.LoadLibrary('libhello-world.so')
+if not lib:
+    raise RuntimeError("could not find hello-world")
+
+calc_hypot = lib.calc_hypot
+calc_hypot.argtypes = [ctypes.c_float]*2
+calc_hypot.restype = ctypes.c_float
+
+import sys
+sys.stdout.write("hypot(10,20) = %s\n" % calc_hypot(10,20))
+sys.stdout.flush()
+# EOF #
+`)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	ff.Sync()
+	ff.Close()
+
+	for _, cmd := range [][]string{
+		{"hwaf", "configure"},
+		{"hwaf"},
+		{"hwaf", "run", "python", "-c", "import mypkg.pyhello"},
+		{"hwaf", "show", "projects"},
+		{"hwaf", "show", "pkg-uses", "mytools/mypkg"},
+		{"hwaf", "show", "flags", "CXXFLAGS", "LINKFLAGS"},
+		{"hwaf", "show", "constituents"},
+		{"hwaf", "pkg", "rm", "mytools/mypkg"},
+		{"hwaf", "pkg", "ls"},
+	} {
+		err := hwaf.Run(cmd[0], cmd[1:]...)
+		if err != nil {
+			hwaf.Display()
+			t.Fatalf("cmd %v failed: %v", cmd, err)
+		}
+	}
+}
+
 func TestHwafHepTuto(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
