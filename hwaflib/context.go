@@ -79,6 +79,7 @@ func NewContextFrom(workarea string) (*Context, error) {
 		gcfg:     nil,
 		lcfg:     nil,
 		PkgDb:    nil,
+		atexit:   make([]func(), 0),
 	}
 
 	err = ctx.init()
