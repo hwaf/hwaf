@@ -20,11 +20,11 @@ if not _heptooldir in sys.path: sys.path.append(_heptooldir)
 def _cmt_get_srcs_lst(self, source, root=None):
     '''hack to support implicit src/*cxx in CMT req-files'''
     if root is None:
-        root = self.root
+        root = self.path
     if isinstance(source, (list, tuple)):
         src = []
         for s in source:
-            src.extend(self._cmt_get_srcs_lst(s, root))
+            src.extend(self._cmt_get_srcs_lst(s, root=root))
         return src
     elif not isinstance(source, type('')):
         ## a waflib.Node ?
