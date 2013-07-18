@@ -256,9 +256,9 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 				switch v := iv.(type) {
 				case string:
 					if strings.HasSuffix(v, fmt.Sprintf(":${%s}", k)) {
-						// gamble: path_append
+						// gamble: path_prepend
 						str := v[:len(v)-len(fmt.Sprintf(":${%s}", k))]
-						stmt := hlib.PathAppendStmt{
+						stmt := hlib.PathPrependStmt{
 							Value: hlib.Value{
 								Name: k,
 								Set: []hlib.KeyValue{
@@ -271,9 +271,9 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 							&stmt,
 						)
 					} else if strings.HasPrefix(v, fmt.Sprintf("${%s}:", k)) {
-						// gamble: path_prepend
+						// gamble: path_append
 						str := v[len(fmt.Sprintf("${%s}:", k)):]
-						stmt := hlib.PathPrependStmt{
+						stmt := hlib.PathAppendStmt{
 							Value: hlib.Value{
 								Name: k,
 								Set: []hlib.KeyValue{
