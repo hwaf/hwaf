@@ -17,7 +17,7 @@ print version and exit.
 
 ex:
  $ hwaf version
- hwaf-20121212
+ hwaf-20130718
 `,
 		Flag: *flag.NewFlagSet("hwaf-version", flag.ExitOnError),
 	}
