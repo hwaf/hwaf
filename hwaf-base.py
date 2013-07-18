@@ -16,7 +16,6 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 if not _heptooldir in sys.path: sys.path.append(_heptooldir)
 
 WSCRIPT_FILE = 'wscript'
-HSCRIPT_FILE = 'hscript.yml'
 
 ### ---------------------------------------------------------------------------
 def options(ctx):
@@ -223,8 +222,7 @@ def hwaf_find_subpackages(self, directory='.'):
     for d in dirs:
         #msg.debug ("##> %s (type: %s)" % (d.abspath(), type(d)))
         node = d
-        if node and (node.ant_glob(WSCRIPT_FILE) or
-                     node.ant_glob(HSCRIPT_FILE)):
+        if node and node.ant_glob(WSCRIPT_FILE):
             srcs.append(d)
         pass
     return srcs
@@ -233,7 +231,7 @@ def hwaf_find_subpackages(self, directory='.'):
 def hwaf_find_suboptions(directory='.'):
     pkgs = []
     for root, dirs, files in os.walk(directory):
-        if WSCRIPT_FILE in files or HSCRIPT_FILE in files:
+        if WSCRIPT_FILE in files:
             pkgs.append(root)
             continue
     return pkgs
@@ -808,22 +806,38 @@ def _get_pkg_version_defines(self):
     return pkg_defines
 
 ### ------------------------------------------------------------------------
-@conf
-def hwaf_build(self, *k, **kw):
+import waflib.Build
+_hwaf_orig_bld_call = waflib.Build.BuildContext.__call__
+def _hwaf(self, *k, **kw):
     '''
-    hwaf_build wraps the Build.BuildContext.__call__ method.
+    hwaf wraps the Build.BuildContext.__call__ method.
 
     e.x:
-      ctx.hwaf_build(
+      ctx(
          features = "cxx cxxshlib",
          name = "mylib",
          source = "src/*.cxx",
       )
     '''
+    #msg.info("ctx(%s, %s)" % (k, kw))
     ## FIXME:
-    return self(*k, **kw)
+    install_path = waflib.Utils.to_list(kw.get('install_path', []))
+    if install_path:
+        kw['install_path'] = install_path[0]
+        pass
 
-import waflib.Build
-waflib.Build.BuildContext.hwaf_build = hwaf_build
+    features = waflib.Utils.to_list(kw.get('features', []))
+    ctx = self
+    for x in features:
+        try:
+            ctx = getattr(self, x)
+            return ctx(*k, **kw)
+        except AttributeError:
+            ctx = self
+            pass
+        pass
+    return _hwaf_orig_bld_call(ctx, *k, **kw)
+
+waflib.Build.BuildContext.__call__ = _hwaf
 
 ## EOF ##
