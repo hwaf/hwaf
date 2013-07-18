@@ -25,7 +25,7 @@ type Version string
 
 type Dep_t struct {
 	Name    string
-	Version string
+	Version Version
 	Type    DepType
 }
 
@@ -77,7 +77,7 @@ type Targets_t []Target_t
 
 type Target_t struct {
 	Name           string
-	Features       string
+	Features       []string
 	Source         []Value
 	Use            []Value
 	Defines        []Value
@@ -89,6 +89,8 @@ type Target_t struct {
 	RPath          []Value
 	Includes       []Value
 	ExportIncludes []Value
+	InstallPath    []Value
+	KwArgs         map[string][]Value
 }
 
 type KeyValue struct {

@@ -96,5 +96,6 @@ func main() {
 	err = g_cmd.Run(args)
 	handle_err(err)
 
+	g_ctx.Exit(0)
 	return
 }

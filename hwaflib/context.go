@@ -39,6 +39,7 @@ type Context struct {
 	gcfg     *gocfg.Config // the global configuration (user>global)
 	lcfg     *gocfg.Config // the local config of a local workarea
 	PkgDb    *PackageDb    // a naive database of locally checked out packages
+	atexit   []func()      // list of functions to run at-exit
 }
 
 func NewContext() (*Context, error) {
@@ -53,6 +54,7 @@ func NewContext() (*Context, error) {
 		gcfg:     nil,
 		lcfg:     nil,
 		PkgDb:    nil,
+		atexit:   make([]func(), 0),
 	}
 
 	err = ctx.init()
@@ -83,6 +85,14 @@ func NewContextFrom(workarea string) (*Context, error) {
 	return ctx, err
 }
 
+// Exit runs the at-exit functions before calling os.Exit
+func (ctx *Context) Exit(rc int) {
+	for _, fct := range ctx.atexit {
+		fct()
+	}
+	os.Exit(rc)
+}
+
 func (ctx *Context) WafBin() (string, error) {
 	var err error
 
@@ -94,12 +104,22 @@ func (ctx *Context) WafBin() (string, error) {
 	top := filepath.Join(wrkarea, ".hwaf")
 	waf := filepath.Join(top, "bin", "waf")
 	if path_exists(waf) {
+		err = ctx.init_waf_ctx()
+		if err != nil {
+			ctx.Warn("problem initializing waf: %v\n", err)
+			return "", err
+		}
 		return waf, nil
 	}
 
 	top = ctx.Root
 	waf = filepath.Join(top, "bin", "waf")
 	if path_exists(waf) {
+		err = ctx.init_waf_ctx()
+		if err != nil {
+			ctx.Warn("problem initializing waf: %v\n", err)
+			return "", err
+		}
 		return waf, nil
 	}
 
@@ -112,6 +132,13 @@ func (ctx *Context) WafBin() (string, error) {
 			waf,
 		)
 		return "", err
+	} else {
+		err = ctx.init_waf_ctx()
+		if err != nil {
+			ctx.Warn("problem initializing waf: %v\n", err)
+			return "", err
+		}
+		return waf, nil
 	}
 
 	return "", fmt.Errorf("could not find 'waf' binary")
