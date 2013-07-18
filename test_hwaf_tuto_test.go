@@ -338,6 +338,7 @@ sys.stdout.flush()
 		{"hwaf", "waf", "--version"},
 		{"hwaf", "configure"},
 		{"hwaf"},
+		{"hwaf", "show", "flags", "PYTHONPATH"},
 		{"hwaf", "run", "python", "-c", "import mypkg.pyhello"},
 		{"hwaf", "show", "projects"},
 		{"hwaf", "show", "pkg-uses", "mytools/mypkg"},
@@ -350,6 +351,7 @@ sys.stdout.flush()
 		err := hwaf.Run(cmd[0], cmd[1:]...)
 		if err != nil {
 			hwaf.Run("cat", "src/mytools/mypkg/wscript")
+			hwaf.Run("hwaf", "show", "flags", "PYTHONPATH")
 			hwaf.Display()
 			t.Fatalf("cmd %v failed: %v", cmd, err)
 		}
