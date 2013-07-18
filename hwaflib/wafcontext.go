@@ -49,8 +49,8 @@ func (ctx *Context) init_waf_ctx() error {
 	}
 	ctx.atexit = append(ctx.atexit, func() {
 		for _, fname := range wscripts {
-			fmt.Printf(">>> removing [%s]...\n", fname)
-			//os.Remove(fname)
+			//fmt.Printf(">>> removing [%s]...\n", fname)
+			os.Remove(fname)
 		}
 	})
 
