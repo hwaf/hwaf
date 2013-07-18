@@ -50,7 +50,10 @@ func (ctx *Context) init_waf_ctx() error {
 	ctx.atexit = append(ctx.atexit, func() {
 		for _, fname := range wscripts {
 			//fmt.Printf(">>> removing [%s]...\n", fname)
-			os.Remove(fname)
+			keep := os.Getenv("HWAF_KEEP_WSCRIPT")
+			if keep == "" || keep == "0" {
+				os.Remove(fname)
+			}
 		}
 	})
 
