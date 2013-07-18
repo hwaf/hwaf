@@ -636,7 +636,7 @@ def _hwaf_select_value(self, value):
         if v[0] == "default":
             default = v[1]
         pass
-    msg.info('select default value: %s' % (value,))
+    #msg.debug('select default value: %s' % (value,))
     return waflib.Utils.subst_vars(default, self.env)
 
 ### ------------------------------------------------------------------------
