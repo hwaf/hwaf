@@ -239,7 +239,7 @@ package: {
 
 options: {}
 configure: {
-    tools: [find_clhep, find_python],
+    tools: [find_python],
     env: {
         PYTHONPATH: "${INSTALL_AREA}/python:${PYTHONPATH}",
     },
