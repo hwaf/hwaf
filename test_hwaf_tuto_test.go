@@ -241,6 +241,7 @@ options: {}
 configure: {
     tools: [find_python],
     env: {
+        MYPATH: "/tmp",
         PYTHONPATH: "${INSTALL_AREA}/python:${PYTHONPATH}",
     },
 }
@@ -332,12 +333,14 @@ sys.stdout.flush()
 	ff.Close()
 
 	for _, cmd := range [][]string{
+		{"hwaf", "waf", "--version"},
 		{"hwaf", "configure"},
 		{"hwaf"},
 		{"hwaf", "run", "python", "-c", "import mypkg.pyhello"},
 		{"hwaf", "show", "projects"},
 		{"hwaf", "show", "pkg-uses", "mytools/mypkg"},
 		{"hwaf", "show", "flags", "CXXFLAGS", "LINKFLAGS"},
+		{"hwaf", "show", "flags", "MYPATH"},
 		{"hwaf", "show", "constituents"},
 		{"hwaf", "pkg", "rm", "mytools/mypkg"},
 		{"hwaf", "pkg", "ls"},
