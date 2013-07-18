@@ -168,6 +168,7 @@ sys.stdout.flush()
 	ff.Close()
 
 	for _, cmd := range [][]string{
+		{"hwaf", "waf", "--version"},
 		{"hwaf", "configure"},
 		{"hwaf"},
 		{"hwaf", "run", "python", "-c", "import mypkg.pyhello"},
@@ -383,6 +384,7 @@ func TestHwafHepTuto(t *testing.T) {
 		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-ab", "pkg-ab"},
 		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-ac", "pkg-ac"},
 		{"hwaf", "pkg", "ls"},
+		{"hwaf", "waf", "--version"},
 		{"hwaf", "configure"},
 		{"hwaf", "build"},
 		{"hwaf", "install"},
