@@ -98,12 +98,12 @@ func waf_gen_wscript(fname string) error {
 
 	wscript, err := waf_get_wscript(data)
 	if err != nil {
-		return err
+		return fmt.Errorf("error parsing file [%s]:\n%v", hscript, err)
 	}
 
 	enc := hlib.NewWscriptEncoder(f)
 	if enc == nil {
-		return fmt.Errorf("error creating WscriptEncoder")
+		return fmt.Errorf("error creating WscriptEncoder for file [%s]", fname)
 	}
 
 	err = enc.Encode(wscript)
