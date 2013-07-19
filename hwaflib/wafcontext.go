@@ -41,6 +41,12 @@ func (ctx *Context) init_waf_ctx() error {
 	for _, fname := range fnames {
 		path := filepath.Dir(fname)
 		wscript := filepath.Join(path, "wscript")
+		if path_exists(wscript) {
+			err = os.Rename(wscript, wscript+".bak")
+			if err != nil {
+				return err
+			}
+		}
 		err = waf_gen_wscript(wscript)
 		wscripts = append(wscripts, wscript)
 		if err != nil {
