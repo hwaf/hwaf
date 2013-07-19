@@ -191,7 +191,13 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 		return nil, fmt.Errorf("invalid 'package' section:\n%v", err)
 	}
 
-	wpkg.Name = pkg["name"].(string)
+	switch pkgname := pkg["name"].(type) {
+	case string:
+		wpkg.Name = pkgname
+	default:
+		return nil, fmt.Errorf("invalid type (%T) for 'package.name' field (expected a string)", pkgname)
+
+	}
 
 	if _, ok := pkg["authors"]; ok {
 		switch v := pkg["authors"].(type) {
