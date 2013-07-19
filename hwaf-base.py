@@ -693,7 +693,7 @@ def hwaf_path_remove(self, name, value):
     new_val = []
     for x in cur_val:
         ## FIXME: what are the CMT semantics ?
-        if x == remove:
+        if x == remove or remove in x:
             continue
         new_val.append(x)
         pass
