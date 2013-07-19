@@ -124,11 +124,58 @@ func waf_get_yaml_map(data interface{}) map[string]interface{} {
 	return out
 }
 
+func waf_validate_sections(data map[string]interface{}, sections ...string) error {
+	not_valid := make([]string, 0)
+	for k, _ := range data {
+		found := false
+		for _, ref := range sections {
+			if ref == k {
+				found = true
+				break
+			}
+		}
+		if !found {
+			not_valid = append(not_valid, k)
+		}
+	}
+
+	switch n := len(not_valid); n {
+	case 0:
+		return nil
+	case 1:
+		return fmt.Errorf(
+			"invalid section:  %s\nvalid sections: %v",
+			not_valid[0],
+			sections,
+		)
+	default:
+		return fmt.Errorf(
+			"invalid sections: %v\valid sections: %v",
+			not_valid,
+			sections,
+		)
+	}
+
+	return nil
+}
+
 func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 	var err error
 	var wscript hlib.Wscript_t
 
 	wpkg := &wscript.Package
+
+	// validate sections layout
+	err = waf_validate_sections(
+		data,
+		"package",
+		"options",
+		"configure",
+		"build",
+	)
+	if err != nil {
+		return nil, fmt.Errorf("invalid hscript:\n%v", err)
+	}
 
 	// ---------- package section ---------------------------------------------
 	if _, ok := data["package"]; !ok {
@@ -136,6 +183,14 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 	}
 
 	pkg := waf_get_yaml_map(data["package"])
+	err = waf_validate_sections(
+		pkg,
+		"name", "authors", "managers", "version", "deps",
+	)
+	if err != nil {
+		return nil, fmt.Errorf("invalid 'package' section:\n%v", err)
+	}
+
 	wpkg.Name = pkg["name"].(string)
 
 	if _, ok := pkg["authors"]; ok {
@@ -173,6 +228,14 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 			return nil, fmt.Errorf("'deps' field has to be a map")
 		}
 		deps := waf_get_yaml_map(pkg["deps"])
+
+		err = waf_validate_sections(
+			deps,
+			"public", "private", "runtime",
+		)
+		if err != nil {
+			return nil, fmt.Errorf("invalid 'package.deps' section:\n%v", err)
+		}
 
 		all_deps := make(map[string]int)
 		if _, ok := deps["public"]; ok {
@@ -229,6 +292,14 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 	if _, ok := data["options"]; ok {
 		wopt := &wscript.Options
 		opt := waf_get_yaml_map(data["options"])
+		err = waf_validate_sections(
+			opt,
+			"tools", "hwaf-call",
+		)
+		if err != nil {
+			return nil, fmt.Errorf("invalid 'options' section:\n%v", err)
+		}
+
 		if _, ok := opt["tools"]; ok {
 			tools := opt["tools"].([]interface{})
 			for _, itool := range tools {
@@ -248,6 +319,17 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 	if _, ok := data["configure"]; ok {
 		wcfg := &wscript.Configure
 		cfg := waf_get_yaml_map(data["configure"])
+
+		err = waf_validate_sections(
+			cfg,
+			"tools", "hwaf-call", "env",
+			"declare-tags",
+			"apply-tags",
+		)
+		if err != nil {
+			return nil, fmt.Errorf("invalid 'configure' section:\n%v", err)
+		}
+
 		if _, ok := cfg["tools"]; ok {
 			tools := cfg["tools"].([]interface{})
 			for _, itool := range tools {
