@@ -75,6 +75,8 @@ def options(ctx):
 ### ---------------------------------------------------------------------------
 def configure(ctx):
     {{with .Tools}}{{. | gen_wscript_tools}}{{end}}
+    {{with .HwafCall}}{{. | gen_wscript_hwaf_call}}
+    {{end}}
     {{.Env | gen_wscript_env}}
     {{range .Stmts}}##{{. | gen_wscript_stmts}}
     {{end}}
@@ -94,9 +96,11 @@ def configure(ctx):
 ### ---------------------------------------------------------------------------
 def build(ctx):
     {{with .Tools}}{{. | gen_wscript_tools}}{{end}}
-    {{with .Targets}}{{. | gen_wscript_targets}}{{end}}
+    {{with .HwafCall}}{{. | gen_wscript_hwaf_call}}
+    {{end}}
     {{range .Stmts}}##{{. | gen_wscript_stmts}}
     {{end}}
+    {{with .Targets}}{{. | gen_wscript_targets}}{{end}}
     return # build
 `,
 		wscript.Build,
@@ -129,11 +133,12 @@ func w_tmpl(w io.Writer, text string, data interface{}) error {
 			}
 			return "[" + strings.Join(str, ", ") + "]"
 		},
-		"gen_wscript_pkg_deps": gen_wscript_pkg_deps,
-		"gen_wscript_tools":    gen_wscript_tools,
-		"gen_wscript_env":      gen_wscript_env,
-		"gen_wscript_stmts":    gen_wscript_stmts,
-		"gen_wscript_targets":  gen_wscript_targets,
+		"gen_wscript_pkg_deps":  gen_wscript_pkg_deps,
+		"gen_wscript_tools":     gen_wscript_tools,
+		"gen_wscript_hwaf_call": gen_wscript_hwaf_call,
+		"gen_wscript_env":       gen_wscript_env,
+		"gen_wscript_stmts":     gen_wscript_stmts,
+		"gen_wscript_targets":   gen_wscript_targets,
 	})
 	template.Must(t.Parse(text))
 	return t.Execute(w, data)
@@ -317,11 +322,34 @@ func gen_wscript_tools(tools []string) string {
 	return strings.Join(str, "\n")
 }
 
+func gen_wscript_hwaf_call(calls []string) string {
+	const indent = "    "
+	str := []string{""}
+
+	for _, script := range calls {
+		str = append(
+			str,
+			fmt.Sprintf(
+				"ctx._hwaf_load_fct(PACKAGE['name'], %q)",
+				script,
+			),
+			"",
+		)
+	}
+
+	// reindent:
+	for i, s := range str[1:] {
+		str[i+1] = indent + s
+	}
+
+	return strings.Join(str, "\n")
+}
+
 func gen_wscript_env(env Env_t) string {
 	const indent = "    "
 	var str []string
 
-	str = append(str, "## environment -- begin")
+	//str = append(str, "## environment -- begin")
 	for k, _ := range env {
 		str = append(str, fmt.Sprintf("ctx.hwaf_declare_runtime_env(%q)", k))
 		// 	switch len(values) {
@@ -341,12 +369,12 @@ func gen_wscript_env(env Env_t) string {
 		// 	default:
 		// 	}
 	}
-	str = append(str, "## environment -- end")
+	//str = append(str, "## environment -- end")
 
-	// reindent:
-	for i, s := range str[1:] {
-		str[i+1] = indent + s
-	}
+	// // reindent:
+	// for i, s := range str[1:] {
+	// 	str[i+1] = indent + s
+	// }
 
 	return strings.Join(str, "\n")
 }
