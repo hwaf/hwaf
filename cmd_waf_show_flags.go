@@ -12,7 +12,7 @@ import (
 func hwaf_make_cmd_waf_show_flags() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_waf_show_flags,
-		UsageLine: "flags [options] <flags-name> [<flags-name> [...]]",
+		UsageLine: "flags [options] [<flag-name> [<flag-name> [...]]]",
 		Short:     "show local project's 'flags-name' value",
 		Long: `
 show flags displays the value of some flags.
@@ -20,6 +20,8 @@ show flags displays the value of some flags.
 ex:
  $ hwaf show flags CXXFLAGS
  ['-O2', '-fPIC', '-pipe', '-ansi', '-Wall', '-W', '-pthread', '-m64', '-Wno-deprecated']
+
+ $ hwaf show flags
 `,
 		Flag: *flag.NewFlagSet("hwaf-waf-show-flags", flag.ExitOnError),
 	}
@@ -28,13 +30,6 @@ ex:
 
 func hwaf_run_cmd_waf_show_flags(cmd *commander.Command, args []string) {
 	var err error
-	n := "hwaf-" + cmd.Name()
-
-	switch len(args) {
-	case 0:
-		err = fmt.Errorf("%s: you need to give at least one flag name", n)
-		handle_err(err)
-	}
 
 	workdir, err := g_ctx.Workarea()
 	handle_err(err)
@@ -51,6 +46,11 @@ func hwaf_run_cmd_waf_show_flags(cmd *commander.Command, args []string) {
 
 	pinfo, err := hwaflib.NewProjectInfo(pinfo_name)
 	handle_err(err)
+
+	switch len(args) {
+	case 0:
+		args = pinfo.Keys()
+	}
 
 	err_stack := []error{}
 	for _, k := range args {
