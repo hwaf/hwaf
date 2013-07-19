@@ -55,6 +55,57 @@ func test_with_hscript(t *testing.T, t_name, content string, t_err error) {
 	ff.Sync()
 	ff.Close()
 
+	err = os.MkdirAll(filepath.Join(mypkgdir, "waftools"), 0777)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	// waftools/script-1.py
+	ff, err = os.Create(filepath.Join(mypkgdir, "waftools", "script-1.py"))
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	_, err = ff.WriteString(`
+## -*- python -*-
+def no_configure(ctx):
+    pass
+
+def no_build(ctx):
+    pass
+
+`)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	ff.Sync()
+	ff.Close()
+
+	// waftools/script-2.py
+	ff, err = os.Create(filepath.Join(mypkgdir, "waftools", "script-2.py"))
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	_, err = ff.WriteString(`
+## -*- python -*-
+import waflib.Logs as msg
+
+def configure(ctx):
+    msg.info("tool script-2 loaded from configure")
+    pass
+
+def build(ctx):
+    msg.info("tool script-1 loaded from configure")
+    pass
+
+`)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	ff.Sync()
+	ff.Close()
+
 	for _, cmd := range [][]string{
 		{"hwaf", "configure"},
 		//{"hwaf"},
