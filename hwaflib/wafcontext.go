@@ -447,49 +447,30 @@ func waf_gen_hvalue_from(name string, data interface{}) hlib.Value {
 		v.Set = append(v.Set, kv)
 	}
 
+	_add_value := func(value *hlib.Value, strs ...string) {
+		v := make([]string, len(strs))
+		copy(v, strs)
+		_add_to_value(value, hlib.KeyValue{
+			Tag:   "default",
+			Value: v,
+		})
+	}
+
 	switch data := data.(type) {
 	case string:
-		_add_to_value(
-			&value,
-			hlib.KeyValue{
-				Tag:   "default",
-				Value: []string{data},
-			},
-		)
+		_add_value(&value, data)
 
 	case []string:
-		v := make([]string, len(data))
-		copy(v, data)
-		_add_to_value(
-			&value,
-			hlib.KeyValue{
-				Tag:   "default",
-				Value: v,
-			},
-		)
+		_add_value(&value, data...)
 
 	case []interface{}:
 		for _, v := range data {
 			switch data := v.(type) {
 			case string:
-				_add_to_value(
-					&value,
-					hlib.KeyValue{
-						Tag:   "default",
-						Value: []string{data},
-					},
-				)
+				_add_value(&value, data)
 
 			case []string:
-				v := make([]string, len(data))
-				copy(v, data)
-				_add_to_value(
-					&value,
-					hlib.KeyValue{
-						Tag:   "default",
-						Value: v,
-					},
-				)
+				_add_value(&value, data...)
 			default:
 				panic(fmt.Errorf("unknown type (%T)", data))
 			}
