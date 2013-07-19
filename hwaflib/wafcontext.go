@@ -306,10 +306,94 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 							&stmt,
 						)
 					}
+				default:
+					return nil, fmt.Errorf("unknown type (%T) for 'configure.env' field", v)
 				}
 			}
 		}
-		//  handle 'tag' section
+
+		// FIXME:
+		//  handle 'declare-tags' section
+		if _, ok := cfg["declare-tags"]; ok {
+			add_tag := func(name string, data ...string) {
+				content := make([]string, len(data))
+				copy(content, data)
+				stmt := hlib.TagStmt{
+					Name:    name,
+					Content: content,
+				}
+				wcfg.Stmts = append(
+					wcfg.Stmts,
+					&stmt,
+				)
+			}
+			switch tags := cfg["declare-tags"].(type) {
+			case []interface{}:
+				for _, iv := range tags {
+					tags := waf_get_yaml_map(iv)
+					for name, content := range tags {
+						switch content := content.(type) {
+						case string:
+							add_tag(name, content)
+						case []interface{}:
+							tag_content := make([]string, 0, len(content))
+							for _, tag := range content {
+								tag_content = append(tag_content, tag.(string))
+							}
+							add_tag(name, tag_content...)
+						case []string:
+							add_tag(name, content...)
+						default:
+							return nil, fmt.Errorf("unknown type (%T) for 'configure.declare-tags' field", tags)
+						}
+					}
+				}
+			default:
+				return nil, fmt.Errorf("unknown type (%T) for 'configure.declare-tags' field", tags)
+
+			}
+		}
+
+		//  handle 'apply-tag' section
+		if _, ok := cfg["apply-tags"]; ok {
+			add_tag := func(data ...string) {
+				tags := make([]string, len(data))
+				copy(tags, data)
+				stmt := hlib.ApplyTagStmt{
+					Value: hlib.Value{
+						Name: "",
+						Set: []hlib.KeyValue{
+							{Tag: "default", Value: tags},
+						},
+					},
+				}
+				wcfg.Stmts = append(
+					wcfg.Stmts,
+					&stmt,
+				)
+			}
+			switch tags := cfg["apply-tags"].(type) {
+			case string:
+				add_tag(tags)
+			case []string:
+				add_tag(tags...)
+			case []interface{}:
+				for _, iv := range tags {
+					switch iv := iv.(type) {
+					case string:
+						add_tag(iv)
+					default:
+						return nil, fmt.Errorf("unknown type (%T) for 'configure.apply-tags' field", tags)
+
+					}
+				}
+			default:
+				return nil, fmt.Errorf("unknown type (%T) for 'configure.apply-tags' field", tags)
+
+			}
+		}
+
+		// FIXME:
 		//  handle 'export-tools' section ?
 
 		if _, ok := cfg["hwaf-call"]; ok {

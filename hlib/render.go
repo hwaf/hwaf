@@ -393,6 +393,13 @@ func gen_wscript_stmts(stmt Stmt) string {
 			")",
 		)
 
+	case *ApplyTagStmt:
+		str = []string{fmt.Sprintf("## apply_tag %v", stmt)}
+		str = append(
+			str,
+			fmt.Sprintf("ctx.hwaf_apply_tag(%q)", x.Value.Set[0].Value[0]),
+		)
+
 	case *PathStmt:
 		str = []string{fmt.Sprintf("## path %v", stmt)}
 		str = append(
