@@ -897,6 +897,7 @@ def _hwaf(self, *k, **kw):
         try:
             #msg.info("--- trying [%s] ---..." % x)
             ctx = getattr(self, x)
+            kw['features'] = [xx for xx in features if x != xx]
             #msg.info("--- trying [%s] ---... [ok]" % x)
             return ctx(*k, **kw)
         except AttributeError:
