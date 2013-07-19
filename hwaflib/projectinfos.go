@@ -3,6 +3,7 @@ package hwaflib
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 
 	gocfg "github.com/gonuts/config"
 )
@@ -39,6 +40,24 @@ func (pi *ProjectInfo) Get(key string) (string, error) {
 		}
 	}
 	return s, err
+}
+
+func (pi *ProjectInfo) Keys() []string {
+
+	opts, err := pi.cfg.Options("DEFAULT")
+	if err != nil {
+		return nil
+	}
+	sort.Strings(opts)
+
+	keys := make([]string, 0, len(opts))
+	for _, key := range opts {
+		if key == "HWAF_ENV_SPY" {
+			continue
+		}
+		keys = append(keys, key)
+	}
+	return keys
 }
 
 // EOF
