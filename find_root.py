@@ -505,9 +505,16 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         return None, None
     dep_inc_dirs = []
     def _get_deps(obj):
-        uses = getattr(obj, 'use', [])
+        uses = waflib.Utils.to_list(getattr(obj, 'use', []))
         ld = obj.path.get_bld().abspath()
-        dep_inc_dirs.extend(getattr(obj,'includes',[]))
+        includes = waflib.Utils.to_list(getattr(obj,'includes',[]))
+        for inc in includes:
+            if isinstance(inc, type("")):
+                inc_node = obj.path.find_dir(inc)
+            else:
+                inc_node = inc
+            if inc_node:
+                dep_inc_dirs.append(inc_node.abspath())
         for u in uses:
             tgt,n = _maybe_tgen(u, 'complib-%s' % u, 'genreflex-%s' % u)
             if tgt:
