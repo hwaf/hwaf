@@ -586,11 +586,15 @@ def gen_rootcint_dummy(self):
 @extension('.h')
 def gen_rootcint_hook(self, node):
     "Bind the .h file extension to the creation of a gen_rootcint instance"
+    if not self.env['GENROOTCINT_DICTNAME']:
+        # project with *no* rootcint target...
+        return
     source = node.name
     out_node_dir = self.path.get_bld().make_node(
         "_rootcint_dicts").make_node(
         self.env['GENROOTCINT_DICTNAME']
         )
+
     bld_node = out_node_dir
     out_node = bld_node.make_node(source.replace(".h",".cxx"))
     tsk = self.create_task('gen_rootcint', node, [out_node,])
@@ -656,7 +660,6 @@ def schedule_gen_rootcint_map(self):
     pass
 
 @extension('.bin')
-@after('symlink_tsk')
 def gen_rootcint_map_hook(self, node):
     "Create a rootmap file for a rootcint dict"
     dso = node.name
