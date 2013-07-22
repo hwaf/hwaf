@@ -42,6 +42,9 @@ class symlink_tsk(waflib.Task.Task):
 @feature('symlink_tsk')
 @after_method('apply_link')
 def add_install_copy(self):
+    link_tsk = getattr(self, 'link_task', None)
+    if not link_tsk:
+        return
     link_cls_name = self.link_task.__class__.__name__
     # FIXME: is there an API for this ?
     if link_cls_name.endswith('lib'):
