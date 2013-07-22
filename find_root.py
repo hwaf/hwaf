@@ -325,7 +325,7 @@ waflib.Tools.ccroot.USELIB_VARS['gen_reflex'] = set(['GCCXML_FLAGS', 'DEFINES', 
 def gen_reflex_dummy(self):
     pass
 
-@extension('.h')
+#@extension('.h')
 def gen_reflex_hook(self, node):
     "Bind the .h file extension to the creation of a genreflex instance"
     if not self.env['GENREFLEX_DSOMAP']:
@@ -461,6 +461,8 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
             
     kw = dict(kw)
 
+    kw['name'] = name
+
     linkflags = [] # kw.get('linkflags', [])
     linkflags = self.env.SHLINKFLAGS + linkflags
     kw['linkflags'] = linkflags
@@ -471,10 +473,6 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         bld_node = self.root.make_node(self.env['BUILD_INSTALL_AREA'])
     kw['includes'].append(bld_node.parent.abspath())
 
-    ## src_node = self.path.find_dir('src')
-    ## if src_node:
-    ##     kw['includes'].append(src_node.abspath())
-    
     defines = kw.get('defines', [])
     _defines = []
     for d in self.env.CPPFLAGS:
@@ -491,9 +489,6 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         kw['defines'].append('NDEBUG')
         pass
         
-    #libs = kw.get('libs', [])
-    #kw['libs'] = libs + ['Reflex']
-    
     uses = kw.get('use', [])
     kw['use'] = uses + ['Reflex']
 
@@ -525,23 +520,32 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         if tgt:
             _get_deps(tgt)
     kw['includes'] = dep_inc_dirs + kw['includes']
-    target = kw['target'] = kw.get('target', name+'Dict')
+
+    kw['target'] =target = kw.get('target', name+'Dict')
     del kw['target']
+
+    features = waflib.Utils.to_list(kw.get('features', [])) + [
+        'gen_reflex', 'cxx', 'cxxshlib', 'symlink_tsk',
+        ]
+    kw['features'] = features
+
     defines= kw['defines']
     del kw['defines']
+
     o = self(
-        features='gen_reflex cxx cxxshlib symlink_tsk',
-        name='genreflex-%s' % name,
         source=source,
-        target=target,
-        reentrant=False,
-        #libpath = self.env.LD_LIBRARY_PATH,
-        libpath = self.env.LD_LIBRARY_PATH + [self.path.get_bld().abspath()],
         defines=defines,
-        install_path='${INSTALL_AREA}/lib',
-        depends_on=[self.path.find_resource(selection_file)],
         **kw
         )
+
+    o.name = 'genreflex-%s' % name
+    o.target = kw.get('target', name+'Dict')
+    o.libpath = self.env.LD_LIBRARY_PATH + [self.path.get_bld().abspath()]
+    o.install_path ='${INSTALL_AREA}/lib'
+    o.reentrant = False
+    o.depends_on = [self.path.find_resource(selection_file)]
+    o.mappings['.h'] = gen_reflex_hook
+    
     o.env.GENREFLEX = self.env['GENREFLEX']
     o.env.GCCXML_USER_FLAGS = ['-D__GNUC_MINOR__=2',]
     o.env.GCCXML_FLAGS = [
@@ -583,7 +587,7 @@ waflib.Tools.ccroot.USELIB_VARS['gen_rootcint'] = set(['DEFINES', 'INCLUDES', 'C
 def gen_rootcint_dummy(self):
     pass
 
-@extension('.h')
+#@extension('.h')
 def gen_rootcint_hook(self, node):
     "Bind the .h file extension to the creation of a gen_rootcint instance"
     if not self.env['GENROOTCINT_DICTNAME']:
@@ -610,7 +614,8 @@ class gen_rootcint(waflib.Task.Task):
     reentrant = True
     shell = False
     #shell = True
-
+    after = ['apply_incpaths',]
+    
     def scan_(self):
         linkdef = self.env['ROOTCINT_LINKDEF']
         linkdef_node = self.generator.bld.root.find_resource(linkdef)
@@ -746,6 +751,7 @@ def build_rootcint_dict(self, name, source, **kw):
         source=source,
         **kw
         )
+    o.mappings['.h'] = gen_rootcint_hook
     o.name = 'rootcint-dict-%s' % name
     o.reentrant = True
     o.depends_on = [linkdef_node.abspath()]
