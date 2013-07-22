@@ -94,6 +94,7 @@ def find_root(ctx, **kwargs):
     ctx.find_program('genreflex',   var='GENREFLEX',  **kwargs)
     ctx.find_program('root',        var='ROOT-EXE',   **kwargs)
     ctx.find_program('rootcint',    var='ROOTCINT',   **kwargs)
+    ctx.find_program('rlibmap',     var='RLIBMAP',     **kwargs)
 
     # reflex...
     ctx.copy_uselib_defs(dst='Reflex', src='ROOT')
@@ -316,7 +317,7 @@ class merge_dsomap(waflib.Task.Task):
                 return waflib.Task.ASK_LATER
         return waflib.Task.RUN_ME
     
-### ---
+### ---------------------------------------------------------------------------
 waflib.Tools.ccroot.USELIB_VARS['gen_reflex'] = set(['GCCXML_FLAGS', 'DEFINES', 'INCLUDES', 'CPPFLAGS', 'LIB'])
 
 @feature('gen_reflex')
@@ -574,41 +575,180 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
     o.env.GENREFLEX_DICTNAME = name
     return o
 
+### ---------------------------------------------------------------------------
+waflib.Tools.ccroot.USELIB_VARS['gen_rootcint'] = set(['DEFINES', 'INCLUDES', 'CPPFLAGS', 'LIB'])
+
+@feature('gen_rootcint')
+@after_method('apply_incpaths')
+def gen_rootcint_dummy(self):
+    pass
+
+@extension('.h')
+def gen_rootcint_hook(self, node):
+    "Bind the .h file extension to the creation of a gen_rootcint instance"
+    source = node.name
+    out_node_dir = self.path.get_bld().make_node(
+        "_rootcint_dicts").make_node(
+        self.env['GENROOTCINT_DICTNAME']
+        )
+    bld_node = out_node_dir
+    out_node = bld_node.make_node(source.replace(".h",".cxx"))
+    tsk = self.create_task('gen_rootcint', node, [out_node,])
+    self.source += tsk.outputs
+    #merge_dsomap_hook(self, dsomap_node).set_run_after(tsk)
+
+class gen_rootcint(waflib.Task.Task):
+    vars = ['ROOTCINT', 'ROOTCINT_LINKDEF', 'DEFINES', 'CPPFLAGS', 'INCLUDES']
+    color= 'BLUE'
+    run_str = '${ROOTCINT} -f ${TGT} -c ${ROOTCINTINCPATHS} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} ${SRC} ${ROOTCINT_LINKDEF}'
+    ext_in = ['.h']
+    ext_out= ['.cxx']
+    reentrant = True
+    shell = False
+    #shell = True
+
+    def scan_(self):
+        linkdef = self.env['ROOTCINT_LINKDEF']
+        linkdef_node = self.generator.bld.root.find_resource(linkdef)
+        src_node = self.inputs[0]
+        o=waflib.Utils.h_file(src_node.abspath())
+        return ([linkdef_node,src_node],
+                [waflib.Utils.h_file(linkdef_node.abspath()), o])
+
+    def exec_command(self, cmd, **kw):
+        cwd_node = self.outputs[0].parent
+        out = self.outputs[0].change_ext('.genrootcint.log')
+        fout_node = cwd_node.find_or_declare(out.name)
+        fout = open(fout_node.abspath(), 'w')
+        kw['stdout'] = fout
+        kw['stderr'] = fout
+        rc = waflib.Task.Task.exec_command(self, cmd, **kw)
+        if rc != 0:
+            msg.error("** error running [%s]" % ' '.join(cmd))
+            msg.error(fout_node.read())
+        return rc
+        
+    def runnable_status(self):
+        for tsk in self.run_after:
+            if not getattr(tsk, 'hasrun', False):
+                return waflib.Task.ASK_LATER
+        for in_node in self.inputs:
+            try:
+                os.stat(in_node.abspath())
+            except:
+                return waflib.Task.ASK_LATER
+        for out_node in self.outputs:
+            try:
+                os.stat(out_node.abspath())
+            except:
+                return waflib.Task.RUN_ME
+        return waflib.Task.Task.runnable_status(self)
+
+### ---------------------------------------------------------------------------
+@feature('gen_rootcint_map')
+@after('symlink_tsk')
+def schedule_gen_rootcint_map(self):
+    lnk_task = getattr(self, 'link_task', None)
+    if not lnk_task:
+        return
+    for n in lnk_task.outputs:
+        gen_rootcint_map_hook(self, n)
+    pass
+
+@extension('.bin')
+@after('symlink_tsk')
+def gen_rootcint_map_hook(self, node):
+    "Create a rootmap file for a rootcint dict"
+    dso = node.name
+    bld_node = node.get_bld().parent
+    dso_ext = self.bld.dso_ext()
+    out_node = bld_node.make_node(dso.replace(dso_ext,".dsomap"))
+    tsk = self.create_task('gen_rootcint_map', node, out_node)
+    self.source += tsk.outputs
+    merge_dsomap_hook(self, out_node).set_run_after(tsk)
+
+class gen_rootcint_map(waflib.Task.Task):
+    vars = ['RLIBMAP', 'DEFINES', 'CPPFLAGS', 'INCLUDES', 'RLIBMAP_LINKDEF']
+    color= 'BLUE'
+    #run_str = '${GENMAP} -input-library ${SRC[0].name} -o ${TGT[0].name}'
+    run_str = '${RLIBMAP} -o ${TGT[0].name} -l ${SRC} -c ${RLIBMAP_LINKDEF}'
+    ext_in  = ['.so', '.dylib', '.dll', '.bin']
+    ext_out = ['.dsomap']
+    shell = False
+    reentrant = True
+    after = ['cxxshlib', 'cxxprogram', 'symlink_tsk']
+
+    def exec_command(self, cmd, **kw):
+        cwd_node = self.outputs[0].parent
+        out = self.outputs[0].change_ext('.gen_rootcint_map.log')
+        fout_node = cwd_node.find_or_declare(out.name)
+        fout = open(fout_node.abspath(), 'w')
+        kw['stdout'] = fout
+        kw['stderr'] = fout
+        kw['env'] = self.generator.bld._get_env_for_subproc()
+        kw['cwd'] = self.inputs[0].get_bld().parent.abspath()
+        rc = waflib.Task.Task.exec_command(self, cmd, **kw)
+        if rc != 0:
+            msg.error("** error running [%s]" % ' '.join(cmd))
+            msg.error(fout_node.read())
+        return rc
+
+    def runnable_status(self):
+        status = waflib.Task.Task.runnable_status(self)
+        if status == waflib.Task.ASK_LATER:
+            return status
+        
+        for out_node in self.outputs:
+            try:
+                os.stat(out_node.abspath())
+            except:
+                return waflib.Task.RUN_ME
+        return status
+    pass
+
 ### ------------------------------------------------------------------------
-def build_rootcint_dict(self, name, source, target, **kw):
+def build_rootcint_dict(self, name, source, **kw):
     kw = dict(kw)
 
-    _src = []
-    for s in waflib.Utils.to_list(source):
-        s = self.path.ant_glob(s)
-        _src.extend(s)
-    source = _src
-    del _src
+    # extract package name
+    PACKAGE_NAME = self._get_pkg_name()
 
-    kw['target'] = target
+    srcs = self._cmt_get_srcs_lst(source)
+
+    #kw['target'] = target = name
+    
     includes = waflib.Utils.to_list(kw.get('includes', []))
-    tgtdir = self.bldnode.find_or_declare(target).parent.abspath()
+    tgtdir = self.bldnode.find_or_declare(name).parent.abspath()
     kw['includes'] = [
         self.path.abspath(),
         self.bldnode.abspath(),
         tgtdir,
         ] + includes
-    self.env.append_unique('INCPATHS', tgtdir)
     
     defines = waflib.Utils.to_list(kw.get('defines', []))
     defines.insert(0, 'R__ACCESS_IN_SYMBOL=1')
     kw['defines'] = defines
+
+    kw['rootcint_linkdef'] = kw.get('rootcint_linkdef', 'src/LinkDef.h')
+    linkdef_node = self.path.find_node(kw['rootcint_linkdef'])
+
+    kw['features'] = waflib.Utils.to_list(kw.get('features', [])) + [
+        'gen_rootcint', 'gen_rootcint_map', 'cxx', 'symlink_tsk',
+        ]
     
     env = self.env
     incpaths = [env.CPPPATH_ST % x for x in kw['includes']]
     o = self(
-        rule='${ROOTCINT} -f ${TGT} -c ${ROOTCINTINCPATHS} ${SRC}',
-        name='rootcint-dict-%s' % name,
+        name = name,
         source=source,
-        reentrant=True,
         **kw
         )
-    o.env['ROOTCINTINCPATHS'] = incpaths
+    o.name = 'rootcint-dict-%s' % name
+    o.reentrant = True
+    o.depends_on = [linkdef_node.abspath()]
+    o.env['ROOTCINT_LINKDEF'] = linkdef_node.abspath()
+    o.env['RLIBMAP_LINKDEF'] = linkdef_node.abspath()
+    o.env['GENROOTCINT_DICTNAME'] = name
     return o
 
 waflib.Build.BuildContext.build_reflex_dict = build_reflex_dict
