@@ -168,6 +168,10 @@ def find_fortran_compiler(ctx, **kwargs):
         else: ctx.env.append_unique('FCFLAGS', '-m64')
         pass
 
+    if ctx.env.FC_NAME == "GFORTRAN":
+        ctx.env['LIB_%s'%"gfortran"] = "gfortran"
+        pass
+    
     ctx.env.HWAF_FOUND_FORTRAN_COMPILER = 1
     return
 
