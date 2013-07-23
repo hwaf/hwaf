@@ -477,6 +477,10 @@ func gen_wscript_targets(tgts Targets_t) string {
 	const indent = "    "
 	var str []string
 
+	// sort targets by name.
+	// waf uses the task order as an internal id.
+	// to make incremental builds to work properly, we need to
+	// always create the same wscript from a given hscript.yml file.
 	sort.Sort(tgts)
 
 	cnv_values := func(values []Value) []string {
