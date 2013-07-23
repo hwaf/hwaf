@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"text/template"
@@ -475,6 +476,8 @@ func gen_wscript_stmts(stmt Stmt) string {
 func gen_wscript_targets(tgts Targets_t) string {
 	const indent = "    "
 	var str []string
+
+	sort.Sort(tgts)
 
 	cnv_values := func(values []Value) []string {
 		out := make([]string, 0, len(values))

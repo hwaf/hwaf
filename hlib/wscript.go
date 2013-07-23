@@ -94,6 +94,12 @@ type Target_t struct {
 	KwArgs         map[string][]Value
 }
 
+// make Targets_t sortable
+
+func (tgts Targets_t) Len() int           { return len(tgts) }
+func (tgts Targets_t) Less(i, j int) bool { return tgts[i].Name < tgts[j].Name }
+func (tgts Targets_t) Swap(i, j int)      { tgts[i], tgts[j] = tgts[j], tgts[i] }
+
 type KeyValue struct {
 	Tag   string
 	Value []string
