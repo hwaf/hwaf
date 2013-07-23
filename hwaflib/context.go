@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -357,6 +358,14 @@ func (ctx *Context) init() error {
 		//return ErrNoHwafRootDir
 	}
 	ctx.Root = root
+
+	// initialize signal handler
+	go func() {
+		ch := make(chan os.Signal)
+		signal.Notify(ch, os.Interrupt)
+		<-ch
+		ctx.Exit(1)
+	}()
 
 	ctx.gcfg, err = ctx.GlobalCfg()
 	if err != nil {
