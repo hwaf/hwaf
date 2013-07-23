@@ -23,6 +23,8 @@ func (enc *WscriptEncoder) Encode(wscript *Wscript_t) error {
 	_, err = fmt.Fprintf(
 		enc.w,
 		`## -*- python -*-
+## automatically generated from a hscript
+## do NOT edit.
 
 ## waf imports
 import waflib.Logs as msg
