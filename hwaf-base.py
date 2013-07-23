@@ -546,7 +546,13 @@ def hwaf_declare_macro(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
-    ## FIXME
+    value = self._hwaf_select_value(value)
+    if self.env[name] and self.env[name] != value:
+        raise waflib.Errors.WafError(
+            "package [%s] re-declares pre-existing macro [%s] (with value=%r)"
+            % (self.path.name, name,value)
+            )
+    self.env[name] = value
     return
 
 ### ------------------------------------------------------------------------
@@ -558,7 +564,9 @@ def hwaf_macro_prepend(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
-    ## FIXME
+    value = self._hwaf_select_value(value)
+    if value:
+        self.env.prepend_value(name, value)
     return
 
 ### ------------------------------------------------------------------------
@@ -570,7 +578,9 @@ def hwaf_macro_append(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
-    ## FIXME
+    value = self._hwaf_select_value(value)
+    if value:
+        self.env.append_value(name, value)
     return
 
 ### ------------------------------------------------------------------------
@@ -616,7 +626,7 @@ def hwaf_apply_tag(self, name):
         self.env.append_unique('HWAF_ACTIVE_TAGS', [name])
         self.env.append_unique('HWAF_ACTIVE_TAGS', content)
     except KeyError:
-        raise waflib.Errors.WafError("no such tag (%s) in HWAF_TAGS" % name)
+        raise waflib.Errors.WafError("package [%s]: no such tag (%s) in HWAF_TAGS" % (self.path.name, name))
     pass
 
 ### ------------------------------------------------------------------------
@@ -631,13 +641,30 @@ def _hwaf_select_value(self, value):
     for d in value:
         v = list((k,v) for k,v in d.items())[0]
         #msg.debug('list= %s' % (v,))
-        if v[0] in tags:
-            return waflib.subst_vars(v[1], self.env)
-        if v[0] == "default":
-            default = v[1]
+        if isinstance(v[1], type("")):
+            if v[0] in tags:
+                return waflib.Utils.subst_vars(v[1], self.env)
+            if v[0] == "default":
+                default = v[1]
+                pass
+        else:
+            if v[0] in tags:
+                out = []
+                for o in v[1]:
+                    out.append(waflib.Utils.subst_vars(o, self.env))
+                return out
+            if v[0] == "default":
+                default = v[1]
+                pass
+            pass
         pass
     #msg.debug('select default value: %s' % (value,))
-    return waflib.Utils.subst_vars(default, self.env)
+    if isinstance(default, type("")):
+        return waflib.Utils.subst_vars(default, self.env)
+    out = []
+    for o in default:
+        out.append(waflib.Utils.subst_vars(o, self.env))
+    return out
 
 ### ------------------------------------------------------------------------
 @conf
@@ -649,6 +676,11 @@ def hwaf_declare_path(self, name, value):
            hwaf-tag can be a simple string or a tuple of strings.
     '''
     value = self._hwaf_select_value(value)
+    if self.env[name] and self.env[name] != value:
+        raise waflib.Errors.WafError(
+            "package [%s] re-declares pre-existing macro [%s] (with value=%r)"
+            % (self.path.name, name,value)
+            )
     self.env[name] = value
     self.declare_runtime_env(name)
     return
