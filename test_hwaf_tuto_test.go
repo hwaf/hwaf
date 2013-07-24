@@ -3,11 +3,18 @@ package main_test
 import (
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 )
 
 func TestHwafTuto(t *testing.T) {
+	{
+		if err := exec.Command("which", "clhep-config").Run(); err != nil {
+			t.Skip("skipping test. (needs CLHEP (missing clhep-config))")
+
+		}
+	}
 	workdir, err := ioutil.TempDir("", "hwaf-test-")
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -357,8 +364,11 @@ sys.stdout.flush()
 }
 
 func TestHwafHepTuto(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
+	{
+		if err := exec.Command("which", "clhep-config").Run(); err != nil {
+			t.Skip("skipping test. (needs CLHEP (missing clhep-config))")
+
+		}
 	}
 
 	workdir, err := ioutil.TempDir("", "hwaf-test-")
