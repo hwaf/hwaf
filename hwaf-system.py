@@ -88,7 +88,8 @@ def configure(ctx):
     ctx.load('find_compiler')
     ctx.find_cxx_compiler(mandatory=True)
     ctx.find_c_compiler(mandatory=True)
-
+    ctx.find_fortran_compiler(mandatory=False)
+    
     projname = waflib.Context.g_module.APPNAME
     if not projname:
         projname = osp.basename(os.getcwd())
