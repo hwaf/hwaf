@@ -302,6 +302,8 @@ def find_at(ctx, check, what, where, **kwargs):
                 ctx.fatal("no such directory [%s]" % bindir)
                 pass
         check(**this_kwargs)
+        setattr(ctx.options, 'with_%s_includes' % what, incdir)
+        setattr(ctx.options, 'with_%s_libs' % what, libdir)
         return True
     except ctx.errors.ConfigurationError:
         os.environ = os_env
@@ -428,7 +430,13 @@ def read_cfg(ctx, fname):
             ctx.env[k] = cfg.get('hwaf-env', k)
             pass
         pass
-    
+
+    def _as_string(v):
+        if isinstance(v, (list, tuple)):
+            if len(v)==1: v=v[0]
+            else: raise ValueError('expected a 1-item collection (got: %r)' % v)
+        return v
+
     # pkg-level config
     for section in cfg.sections():
         #print "*** section=[%s]..." % section
@@ -441,14 +449,17 @@ def read_cfg(ctx, fname):
             continue
         if cfg.has_option(section, 'path'):
             v = cfg.get(section, 'path')
+            v = _as_string(v)
             setattr(ctx.options, 'with_%s' % section, v)
             pass
         if cfg.has_option(section, 'includes'):
             v = cfg.get(section, 'includes')
+            v = _as_string(v)
             setattr(ctx.options, 'with_%s_includes' % section, v)
             pass
         if cfg.has_option(section, 'libs'):
             v = cfg.get(section, 'libs')
+            v = _as_string(v)
             setattr(ctx.options, 'with_%s_libs' % section, v)
             pass
         pass
