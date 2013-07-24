@@ -132,6 +132,10 @@ def configure(ctx):
     if ctx.env.DESTDIR:
         pass
 
+    # percolate CMTCFG
+    ctx.hwaf_declare_tag(ctx.env.CMTCFG, content=ctx.env.CMTCFG.split("-"))
+    ctx.hwaf_apply_tag(ctx.env.CMTCFG)
+
     return
 
 ### ---------------------------------------------------------------------------

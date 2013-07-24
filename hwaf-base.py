@@ -609,6 +609,10 @@ def hwaf_declare_tag(self, name, content):
                            content=["x86_64", "x86_64-slc6", "linux", "slc6", "gcc"])
     '''
     self.env['HWAF_TAGS'][name] = content
+    if name in self.env['HWAF_ACTIVE_TAGS']:
+        #msg.debug("re-applying tag [%s]..." % name)
+        #msg.debug("re-applying tag [%s] - content: %s" % (name,content))
+        self.hwaf_apply_tag(name)
     return
 
 ### ------------------------------------------------------------------------
@@ -622,9 +626,17 @@ def hwaf_apply_tag(self, name):
       ctx.hwaf_apply_tag("x86_64-slc6-gcc46-dbg")
     '''
     try:
-        content = self.env['HWAF_TAGS']
+        #msg.debug("applying tag [%s]..." % name)
+        content = self.env['HWAF_TAGS'][name]
         self.env.append_unique('HWAF_ACTIVE_TAGS', [name])
+        # FIXME: recursively apply_tag for content as well ?
+        #        but then, a declare_tag for each tag content is needed!
+        # for tag in content:
+        #     if not tag in self.env.HWAF_ACTIVE_TAGS:
+        #         self.hwaf_apply_tag(tag)
         self.env.append_unique('HWAF_ACTIVE_TAGS', content)
+        #msg.debug("applying tag content: %s..." % (content,))
+        #msg.debug("applying tag [%s]... [done]" % name)
     except KeyError:
         raise waflib.Errors.WafError("package [%s]: no such tag (%s) in HWAF_TAGS" % (self.path.name, name))
     pass
