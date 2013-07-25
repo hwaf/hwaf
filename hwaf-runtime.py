@@ -81,6 +81,23 @@ def insert_project_level_libdir(self):
     return
 
 ### ---------------------------------------------------------------------------
+import waflib.Utils
+from waflib.TaskGen import feature, before_method, after_method
+@feature('*')
+@after_method('insert_project_level_bindir','insert_project_level_libdir')
+def hwaf_setup_runtime_env(self):
+    '''
+    hwaf_setup_runtime_env crafts a correct os.environ from the ctx.env.
+    '''
+    env = _hwaf_get_runtime_env(self.bld)
+    for k in self.env.HWAF_RUNTIME_ENVVARS:
+        v = env.get(k, None)
+        if v is None: continue
+        os.environ[k] = v
+    return
+
+
+### ---------------------------------------------------------------------------
 import waflib.Build
 import waflib.Scripting
 import waflib.Utils
