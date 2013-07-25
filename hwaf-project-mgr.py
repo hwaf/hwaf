@@ -849,6 +849,55 @@ waflib.Context.g_module.__dict__['_hwaf_show_pkg_uses'] = ShowPkgUses
 
 ### ---------------------------------------------------------------------------
 import waflib.Build
+class ShowPkgTree(waflib.Build.BuildContext):
+    '''shows the dependency tree of packages for a given project'''
+
+    cmd = 'show-pkg-tree'
+
+    def execute_build(self):
+        cmds = waflib.Options.commands[:]
+        if not cmds:
+            cmds = [self.hwaf_project_name()]
+            
+        while cmds:
+            projname = cmds.pop(0)
+            self.show_pkg_tree(projname)
+        return
+
+    def get_pkg_uses(self, pkgname):
+        pkgnames = self.hwaf_pkgs()
+        if not self.hwaf_has_pkg(pkgname):
+            self.fatal('package [%s] not in package list:\npkgs: %s' %
+                       (pkgname,pkgnames))
+        pkgdeps = self.hwaf_pkg_deps(pkgname)
+        return sorted(pkgdeps)
+
+    def do_display_pkg_uses(self, pkgname, depth=0, maxdepth=2):
+        pkgdeps = self.get_pkg_uses(pkgname)
+        msg.info('%s%s' % ('  '*depth, pkgname))
+        depth += 1
+        if depth < maxdepth:
+            for pkgdep in pkgdeps:
+                self.do_display_pkg_uses(pkgdep, depth)
+            
+    def show_pkg_tree(self, projname):
+        self.pkgdir = pkgdir = self.path.find_dir(self.env.CMTPKGS)
+        top_pkgs = self.hwaf_pkg_dirs(projname)
+        pkglist = []
+        for pkgname in top_pkgs:
+            pkg = self.path.find_dir(pkgname)
+            pkgname = pkg.path_from(pkgdir)
+            pkglist.append(pkgname)
+        msg.info('package dependency tree for [%s] (#pkgs=%s)' %
+                 (projname, len(top_pkgs)))
+        for pkg in pkglist:
+            self.do_display_pkg_uses(pkg)
+        return
+    pass # ShowPkgTree
+waflib.Context.g_module.__dict__['_hwaf_show_pkg_tree'] = ShowPkgTree
+
+### ---------------------------------------------------------------------------
+import waflib.Build
 class ShowProjects(waflib.Build.BuildContext):
     '''shows the tree of projects for the current project'''
 
