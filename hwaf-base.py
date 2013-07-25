@@ -545,7 +545,7 @@ def declare_runtime_env(self, k):
     if not self.env.HWAF_RUNTIME_ENVVARS:
         self.env.HWAF_RUNTIME_ENVVARS = []
         pass
-    if msg.verbose:
+    if msg.verbose and os.getenv('HWAF_DEBUG_RUNTIME', None):
         v = self.env[k]
         if v and isinstance(v, (list,tuple)) and len(v) != 1:
             raise KeyError("env[%s]=%s" % (k,v))
