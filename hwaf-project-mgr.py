@@ -703,7 +703,7 @@ def hwaf_pkg_dirs(self, projname=None):
 def _hwaf_build_pkg_deps(ctx, pkgdir=None):
     """process all packages and build the dependency graph"""
 
-    if pkgdir is None: pkgdir = ctx.env.CTMPKGS
+    if pkgdir is None: pkgdir = ctx.env.CMTPKGS
     ctx.pkgdir = pkgdir = ctx.path.find_dir(pkgdir)
     if not pkgdir:
         ctx.msg("pkg-dir", "<N/A>")
