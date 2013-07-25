@@ -19,19 +19,24 @@ def options(ctx):
     ctx.load('compiler_fc')
 
     ctx.add_option(
+        '--with-hwaf-toolchain',
+        default=None,
+        help="path to a complete C/C++/Fortran toolchain")
+
+    ctx.add_option(
         '--with-c-compiler',
         default=None,
-        help="path to a C compiler")
+        help="path to a C compiler executable")
 
     ctx.add_option(
         '--with-cxx-compiler',
         default=None,
-        help="path to a C++ compiler")
+        help="path to a C++ compiler executable")
 
     ctx.add_option(
         '--with-fortran-compiler',
         default=None,
-        help="path to a FORTRAN compiler")
+        help="path to a FORTRAN compiler executable")
 
     return
 
@@ -57,11 +62,25 @@ def find_c_compiler(ctx, **kwargs):
             break
         pass
 
-    if ctx.options.with_c_compiler:
-        ctx.env.CC = ctx.options.with_c_compiler
-    else:
-        ctx.env.CC = os.environ.get('CC', comp)
+    # find CC
+    path_list = []
+    if getattr(ctx.options, 'with_hwaf_toolchain', None):
+        topdir = ctx.options.with_hwaf_toolchain
+        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        path_list.append(osp.join(topdir, "bin"))
         pass
+    elif getattr(ctx.options, 'with_c_compiler', None):
+        comp = ctx.options.with_c_compiler
+        comp = waflib.Utils.subst_vars(comp, ctx.env)
+        topdir = osp.dirname(comp)
+        path_list.append(topdir)
+        ctx.env['CC'] = comp
+        pass
+    else:
+        comp = os.environ.get('CC', comp)
+        ctx.env['CC'] = comp
+        pass
+    kwargs['path_list']=path_list
     
     ctx.load('c_config')
     ctx.load('compiler_c')
@@ -110,14 +129,29 @@ def find_cxx_compiler(ctx, **kwargs):
             break
         pass
 
-    if ctx.options.with_cxx_compiler:
-        ctx.env.CXX = ctx.options.with_cxx_compiler
-    else:
-        ctx.env.CXX = os.environ.get('CXX', comp)
+    # find CXX
+    path_list = []
+    if getattr(ctx.options, 'with_hwaf_toolchain', None):
+        topdir = ctx.options.with_hwaf_toolchain
+        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        path_list.append(osp.join(topdir, "bin"))
         pass
+    elif getattr(ctx.options, 'with_cxx_compiler', None):
+        comp = ctx.options.with_cxx_compiler
+        comp = waflib.Utils.subst_vars(comp, ctx.env)
+        topdir = osp.dirname(comp)
+        path_list.append(topdir)
+        ctx.env.CXX = comp
+        pass
+    else:
+        comp = os.environ.get('CXX', comp)
+        ctx.env.CXX = comp
+        pass
+    kwargs['path_list']=path_list
     
     ctx.load('c_config')
     ctx.load('compiler_cxx')
+    
     if ctx.is_opt():
         if ctx.is_windows(): pass
         else: ctx.env.append_unique('CXXFLAGS', '-O2')
@@ -150,11 +184,38 @@ def find_fortran_compiler(ctx, **kwargs):
     if ctx.env.HWAF_FOUND_FORTRAN_COMPILER:
         return
 
-    # if ctx.options.with_fortran_compiler:
-    #     ctx.env.FC = ctx.options.with_fortran_compiler
-    # else:
-    #     ctx.env.FC = os.environ.get('FC', comp)
-    #     pass
+    comp = ctx.env.CFG_COMPILER
+    for k,v in {
+        'gcc': 'gfortran',
+        'g++': 'gfortran',
+        'icc': 'gfortran',
+        'clang': 'gfortran',
+        }.items():
+        if comp.startswith(k):
+            comp = v
+            break
+        pass
+
+    # find FC
+    path_list = []
+    if getattr(ctx.options, 'with_hwaf_toolchain', None):
+        topdir = ctx.options.with_hwaf_toolchain
+        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        path_list.append(osp.join(topdir, "bin"))
+        pass
+    elif getattr(ctx.options, 'with_fc_compiler', None):
+        comp = ctx.options.with_fc_compiler
+        comp = waflib.Utils.subst_vars(comp, ctx.env)
+        topdir = osp.dirname(comp)
+        path_list.append(topdir)
+        ctx.env.FCC = comp
+        pass
+    else:
+        comp = os.environ.get('FC', comp)
+        ctx.env.FCC = comp
+        pass
+    kwargs['path_list']=path_list
+    
     ctx.load('c_config')
     ctx.load('compiler_fc')
 
@@ -173,6 +234,52 @@ def find_fortran_compiler(ctx, **kwargs):
         pass
     
     ctx.env.HWAF_FOUND_FORTRAN_COMPILER = 1
+    return
+
+### ---------------------------------------------------------------------------
+@conf
+def find_toolchain(ctx, **kw):
+    # prevent hysteresis
+    if ctx.env.HWAF_FOUND_TOOLCHAIN:
+        return
+
+    topdir = getattr(ctx.options, 'with_hwaf_toolchain', None)
+    if not topdir:
+        topdir = kw.get('path', None)
+        pass
+
+    if topdir:
+
+        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        if not osp.exists(topdir):
+            ctx.fatal("path [%s] does not exist" % topdir)
+            pass
+
+        # setup runtime environment
+        bindir = osp.join(topdir, 'bin')
+        libdir = osp.join(topdir, 'lib')
+        if ctx.is_64b() and osp.exists(osp.join(topdir, 'lib64')):
+            libdir = osp.join(topdir, 'lib64')
+            pass
+
+        os.environ['PATH'] = os.pathsep.join([bindir] + os.environ['PATH'].split(os.pathsep))
+        os.environ['LD_LIBRARY_PATH'] = os.pathsep.join([libdir] + os.environ['LD_LIBRARY_PATH'].split(os.pathsep))
+
+        ctx.env.prepend_value('PATH', [bindir])
+        ctx.env.prepend_value('LD_LIBRARY_PATH', [libdir])
+
+        pass
+    
+    # C compiler
+    ctx.find_c_compiler(**kw)
+    
+    # C++ compiler
+    ctx.find_cxx_compiler(**kw)
+    
+    # Fortran compiler
+    ctx.find_fortran_compiler(mandatory=False, **kw)
+    
+    ctx.env.HWAF_FOUND_TOOLCHAIN = 1
     return
 
 ## EOF ##

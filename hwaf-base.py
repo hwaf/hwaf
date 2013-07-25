@@ -44,7 +44,7 @@ def options(ctx):
         )
     ctx.add_option(
         '--local-cfg',
-        default=None,
+        default="local.conf",
         help="Path to the local config file listing all type of configuration infos")
 
     ctx.load('hwaf-system', tooldir=_heptooldir)
@@ -437,8 +437,32 @@ def read_cfg(ctx, fname):
             else: raise ValueError('expected a 1-item collection (got: %r)' % v)
         return v
 
+    # toolchain config
+    if cfg.has_section('hwaf-toolchain'):
+        section = 'hwaf-toolchain'
+        secattr = section.replace('-','_')
+        if cfg.has_option(section, 'path'):
+            v = cfg.get(section, 'path')
+            v = _as_string(v)
+            setattr(ctx.options, 'with_%s' % secattr, v)
+            
+        if cfg.has_option(section, 'incdir'):
+            v = cfg.get(section, 'incdir')
+            v = _as_string(v)
+            setattr(ctx.options, 'with_%s_incdir' % secattr, v)
+            pass
+        if cfg.has_option(section, 'libdir'):
+            v = cfg.get(section, 'libdir')
+            v = _as_string(v)
+            setattr(ctx.options, 'with_%s_libdir' % secattr, v)
+            pass
+        pass
+    
+        
     # pkg-level config
     for section in cfg.sections():
+        if section.startswith('hwaf-'):
+            continue
         #print "*** section=[%s]..." % section
         if not hasattr(ctx.options, 'with_%s' % section):
             continue

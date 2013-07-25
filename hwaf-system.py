@@ -85,11 +85,6 @@ def configure(ctx):
     ctx.env.CFG_COMPILER, \
     ctx.env.CFG_TYPE = ctx.env.CFG_QUADRUPLET
 
-    ctx.load('find_compiler')
-    ctx.find_cxx_compiler(mandatory=True)
-    ctx.find_c_compiler(mandatory=True)
-    ctx.find_fortran_compiler(mandatory=False)
-    
     projname = waflib.Context.g_module.APPNAME
     if not projname:
         projname = osp.basename(os.getcwd())
@@ -137,6 +132,11 @@ def configure(ctx):
     ctx.hwaf_declare_tag(ctx.env.CMTCFG, content=ctx.env.CMTCFG.split("-"))
     ctx.hwaf_apply_tag(ctx.env.CMTCFG)
 
+    # bootstrap the toolchain
+
+    ctx.load('find_compiler')
+    ctx.find_toolchain()
+    
     return
 
 ### ---------------------------------------------------------------------------
