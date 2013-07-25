@@ -114,10 +114,17 @@ func (db *PackageDb) sync() error {
 	}
 	defer f.Close()
 
-	err = json.NewEncoder(f).Encode(&db.db)
+	data, err := json.MarshalIndent(&db.db, "", "    ")
 	if err != nil {
 		return err
 	}
+
+	_, err = f.Write(data)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(f, "\n")
+
 	err = f.Sync()
 	if err != nil {
 		return err
