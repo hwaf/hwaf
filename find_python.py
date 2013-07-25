@@ -78,9 +78,18 @@ def find_python(ctx, **kwargs):
     # FIXME: take it from a user configuration file ?
     pyversion = kwargs.get("version", (2,6))
 
+    # find python
+    path_list = []
+    if getattr(ctx.options, 'with_python', None):
+        topdir = ctx.options.with_python
+        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        path_list.append(osp.join(topdir, "bin"))
+        pass
+    kwargs['path_list']=path_list
+    
     # FIXME: force python2. needed to be done *before* 'ctx.load(python)'
-    try:    ctx.find_program('python2', var='PYTHON')
-    except: ctx.find_program('python',  var='PYTHON')
+    try:    ctx.find_program('python2', var='PYTHON', **kwargs)
+    except: ctx.find_program('python',  var='PYTHON', **kwargs)
 
     ctx.declare_runtime_env('PYTHON')
     try:
