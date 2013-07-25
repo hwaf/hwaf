@@ -65,7 +65,7 @@ def find_root(ctx, **kwargs):
     path_list = []
     if getattr(ctx.options, 'with_root', None):
         topdir = ctx.options.with_root
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         root_cfg = osp.join(topdir, "bin", "root-config")
         path_list.append(
             osp.join(topdir, "bin")
@@ -553,7 +553,7 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         '--debug',
         '--gccxmlopt=--gccxml-cxxflags', '--fail_on_warnings',
         #'--gccxmlopt=--gccxml-cxxflags', '-D__STRICT_ANSI__',
-        waflib.Utils.subst_vars('--gccxmlpath=${GCCXML_BINDIR}', o.env),        
+        ctx.hwaf_subst_vars('--gccxmlpath=${GCCXML_BINDIR}', o.env),
         #'--gccxmlpath=',
         ]
     if 'clang' in o.env.CFG_COMPILER:

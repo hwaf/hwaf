@@ -43,7 +43,7 @@ def find_gccxml(ctx, **kwargs):
     path_list = []
     if getattr(ctx.options, 'with_gccxml', None):
         topdir = ctx.options.with_gccxml
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
 
         gccxml_bin = osp.join(topdir, "bin", "gccxml")
         path_list.append(osp.join(topdir, "bin"))

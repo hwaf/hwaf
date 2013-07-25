@@ -61,7 +61,7 @@ def find_boost(ctx, **kwargs):
         if not getattr(ctx.options, k, None):
             continue
         topdir = getattr(ctx.options, k)
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         setattr(ctx.options, k, topdir)
         pass
     
@@ -102,7 +102,7 @@ def find_boost(ctx, **kwargs):
     # clean-up non existing directories
     libdirs = []
     for dirname in waflib.Utils.to_list(kwargs['libs']):
-        dirname = waflib.Utils.subst_vars(dirname, ctx.env)
+        dirname = ctx.hwaf_subst_vars(dirname)
         d = ctx.root.find_dir(dirname)
         if not d: continue
         libdirs.append(dirname)
@@ -115,7 +115,7 @@ def find_boost(ctx, **kwargs):
         if not v: continue
         dirs = []
         for dirname in waflib.Utils.to_list(v):
-            dirname = waflib.Utils.subst_vars(dirname, ctx.env)
+            dirname = ctx.hwaf_subst_vars(dirname)
             d = ctx.root.find_dir(dirname)
             if not d: continue
             dirs.append(dirname)

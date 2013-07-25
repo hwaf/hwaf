@@ -29,7 +29,7 @@ def find_gdb(ctx, **kwargs):
     gdb = "gdb"
     if getattr(ctx.options, 'with_gdb', None):
         topdir = ctx.options.with_gdb
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         gdb = osp.abspath(osp.join(topdir, "bin", "gdb")
             )
         pass

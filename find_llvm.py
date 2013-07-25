@@ -40,7 +40,7 @@ def find_llvm(ctx, **kwargs):
     llvm_cfg = "llvm-config"
     if getattr(ctx.options, 'with_llvm', None):
         topdir = ctx.options.with_llvm
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         llvm_cfg = osp.abspath(osp.join(topdir, "bin", "llvm-config"))
         pass
 

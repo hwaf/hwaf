@@ -41,7 +41,7 @@ def find_libxml2(ctx, **kwargs):
     path_list = []
     if getattr(ctx.options, 'with_libxml2', None):
         topdir = ctx.options.with_libxml2
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.abspath(osp.join(topdir, "bin")))
         pass
 

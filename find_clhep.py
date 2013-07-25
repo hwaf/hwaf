@@ -41,7 +41,7 @@ def find_clhep(ctx, **kwargs):
     path_list = []
     if getattr(ctx.options, 'with_clhep', None):
         topdir = ctx.options.with_clhep
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         clhep_cfg = osp.abspath(osp.join(topdir, "bin", "clhep-config"))
         path_list.append(osp.join(topdir, "bin"))
         pass

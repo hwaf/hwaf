@@ -582,11 +582,14 @@ def hwaf_declare_macro(self, name, value):
            hwaf-tag can be a simple string or a tuple of strings.
     '''
     value = self._hwaf_select_value(value)
-    if self.env[name] and self.env[name] != value:
-        raise waflib.Errors.WafError(
-            "package [%s] re-declares pre-existing macro [%s] (with value=%r)"
-            % (self.path.name, name,value)
-            )
+    if self.env[name]:
+        old_value = self.hwaf_subst_vars(self.env[name])
+        new_value = self.hwaf_subst_vars(value)
+        if old_value != new_value:
+            raise waflib.Errors.WafError(
+                "package [%s] re-declares pre-existing macro [%s]\n old-value=%r\n new-value=%r"
+                % (self.path.name, name, old_value, new_value)
+                )
     self.env[name] = value
     return
 
@@ -723,11 +726,14 @@ def hwaf_declare_path(self, name, value):
            hwaf-tag can be a simple string or a tuple of strings.
     '''
     value = self._hwaf_select_value(value)
-    if self.env[name] and self.env[name] != value:
-        raise waflib.Errors.WafError(
-            "package [%s] re-declares pre-existing macro [%s] (with value=%r)"
-            % (self.path.name, name,value)
-            )
+    if self.env[name]:
+        old_value = self.hwaf_subst_vars(self.env[name])
+        new_value = self.hwaf_subst_vars(value)
+        if old_value != new_value:
+            raise waflib.Errors.WafError(
+                "package [%s] re-declares pre-existing path [%s]\n old-value=%r\n new-value=%r"
+                % (self.path.name, name, old_value, new_value)
+                )
     self.env[name] = value
     self.declare_runtime_env(name)
     return
@@ -810,6 +816,25 @@ def _hwaf_load_fct(ctx, pkgname, fname):
     if fun:
         fun(ctx)
     pass
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_subst_vars(self, value, env=None):
+    '''
+    hwaf_subst_vars recursively calls waflib.Utils.subst_vars on `value` as
+    long as a '${xxx}' variable is in the string
+    '''
+    if env is None: env=self.env
+    
+    orig_value = value
+    i = 1024
+    while i > 0:
+        i -= 1
+        value = waflib.Utils.subst_vars(value, env)
+        if value.count('${') <= 0:
+            return value
+    self.fatal('package [%s] reached maximum recursive limit when resolving value %r' % orig_value)
+    return
 
 ### ------------------------------------------------------------------------
 @conf

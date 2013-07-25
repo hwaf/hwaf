@@ -42,7 +42,7 @@ def find_cmake(ctx, **kwargs):
     path_list = []
     if getattr(ctx.options, 'with_cmake', None):
         topdir = ctx.options.with_cmake
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.join(topdir, "bin"))
         pass
 

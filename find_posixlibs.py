@@ -83,7 +83,7 @@ def find_posixlibs(ctx, **kwargs):
 
     extra_paths = waflib.Utils.to_list(kwargs.get('extra_paths',[]))
     if ctx.env.GDB_HOME:
-        gdb = waflib.Utils.subst_vars('${GDB_HOME}', ctx.env)
+        gdb = ctx.hwaf_subst_vars('${GDB_HOME}')
         extra_paths.append(gdb)
         pass
 

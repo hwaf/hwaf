@@ -82,7 +82,7 @@ def find_python(ctx, **kwargs):
     path_list = []
     if getattr(ctx.options, 'with_python', None):
         topdir = ctx.options.with_python
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.join(topdir, "bin"))
         pass
     kwargs['path_list']=path_list
@@ -139,7 +139,7 @@ def find_python(ctx, **kwargs):
     # hack for ROOT on macosx: LIBPATH_PYEMBED won't point at
     # the directory holding libpython.{so,a}
     pylibdir = ctx.env['LIBPATH_PYEMBED']
-    cmd = waflib.Utils.subst_vars('${PYTHON_CONFIG}', ctx.env)
+    cmd = ctx.hwaf_subst_vars('${PYTHON_CONFIG}')
     for arg in [#('--includes', 'INCLUDES'),
                 ('--ldflags', 'LIBPATH'),
                 #('--cflags', 'CXXFLAGS'),

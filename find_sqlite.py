@@ -40,7 +40,7 @@ def find_sqlite(ctx, **kwargs):
     path_list = []
     if getattr(ctx.options, 'with_sqlite', None):
         topdir = ctx.options.with_sqlite
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.join(topdir, "bin"))
         pass
 

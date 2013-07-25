@@ -66,12 +66,12 @@ def find_c_compiler(ctx, **kwargs):
     path_list = []
     if getattr(ctx.options, 'with_hwaf_toolchain', None):
         topdir = ctx.options.with_hwaf_toolchain
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.join(topdir, "bin"))
         pass
     elif getattr(ctx.options, 'with_c_compiler', None):
         comp = ctx.options.with_c_compiler
-        comp = waflib.Utils.subst_vars(comp, ctx.env)
+        comp = ctx.hwaf_subst_vars(comp)
         topdir = osp.dirname(comp)
         path_list.append(topdir)
         ctx.env['CC'] = comp
@@ -133,12 +133,12 @@ def find_cxx_compiler(ctx, **kwargs):
     path_list = []
     if getattr(ctx.options, 'with_hwaf_toolchain', None):
         topdir = ctx.options.with_hwaf_toolchain
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.join(topdir, "bin"))
         pass
     elif getattr(ctx.options, 'with_cxx_compiler', None):
         comp = ctx.options.with_cxx_compiler
-        comp = waflib.Utils.subst_vars(comp, ctx.env)
+        comp = ctx.hwaf_subst_vars(comp)
         topdir = osp.dirname(comp)
         path_list.append(topdir)
         ctx.env.CXX = comp
@@ -200,12 +200,12 @@ def find_fortran_compiler(ctx, **kwargs):
     path_list = []
     if getattr(ctx.options, 'with_hwaf_toolchain', None):
         topdir = ctx.options.with_hwaf_toolchain
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.join(topdir, "bin"))
         pass
     elif getattr(ctx.options, 'with_fc_compiler', None):
         comp = ctx.options.with_fc_compiler
-        comp = waflib.Utils.subst_vars(comp, ctx.env)
+        comp = ctx.hwaf_subst_vars(comp)
         topdir = osp.dirname(comp)
         path_list.append(topdir)
         ctx.env.FCC = comp
@@ -250,7 +250,7 @@ def find_toolchain(ctx, **kw):
 
     if topdir:
 
-        topdir = waflib.Utils.subst_vars(topdir, ctx.env)
+        topdir = ctx.hwaf_subst_vars(topdir)
         if not osp.exists(topdir):
             ctx.fatal("path [%s] does not exist" % topdir)
             pass
