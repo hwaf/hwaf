@@ -452,15 +452,15 @@ def read_cfg(ctx, fname):
             v = _as_string(v)
             setattr(ctx.options, 'with_%s' % section, v)
             pass
-        if cfg.has_option(section, 'includes'):
-            v = cfg.get(section, 'includes')
+        if cfg.has_option(section, 'incdir'):
+            v = cfg.get(section, 'incdir')
             v = _as_string(v)
-            setattr(ctx.options, 'with_%s_includes' % section, v)
+            setattr(ctx.options, 'with_%s_incdir' % section, v)
             pass
-        if cfg.has_option(section, 'libs'):
-            v = cfg.get(section, 'libs')
+        if cfg.has_option(section, 'libdir'):
+            v = cfg.get(section, 'libdir')
             v = _as_string(v)
-            setattr(ctx.options, 'with_%s_libs' % section, v)
+            setattr(ctx.options, 'with_%s_libdir' % section, v)
             pass
         pass
     return True

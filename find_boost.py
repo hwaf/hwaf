@@ -57,7 +57,7 @@ def find_boost(ctx, **kwargs):
     xx,yy = ctx.env.PYTHON_VERSION.split(".")[:2]
     ctx.options.boost_python = "%s%s" % (xx,yy)
 
-    for k in ('with_boost', 'with_boost_includes', 'with_boost_libs'):
+    for k in ('with_boost', 'with_boost_incdir', 'with_boost_libdir'):
         if not getattr(ctx.options, k, None):
             continue
         topdir = getattr(ctx.options, k)
@@ -81,8 +81,8 @@ def find_boost(ctx, **kwargs):
     kwargs['use'] = waflib.Utils.to_list(kwargs.get('use', [])) + ['python']
 
     # get include/lib-dir from command-line or from API
-    kwargs['includes'] = getattr(ctx.options, 'with_boost_includes', kwargs.get('includes', None))
-    kwargs['libs'] = getattr(ctx.options, 'with_boost_libs', kwargs.get('libs', None))
+    kwargs['includes'] = getattr(ctx.options, 'with_boost_incdir', kwargs.get('includes', None))
+    kwargs['libs'] = getattr(ctx.options, 'with_boost_libdir', kwargs.get('libs', None))
 
     # rationalize types
     if kwargs['libs'] is None: kwargs['libs'] = []
@@ -127,8 +127,8 @@ def find_boost(ctx, **kwargs):
     kwargs['uselib_store'] = "boost"
 
     # set with_boost_xxx variables for 'check_with' benefit
-    setattr(ctx.options, 'with_boost_includes', kwargs['includes'])
-    setattr(ctx.options, 'with_boost_libs',     kwargs['libs'])
+    setattr(ctx.options, 'with_boost_incdir', kwargs['includes'])
+    setattr(ctx.options, 'with_boost_libdir',     kwargs['libs'])
     def _get_with_boost():
         o = getattr(ctx.options, 'with_boost', [])
         if o:
