@@ -301,9 +301,10 @@ def find_at(ctx, check, what, where, **kwargs):
             if not this_kwargs['package'] and not osp.exists(bindir):
                 ctx.fatal("no such directory [%s]" % bindir)
                 pass
+            pass
         check(**this_kwargs)
-        setattr(ctx.options, 'with_%s_includes' % what, incdir)
-        setattr(ctx.options, 'with_%s_libs' % what, libdir)
+        setattr(ctx.options, 'with_%s_incdir' % what, incdir)
+        setattr(ctx.options, 'with_%s_libdir' % what, libdir)
         return True
     except ctx.errors.ConfigurationError:
         os.environ = os_env
