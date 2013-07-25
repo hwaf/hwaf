@@ -560,7 +560,7 @@ func (ctx *Context) LocalCfg() (*gocfg.Config, error) {
 		return nil, err
 	}
 
-	cfg_fname := filepath.Join(workdir, ".hwaf", "local.conf")
+	cfg_fname := filepath.Join(workdir, "local.conf")
 	if !path_exists(cfg_fname) {
 		err = fmt.Errorf("could not find local config [%s]", cfg_fname)
 		return nil, err

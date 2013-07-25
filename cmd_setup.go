@@ -107,7 +107,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	}
 
 	var lcfg *gocfg.Config
-	lcfg_fname := filepath.Join(".hwaf", "local.conf")
+	lcfg_fname := "local.conf"
 
 	// if the user provided a configuration file use that as a default
 	if cfg_fname != "" && path_exists(cfg_fname) {

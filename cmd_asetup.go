@@ -264,7 +264,7 @@ func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
 	err = subcmd.Run()
 	handle_err(err)
 
-	lcfg_fname := filepath.Join(".hwaf", "local.conf")
+	lcfg_fname := "local.conf"
 	if !path_exists(lcfg_fname) {
 		err = fmt.Errorf("%s: no such file [%s]", n, lcfg_fname)
 		handle_err(err)
