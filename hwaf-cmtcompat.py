@@ -48,7 +48,8 @@ def _cmt_get_srcs_lst(self, source, root=None):
                 pass
             elif src_node:
                 # hack to mimick CMT's default (to take sources from src)
-                srcs = src_node.get_bld().ant_glob(source)
+                try:            srcs = src_node.get_bld().ant_glob(source)
+                except OSError: srcs = root.ant_glob(source)
                 pass
             if not srcs:
                 # ok, maybe the output of a not-yet executed task
