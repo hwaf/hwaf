@@ -750,7 +750,8 @@ def build_rootcint_dict(self, name, source, **kw):
         **kw
         )
     o.mappings['.h'] = gen_rootcint_hook
-    o.name = 'rootcint-dict-%s' % name
+    if not 'cxxshlib' in o.features:
+        o.name = 'rootcint-dict-%s' % name
     o.reentrant = True
     o.depends_on = [linkdef_node.abspath()]
     o.env['ROOTCINT_LINKDEF'] = linkdef_node.abspath()
