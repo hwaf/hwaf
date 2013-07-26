@@ -614,7 +614,7 @@ class gen_rootcint(waflib.Task.Task):
     reentrant = True
     shell = False
     #shell = True
-    after = ['apply_incpaths',]
+    #after = ['apply_incpaths',]
     
     def scan_(self):
         linkdef = self.env['ROOTCINT_LINKDEF']
@@ -723,8 +723,6 @@ def build_rootcint_dict(self, name, source, **kw):
 
     srcs = self._cmt_get_srcs_lst(source)
 
-    #kw['target'] = target = name
-    
     includes = waflib.Utils.to_list(kw.get('includes', []))
     tgtdir = self.bldnode.find_or_declare(name).parent.abspath()
     kw['includes'] = [
@@ -743,7 +741,7 @@ def build_rootcint_dict(self, name, source, **kw):
     kw['features'] = waflib.Utils.to_list(kw.get('features', [])) + [
         'gen_rootcint', 'gen_rootcint_map', 'cxx', 'symlink_tsk',
         ]
-    
+
     env = self.env
     incpaths = [env.CPPPATH_ST % x for x in kw['includes']]
     o = self(
