@@ -110,4 +110,17 @@ type Value struct {
 	Set  []KeyValue // first item is the "default"
 }
 
+func DefaultValue(name string, value []string) Value {
+	kv := KeyValue{
+		Tag:   "default",
+		Value: make([]string, len(value)),
+	}
+	copy(kv.Value, value)
+
+	return Value{
+		Name: name,
+		Set:  []KeyValue{kv},
+	}
+}
+
 // EOF
