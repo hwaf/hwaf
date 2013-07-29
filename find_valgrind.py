@@ -37,7 +37,7 @@ def find_valgrind(ctx, **kwargs):
         ctx.fatal('load a C++ compiler first')
         pass
 
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_valgrind', None):
         topdir = ctx.options.with_valgrind
         topdir = ctx.hwaf_subst_vars(topdir)

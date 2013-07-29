@@ -38,7 +38,7 @@ def find_clhep(ctx, **kwargs):
 
     # find CLHEP
     clhep_cfg = "clhep-config"
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_clhep', None):
         topdir = ctx.options.with_clhep
         topdir = ctx.hwaf_subst_vars(topdir)

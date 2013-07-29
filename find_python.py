@@ -79,7 +79,7 @@ def find_python(ctx, **kwargs):
     pyversion = kwargs.get("version", (2,6))
 
     # find python
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_python', None):
         topdir = ctx.options.with_python
         topdir = ctx.hwaf_subst_vars(topdir)

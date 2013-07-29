@@ -39,17 +39,17 @@ def find_cmake(ctx, **kwargs):
         pass
 
 
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_cmake', None):
         topdir = ctx.options.with_cmake
         topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.join(topdir, "bin"))
         pass
-
+    kwargs['path_list'] = path_list
+    
     ctx.find_program(
         "cmake",
         var="CMAKE",
-        path_list=path_list,
         **kwargs)
 
     kwargs['mandatory'] = False

@@ -38,18 +38,17 @@ def find_libxml2(ctx, **kwargs):
 
     # find LibXML2
     xml_cfg = "xml2-config"
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_libxml2', None):
         topdir = ctx.options.with_libxml2
         topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.abspath(osp.join(topdir, "bin")))
         pass
-
+    kwargs['path_list'] = path_list
     
     ctx.find_program(
         xml_cfg,
         var='LIBXML2-CONFIG',
-        path_list=path_list,
         **kwargs)
     #xml_cfg = ctx.env['LIBXML2-CONFIG']
     

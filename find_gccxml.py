@@ -40,7 +40,7 @@ def find_gccxml(ctx, **kwargs):
 
     # find gccxml
     gccxml_bin = "gccxml"
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_gccxml', None):
         topdir = ctx.options.with_gccxml
         topdir = ctx.hwaf_subst_vars(topdir)

@@ -62,7 +62,7 @@ def find_root(ctx, **kwargs):
 
     # find root
     root_cfg = "root-config"
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_root', None):
         topdir = ctx.options.with_root
         topdir = ctx.hwaf_subst_vars(topdir)

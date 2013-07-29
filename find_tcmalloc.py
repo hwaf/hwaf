@@ -37,7 +37,7 @@ def find_tcmalloc(ctx, **kwargs):
         ctx.fatal('load a C++ compiler first')
         pass
 
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_tcmalloc', None):
         path_list.append(
             osp.join(ctx.options.with_tcmalloc, "bin")

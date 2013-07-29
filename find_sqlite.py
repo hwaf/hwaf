@@ -37,7 +37,7 @@ def find_sqlite(ctx, **kwargs):
         ctx.fatal('load a C++ compiler first')
         pass
 
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_sqlite', None):
         topdir = ctx.options.with_sqlite
         topdir = ctx.hwaf_subst_vars(topdir)

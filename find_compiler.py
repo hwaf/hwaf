@@ -63,7 +63,7 @@ def find_c_compiler(ctx, **kwargs):
         pass
 
     # find CC
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_hwaf_toolchain', None):
         topdir = ctx.options.with_hwaf_toolchain
         topdir = ctx.hwaf_subst_vars(topdir)
@@ -130,7 +130,7 @@ def find_cxx_compiler(ctx, **kwargs):
         pass
 
     # find CXX
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_hwaf_toolchain', None):
         topdir = ctx.options.with_hwaf_toolchain
         topdir = ctx.hwaf_subst_vars(topdir)
@@ -197,7 +197,7 @@ def find_fortran_compiler(ctx, **kwargs):
         pass
 
     # find FC
-    path_list = []
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_hwaf_toolchain', None):
         topdir = ctx.options.with_hwaf_toolchain
         topdir = ctx.hwaf_subst_vars(topdir)
@@ -271,13 +271,17 @@ def find_toolchain(ctx, **kw):
         pass
     
     # C compiler
-    ctx.find_c_compiler(**kw)
+    c_kw = dict(kw)
+    ctx.find_c_compiler(**c_kw)
     
     # C++ compiler
-    ctx.find_cxx_compiler(**kw)
+    cxx_kw = dict(kw)
+    ctx.find_cxx_compiler(**cxx_kw)
     
     # Fortran compiler
-    ctx.find_fortran_compiler(mandatory=False, **kw)
+    fc_kw = dict(kw)
+    fc_kw['mandatory'] = fc_kw.get('mandatory', False)
+    ctx.find_fortran_compiler(**fc_kw)
     
     ctx.env.HWAF_FOUND_TOOLCHAIN = 1
     return

@@ -49,6 +49,10 @@ def find_xrootd(ctx, **kwargs):
     libdir = osp.join(ctx.env.XROOTD_HOME, 'lib')
     incdir = osp.join(ctx.env.XROOTD_HOME, 'include')
 
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
+    path_list.append(bindir)
+    kwargs['path_list'] = path_list
+    
     ctx.define_uselib(
         name="xrootd-posix", 
         libpath=libdir,
@@ -76,14 +80,12 @@ def find_xrootd(ctx, **kwargs):
     ctx.find_program(
         "xrdcp", 
         var="XRDCP-BIN", 
-        path_list=bindir,
         **kwargs)
 
     kwargs['mandatory'] = False
     ctx.find_program(
         "xrootd", 
         var="XROOTD-BIN", 
-        path_list=bindir,
         **kwargs)
 
     # -- check everything is kosher...
