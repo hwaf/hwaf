@@ -1012,5 +1012,6 @@ def _hwaf(self, *k, **kw):
     return _hwaf_orig_bld_call(ctx, *k, **kw)
 
 waflib.Build.BuildContext.__call__ = _hwaf
+del _hwaf
 
 ## EOF ##
