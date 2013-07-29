@@ -28,18 +28,18 @@ def build(ctx):
 ### ---------------------------------------------------------------------------
 @waflib.Configure.conf
 def hwaf_configure(ctx):
-    ctx.recurse(ctx.hwaf_pkg_dirs())
+    dirs = ctx.hwaf_pkg_dirs()
+    for d in dirs:
+        ctx.start_msg("configuring")
+        ctx.end_msg(d)
+        ctx.recurse(d)
     return
 
 ### ---------------------------------------------------------------------------
 @waflib.Configure.conf
 def hwaf_build(ctx):
-    # pkgs = ctx.hwaf_find_subpackages(ctx.env.CMTPKGS)
-    # for pkg in pkgs:
-    #     ctx.recurse(pkg.srcpath())
-    #     pass
-    ctx.recurse(ctx.hwaf_pkg_dirs())
-
+    dirs = ctx.hwaf_pkg_dirs()
+    ctx.recurse(dirs)
     ctx._hwaf_install_project_infos()
     return
 
