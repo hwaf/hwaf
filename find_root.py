@@ -63,10 +63,9 @@ def find_root(ctx, **kwargs):
     # find root
     root_cfg = "root-config"
     path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
-    if getattr(ctx.options, 'with_root', None):
-        topdir = ctx.options.with_root
+    topdir = getattr(ctx.options, 'with_root', os.getenv('ROOTSYS', None))
+    if topdir:
         topdir = ctx.hwaf_subst_vars(topdir)
-        root_cfg = osp.join(topdir, "bin", "root-config")
         path_list.append(
             osp.join(topdir, "bin")
             )
@@ -236,15 +235,18 @@ def find_root(ctx, **kwargs):
         pass
     if not rootsys:
         # make up one.
-        rootsys = ctx.options.with_root
+        rootsys = getattr(ctx.options, 'with_root', None)
         pass
     ctx.end_msg(rootsys)
     if not rootsys:
         ctx.fatal("No $ROOTSYS environment variable")
         pass
-    ctx.env.ROOTSYS = rootsys
+    ctx.env.ROOTSYS = ctx.hwaf_subst_vars(rootsys)
     ctx.declare_runtime_env('ROOTSYS')
 
+    ctx.env.prepend_value('PATH', osp.join(ctx.env.ROOTSYS, 'bin'))
+    ctx.env.prepend_value('LD_LIBRARY_PATH', osp.join(ctx.env.ROOTSYS, 'lib'))
+    
     pyroot_path = osp.join(ctx.env.ROOTSYS, 'lib')
     ctx.env.prepend_value('PYTHONPATH', pyroot_path)
     ctx.env.prepend_value('LD_LIBRARY_PATH', pyroot_path)
