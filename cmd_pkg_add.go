@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -47,14 +46,18 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	n := "hwaf-pkg-" + cmd.Name()
 	pkguri := ""
 	pkgname := ""
+
 	switch len(args) {
-	case 1:
-		pkguri = args[0]
-		pkgname = ""
+	default:
+		err = fmt.Errorf("%s: expects 0, 1 or 2 arguments (got %d: %v)", n, len(args), args)
+		handle_err(err)
 	case 2:
 		pkguri = args[0]
 		pkgname = args[1]
-	default:
+	case 1:
+		pkguri = args[0]
+		pkgname = ""
+	case 0:
 		fname := cmd.Flag.Lookup("f").Value.Get().(string)
 		if fname != "" {
 			f, err := os.Open(fname)
@@ -64,7 +67,10 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 			pkgs := [][]string{}
 			scnr := bufio.NewScanner(f)
 			for scnr.Scan() {
-				line := scnr.Text()
+				line := strings.Trim(scnr.Text(), " \n")
+				if strings.HasPrefix(line, "#") {
+					continue
+				}
 				tokens := strings.Split(line, " ")
 				pkg := []string{}
 				for _, tok := range tokens {
@@ -112,52 +118,6 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	pkguri = os.ExpandEnv(pkguri)
-
-	// FIXME: shouldn't this be refactorized ?
-	if strings.HasPrefix(pkguri, "git@github.com:") {
-		pkguri = strings.Replace(
-			pkguri,
-			"git@github.com:",
-			"git+ssh://git@github.com/",
-			1)
-	}
-
-	//pkguri = filepath.Clean(pkguri)
-
-	uri, err := url.Parse(pkguri)
-	handle_err(err)
-	// fmt.Printf(">>> [%v]\n", uri)
-	// fmt.Printf("    Scheme: %q\n", uri.Scheme)
-	// fmt.Printf("    Opaque: %q\n", uri.Opaque)
-	// fmt.Printf("    Host:   %q\n", uri.Host)
-	// fmt.Printf("    Path:   %q\n", uri.Path)
-	// fmt.Printf("    Fragm:  %q\n", uri.Fragment)
-
-	switch pkgname {
-	case "":
-		pkgname = uri.Path
-	default:
-		pkgname = os.ExpandEnv(pkgname)
-		pkgname = filepath.Clean(pkgname)
-	}
-
-	// FIXME: hack. we need a better "plugin architecture" for this...
-	if uri.Scheme == "" && !path_exists(uri.Path) {
-		if svnroot := os.Getenv("SVNROOT"); svnroot != "" {
-			pkguri = svnroot + "/" + pkguri
-			pkguri = os.ExpandEnv(pkguri)
-			uri, err = url.Parse(pkguri)
-			handle_err(err)
-			// fmt.Printf(">>> [%v]\n", uri)
-			// fmt.Printf("    Scheme: %q\n", uri.Scheme)
-			// fmt.Printf("    Opaque: %q\n", uri.Opaque)
-			// fmt.Printf("    Host:   %q\n", uri.Host)
-			// fmt.Printf("    Path:   %q\n", uri.Path)
-			// fmt.Printf("    Fragm:  %q\n", uri.Fragment)
-		}
-	}
-
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 	bname := cmd.Flag.Lookup("b").Value.Get().(string)
 
@@ -174,61 +134,27 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	dir := filepath.Join(pkgdir, pkgname)
-	if filepath.IsAbs(pkgname) {
-		dir = pkgname
-	}
+	//fmt.Printf(">>> helper(pkguri=%q, pkgname=%q, pkgid=%q)...\n", pkguri, pkgname, bname)
+	helper, err := vcs.NewHelper(pkguri, pkgname, bname, pkgdir)
+	handle_err(err)
+	defer helper.Delete()
 
-	switch uri.Scheme {
-	case "svn", "svn+ssh":
-		if !path_exists(filepath.Dir(dir)) {
-			err = os.MkdirAll(filepath.Dir(dir), 0755)
-			handle_err(err)
-		}
-		repo := pkguri
-		if bname != "" && bname != "trunk" {
-			// can't use filepath.Join as it may mess-up the uri.Scheme
-			repo = strings.Join([]string{pkguri, "tags", bname}, "/")
-		} else {
-			// can't use filepath.Join as it may mess-up the uri.Scheme
-			repo = strings.Join([]string{pkguri, "trunk"}, "/")
-		}
-
-		if g_ctx.PkgDb.HasPkg(dir) {
-			err = fmt.Errorf("%s: package [%s] already in db.\ndid you forget to run 'hwaf pkg rm %s' ?", n, dir, dir)
-			handle_err(err)
-		}
-
-		err = vcs.Svn.Create(dir, repo)
-		handle_err(err)
-
-		err = g_ctx.PkgDb.Add("svn", repo, dir)
-		handle_err(err)
-		return
-	}
+	dir := filepath.Join(pkgdir, helper.PkgName)
+	//fmt.Printf(">>> dir=%q\n", dir)
 
 	if g_ctx.PkgDb.HasPkg(dir) {
 		err = fmt.Errorf("%s: package [%s] already in db.\ndid you forget to run 'hwaf pkg rm %s' ?", n, dir, dir)
 		handle_err(err)
 	}
 
-	err = vcs.Git.Create(dir, pkguri)
+	//fmt.Printf(">>> pkgname=%q\n", helper.PkgName)
+	err = helper.Checkout()
 	handle_err(err)
 
-	if bname != "" {
-		git := exec.Command(
-			"git", "checkout", bname,
-		)
-		git.Dir = dir
-		if !quiet {
-			git.Stdout = os.Stdout
-			git.Stderr = os.Stderr
-		}
-		err = git.Run()
-		handle_err(err)
-	}
+	err = g_ctx.PkgDb.Add(helper.Type, helper.Repo, dir)
+	handle_err(err)
 
-	err = g_ctx.PkgDb.Add("git", pkguri, dir)
+	err = helper.Delete()
 	handle_err(err)
 
 	if !quiet {
