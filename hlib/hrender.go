@@ -189,6 +189,13 @@ func gen_hscript_targets(tgts Targets_t) string {
 			fmt.Sprintf("%ssource:   [%s],", indent, w_py_strlist(srcs)),
 		)
 
+		if tgt.Group != "" {
+			str = append(
+				str,
+				fmt.Sprintf("%sgroup:    %q,", indent, tgt.Group),
+			)
+		}
+
 		for _, vv := range []struct {
 			hdr    string
 			values []Value

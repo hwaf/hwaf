@@ -577,6 +577,11 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 				delete(tgt, "target")
 			}
 
+			if _, ok := tgt["group"]; ok {
+				wtgt.Group = tgt["group"].(string)
+				delete(tgt, "group")
+			}
+
 			cnvmap := map[string]*[]hlib.Value{
 				"source":          &wtgt.Source,
 				"use":             &wtgt.Use,

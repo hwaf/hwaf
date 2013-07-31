@@ -80,6 +80,7 @@ type Target_t struct {
 	Features       []string
 	Source         []Value
 	Target         string
+	Group          string
 	Use            []Value
 	Defines        []Value
 	CFlags         []Value
