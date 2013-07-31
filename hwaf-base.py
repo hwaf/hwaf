@@ -963,6 +963,16 @@ def _get_pkg_version_defines(self):
     pkg_vers = "%s-XX-XX-XX" % pkg_name
     pkg_defines = ['PACKAGE_VERSION="%s"' % pkg_vers,
                    'PACKAGE_VERSION_UQ=%s'% pkg_vers]
+
+    # first: try version.hwaf
+    version_hwaf = self.path.get_src().find_resource('version.hwaf')
+    if version_hwaf:
+        pkg_vers = version_hwaf.read().strip()
+        pkg_defines = ['PACKAGE_VERSION="%s"' % pkg_vers,
+                       'PACKAGE_VERSION_UQ=%s'% pkg_vers]
+        return pkg_defines
+    
+    # then: try cmt/version.cmt
     cmt_dir_node = self.path.get_src().find_dir('cmt')
     if not cmt_dir_node:
         return pkg_defines
