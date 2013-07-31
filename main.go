@@ -31,6 +31,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
@@ -87,8 +88,31 @@ func main() {
 	pwd, err := os.Getwd()
 	handle_err(err)
 
-	g_ctx, err = hwaflib.NewContextFrom(pwd)
-	handle_err(err)
+	wdir := pwd
+	switch os.Args[1] {
+	case "init", "setup", "asetup":
+		// these are supposed to *create* the .hwaf directory...
+
+	default:
+		wdir = func() string {
+			// try to find a workarea in a parent dir:
+			for dir := wdir; dir != "/"; dir = filepath.Dir(dir) {
+				if path_exists(filepath.Join(dir, ".hwaf")) {
+					return dir
+				}
+			}
+			return ""
+		}()
+	}
+
+	switch wdir {
+	case "":
+		g_ctx, err = hwaflib.NewContext()
+		handle_err(err)
+	default:
+		g_ctx, err = hwaflib.NewContextFrom(wdir)
+		handle_err(err)
+	}
 
 	err = g_cmd.Flag.Parse(os.Args[1:])
 	handle_err(err)

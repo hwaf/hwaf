@@ -32,6 +32,12 @@ func hwaf_run_cmd_waf_run(cmd *commander.Command, args []string) {
 	waf, err := g_ctx.WafBin()
 	handle_err(err)
 
+	pwd, err := os.Getwd()
+	handle_err(err)
+
+	err = os.Setenv("HWAF_WAF_SHELL_CWD", pwd)
+	handle_err(err)
+
 	subargs := append([]string{"run", "--"}, args...)
 	sub := exec.Command(waf, subargs...)
 	sub.Stdin = os.Stdin
