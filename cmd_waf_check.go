@@ -12,9 +12,9 @@ func hwaf_make_cmd_waf_check() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_waf_check,
 		UsageLine: "check",
-		Short:     "check builds local project or packages and runs unit-tests",
+		Short:     "build and run unit-tests for the local project or packages",
 		Long: `
-check builds the local project or packages and runs unit-tests
+check builds and runs unit-tests for the local project or packages.
 
 ex:
  $ hwaf check
