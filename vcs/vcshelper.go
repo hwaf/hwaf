@@ -126,12 +126,15 @@ func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
 		}
 
 		pkgurl := ""
+		rev := ""
 		scanner := bufio.NewScanner(bytes.NewReader(bout))
 		for scanner.Scan() {
 			bline := scanner.Bytes()
 			if bytes.HasPrefix(bline, []byte(`Repository Root: `)) {
 				pkgurl = string(bytes.Replace(bline, []byte(`Repository Root: `), nil, -1))
-				break
+			}
+			if bytes.HasPrefix(bline, []byte(`Revision: `)) {
+				rev = string(bytes.Replace(bline, []byte(`Revision: `), nil, -1))
 			}
 		}
 		pkgurl = strings.Trim(pkgurl, " \n")
@@ -147,6 +150,18 @@ func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
 		}
 		h.PkgName = n
 		//fmt.Printf("n:   %q\n", n)
+
+		// retrieve tag/version infos
+		rev = strings.Trim(rev, " \n")
+		if pkgid != "" {
+			rev = pkgid
+		} else {
+			rev = filepath.Base(n) + "-" + rev
+		}
+		err = ioutil.WriteFile(filepath.Join(tmpdir, "version.hwaf"), []byte(rev+"\n"), 0666)
+		if err != nil {
+			return nil, err
+		}
 
 	case "git", "git+ssh":
 		err = Git.Create(tmpdir, pkguri)
@@ -179,6 +194,16 @@ func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
 		}
 		h.PkgName = n
 		//fmt.Printf("n:   %q\n", n)
+
+		// retrieve tag/version infos
+		bout, err = Git.runOutput(tmpdir, "rev-parse --short HEAD")
+		if err != nil {
+			return nil, err
+		}
+		err = ioutil.WriteFile(filepath.Join(tmpdir, "version.hwaf"), bout, 0666)
+		if err != nil {
+			return nil, err
+		}
 
 	default:
 		return nil, fmt.Errorf("unknown URL scheme [%v]", uri.Scheme)
