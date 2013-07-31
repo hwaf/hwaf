@@ -80,7 +80,7 @@ func init() {
 func main() {
 
 	if len(os.Args) == 1 && path_exists("wscript") {
-		os.Args = append(os.Args, "build", "install")
+		os.Args = append(os.Args, "waf", "build+install")
 	}
 
 	var err error

@@ -34,7 +34,7 @@ func hwaf_run_cmd_waf(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	if len(args) == 1 && args[0] == "build+install" {
-		sub := exec.Command(waf, "build")
+		sub := exec.Command(waf, "build", "--notests")
 		sub.Stdin = os.Stdin
 		sub.Stdout = os.Stdout
 		sub.Stderr = os.Stderr
