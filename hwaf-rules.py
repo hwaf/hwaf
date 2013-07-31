@@ -129,7 +129,16 @@ g_testlock = Utils.threading.Lock()
 
 class hwaf_utest(Task.Task):
     """
-    Execute a unit test
+    Execute a unit test.
+
+    ctx(
+        features='test cxx cxxprogram',
+        source='foo.cxx',
+        target='app',
+        ut_cwd=None,           # optional dir for running test
+        ut_args=['--verbose'], # optional additional arguments to test-binary
+        ut_rc=0,               # optional expected return code
+    )
     """
     color = 'CYAN'
     after = ['vnum', 'inst', 'symlink_tsk']
@@ -223,6 +232,10 @@ class hwaf_utest(Task.Task):
         if testcmd:
             self.ut_exec = (testcmd % self.ut_exec[0]).split(' ')
 
+        returncode = getattr(self.generator, 'ut_rc', 0)
+        if isinstance(returncode, (list,tuple)):
+            returncode = int(returncode[0])
+        
         #print(">>>> running %s..." % self.ut_exec[0])
         proc = Utils.subprocess.Popen(
             self.ut_exec,
@@ -233,7 +246,7 @@ class hwaf_utest(Task.Task):
             )
         (stdout, stderr) = proc.communicate()
 
-        tup = (filename, proc.returncode, stdout, stderr)
+        tup = (filename, proc.returncode, stdout, stderr, returncode)
         self.generator.utest_result = tup
 
         g_testlock.acquire()
@@ -263,21 +276,21 @@ def hwaf_utest_summary(bld, *k, **kwargs):
         Logs.pprint('CYAN', 'unit-tests execution summary')
 
         total = len(lst)
-        tfail = len([x for x in lst if x[1]])
+        tfail = len([x for x in lst if x[1] != x[4]])
         val = 100 * (total - tfail) / (1.0 * total)
         Logs.pprint('CYAN', 'test report %3.0f%% success' % val)
         
         Logs.pprint('CYAN', '  tests that pass %d/%d' % (total-tfail, total))
-        for (f, code, out, err) in lst:
-            if not code:
+        for (f, code, out, err, exp_rc) in lst:
+            if code == exp_rc:
                 Logs.pprint('CYAN', '    %s' % f)
                 pass
             pass
 
         Logs.pprint('CYAN', '  tests that fail %d/%d' % (tfail, total))
-        for (f, code, out, err) in lst:
-            if code:
-                Logs.pprint('CYAN', '    %s (err=%d)' % (f,code))
+        for (f, code, out, err, exp_rc) in lst:
+            if code != exp_rc:
+                Logs.pprint('CYAN', '    %s (err=%d, exp=%d)' % (f,code, exp_rc))
                 pass
             pass
         Logs.pprint('CYAN', '='*80)
@@ -301,9 +314,9 @@ def hwaf_utest_set_exit_code(bld, *k):
         return
 
     msg = []
-    for (f, code, out, err) in lst:
-        if code:
-            msg.append('=== %s === (err=%d)' % (f,code))
+    for (f, code, out, err, exp_rc) in lst:
+        if code != exp_rc:
+            msg.append('=== %s === (err=%d expected=%d)' % (f,code, exp_rc))
             if out: msg.append('stdout:%s%s' % (os.linesep, out.decode('utf-8')))
             if err: msg.append('stderr:%s%s' % (os.linesep, err.decode('utf-8')))
             pass
