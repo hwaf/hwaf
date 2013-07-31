@@ -61,7 +61,7 @@ func hwaf_run_cmd_self_bdist_upload(cmd *commander.Command, args []string) {
 	}
 
 	// first the tar-ball
-	dst_dir := "binet@lxplus.cern.ch:~/dev/repos/mana-fwk/www/downloads/tar"
+	dst_dir := "binet@lxvoadm.cern.ch:~/dev/repos/mana-fwk/www/downloads/tar"
 	dst := fmt.Sprintf("%s/%s", dst_dir, fname)
 	scp := exec.Command("scp", fname, dst)
 	scp.Stdin = os.Stdin
@@ -71,7 +71,7 @@ func hwaf_run_cmd_self_bdist_upload(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	// now the binary itself
-	dst_dir = "binet@lxplus.cern.ch:~/dev/repos/mana-fwk/www/downloads/bin"
+	dst_dir = "binet@lxvoadm.cern.ch:~/dev/repos/mana-fwk/www/downloads/bin"
 	dst = fmt.Sprintf("%s/hwaf-%s-%s", dst_dir, runtime.GOOS, runtime.GOARCH)
 	bin, err := exec.LookPath(os.Args[0])
 	handle_err(err)
