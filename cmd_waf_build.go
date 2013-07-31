@@ -34,7 +34,19 @@ func hwaf_run_cmd_waf_build(cmd *commander.Command, args []string) {
 	waf, err := g_ctx.WafBin()
 	handle_err(err)
 
-	subargs := append([]string{"build"}, args...)
+	subargs := []string{"build"}
+	run_tests := false
+	for _, arg := range args {
+		if arg == "check" {
+			arg = "--alltests"
+			run_tests = true
+		}
+		subargs = append(subargs, arg)
+	}
+	if !run_tests {
+		subargs = append(subargs[:1], append([]string{"--notests"}, subargs[1:]...)...)
+	}
+
 	sub := exec.Command(waf, subargs...)
 	sub.Stdout = os.Stdout
 	sub.Stderr = os.Stderr

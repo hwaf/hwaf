@@ -52,6 +52,7 @@ func init() {
 			hwaf_make_cmd_waf(),
 			hwaf_make_cmd_waf_configure(),
 			hwaf_make_cmd_waf_build(),
+			hwaf_make_cmd_waf_check(),
 			hwaf_make_cmd_waf_install(),
 			hwaf_make_cmd_waf_clean(),
 			hwaf_make_cmd_waf_distclean(),
@@ -79,7 +80,7 @@ func init() {
 func main() {
 
 	if len(os.Args) == 1 && path_exists("wscript") {
-		os.Args = append(os.Args, "waf", "build+install")
+		os.Args = append(os.Args, "build", "install")
 	}
 
 	var err error
