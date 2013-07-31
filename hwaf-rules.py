@@ -144,6 +144,9 @@ class hwaf_utest(Task.Task):
         if getattr(Options.options, 'no_tests', True):
             return Task.SKIP_ME
 
+        if not self.generator.bld.cmd in ('build', 'check'):
+            return Task.SKIP_ME
+        
         ret = super(hwaf_utest, self).runnable_status()
         #print("%s: ret=%s" % (self.inputs[0].name, ret))
         if ret in (Task.SKIP_ME, Task.RUN_ME):

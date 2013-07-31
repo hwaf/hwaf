@@ -41,9 +41,11 @@ def hwaf_configure(ctx):
 def hwaf_build(ctx):
 
     ctx.add_group('test')
-    # schedule unit tests
-    ctx.add_post_fun(ctx.hwaf_utest_summary)
-    ctx.add_post_fun(ctx.hwaf_utest_set_exit_code)
+    if ctx.cmd in ('build','check'):
+        # schedule unit tests
+        ctx.add_post_fun(ctx.hwaf_utest_summary)
+        ctx.add_post_fun(ctx.hwaf_utest_set_exit_code)
+        pass
     
     dirs = ctx.hwaf_pkg_dirs()
     ctx.recurse(dirs)
