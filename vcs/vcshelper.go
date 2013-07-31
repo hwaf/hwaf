@@ -84,13 +84,13 @@ func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
 		PkgDir:  pkgdir,
 	}
 
-	fmt.Printf(">>> [%v]\n", uri)
-	fmt.Printf("    Scheme: %q\n", uri.Scheme)
-	fmt.Printf("    Opaque: %q\n", uri.Opaque)
-	fmt.Printf("    Host:   %q\n", uri.Host)
-	fmt.Printf("    Path:   %q\n", uri.Path)
-	fmt.Printf("    Fragm:  %q\n", uri.Fragment)
-	fmt.Printf("    PkgUri: %q\n", pkguri)
+	// fmt.Printf(">>> [%v]\n", uri)
+	// fmt.Printf("    Scheme: %q\n", uri.Scheme)
+	// fmt.Printf("    Opaque: %q\n", uri.Opaque)
+	// fmt.Printf("    Host:   %q\n", uri.Host)
+	// fmt.Printf("    Path:   %q\n", uri.Path)
+	// fmt.Printf("    Fragm:  %q\n", uri.Fragment)
+	// fmt.Printf("    PkgUri: %q\n", pkguri)
 
 	switch uri.Scheme {
 	case "local":
