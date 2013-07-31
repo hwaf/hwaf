@@ -250,6 +250,9 @@ def hwaf_run_cmd_with_runtime_env(ctx, cmds):
     # get the runtime...
     env = _hwaf_get_runtime_env(ctx)
 
+    # retrieve the directory from which to run the command
+    ishell_cwd = os.environ.get('HWAF_WAF_SHELL_CWD', cwd)
+
     for k in env:
         v = env[k]
         if not isinstance(v, str):
@@ -265,7 +268,7 @@ def hwaf_run_cmd_with_runtime_env(ctx, cmds):
     retval = subprocess.Popen(
         cmds,
         env=env,
-        cwd=os.getcwd(),
+        cwd=ishell_cwd,
         shell=True,
         ).wait()
 
@@ -330,6 +333,8 @@ def hwaf_ishell(ctx):
     # get the runtime...
     env = _hwaf_get_runtime_env(ctx)
 
+    # retrieve the directory from which to run the shell
+    ishell_cwd = os.environ.get('HWAF_WAF_SHELL_CWD', cwd)
 
     ## handle the shell flavours...
     if ctx.is_linux():
@@ -450,7 +455,7 @@ def hwaf_ishell(ctx):
     retval = subprocess.Popen(
         shell_cmd,
         env=env,
-        cwd=os.getcwd(),
+        cwd=ishell_cwd,
         shell=True,
         ).wait()
 
