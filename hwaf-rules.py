@@ -66,6 +66,51 @@ def add_install_copy(self):
         pass
     return
 
+### -----------------------------------------------------------------------------
+import waflib.Build
+class InstallContext(waflib.Build.InstallContext):
+    '''
+    InstallContext class to be less verbose by default
+    '''
+    def __init__(self, **kw):
+        super(InstallContext, self).__init__(**kw)
+        return
+
+    def execute_build(self):
+        self.logger = msg
+        lvl = msg.log.level
+        if lvl < msg.logging.ERROR:
+            msg.log.setLevel(msg.logging.ERROR)
+            pass
+        try:
+            ret = super(InstallContext, self).execute_build()
+        finally:
+            msg.log.setLevel(lvl)
+        return ret
+    pass # class InstallContext
+
+### -----------------------------------------------------------------------------
+import waflib.Build
+class UninstallContext(waflib.Build.UninstallContext):
+    '''
+    UninstallContext class to be less verbose by default
+    '''
+    def __init__(self, **kw):
+        super(UninstallContext, self).__init__(**kw)
+        return
+
+    def execute_build(self):
+        self.logger = msg
+        lvl = msg.log.level
+        if lvl < msg.logging.ERROR:
+            msg.log.setLevel(msg.logging.ERROR)
+        try:
+            ret = super(UninstallContext, self).execute_build()
+        finally:
+            msg.log.setLevel(lvl)
+        return ret
+    pass # class UninstallContext
+
 ### ---------------------------------------------------------------------------
 import os, sys
 from waflib.TaskGen import feature, after_method
