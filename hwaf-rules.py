@@ -79,9 +79,10 @@ class InstallContext(waflib.Build.InstallContext):
     def execute_build(self):
         self.logger = msg
         lvl = msg.log.level
-        if lvl < msg.logging.ERROR:
-            msg.log.setLevel(msg.logging.ERROR)
-            pass
+        if not msg.verbose:
+            if lvl < msg.logging.ERROR:
+                msg.log.setLevel(msg.logging.ERROR)
+                pass
         try:
             ret = super(InstallContext, self).execute_build()
         finally:
@@ -102,8 +103,9 @@ class UninstallContext(waflib.Build.UninstallContext):
     def execute_build(self):
         self.logger = msg
         lvl = msg.log.level
-        if lvl < msg.logging.ERROR:
-            msg.log.setLevel(msg.logging.ERROR)
+        if not msg.verbose:
+            if lvl < msg.logging.ERROR:
+                msg.log.setLevel(msg.logging.ERROR)
         try:
             ret = super(UninstallContext, self).execute_build()
         finally:
