@@ -996,7 +996,15 @@ def _hwaf(self, *k, **kw):
         kw['install_path'] = install_path[0]
         pass
 
+    # group = waflib.Utils.to_list(kw.get('group', []))
+    # if group and len(group)==1 and group[0]:
+    #     kw['group'] = group[0]
+    #     pass
+
     features = waflib.Utils.to_list(kw.get('features', []))
+
+    if 'hwaf_utest' in features: kw['group'] = 'test'
+        
     ctx = self
     for x in features:
         try:

@@ -10,6 +10,7 @@ import waflib.Configure
 import waflib.ConfigSet
 import waflib.Utils
 import waflib.Logs as msg
+import waflib.Options
 
 _heptooldir = osp.dirname(osp.abspath(__file__))
 
@@ -38,6 +39,12 @@ def hwaf_configure(ctx):
 ### ---------------------------------------------------------------------------
 @waflib.Configure.conf
 def hwaf_build(ctx):
+
+    ctx.add_group('test')
+    # schedule unit tests
+    ctx.add_post_fun(ctx.hwaf_utest_summary)
+    ctx.add_post_fun(ctx.hwaf_utest_set_exit_code)
+    
     dirs = ctx.hwaf_pkg_dirs()
     ctx.recurse(dirs)
     ctx._hwaf_install_project_infos()
