@@ -66,7 +66,16 @@ func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
 				}
 			}
 		} else {
-			uri.Scheme = "local"
+			// check whether this is a local xyz-repo
+			for _, vcs := range List {
+				if vcs.Ping("file", uri.Path) == nil {
+					uri.Scheme = vcs.cmd
+					break
+				}
+			}
+			if uri.Scheme == "" {
+				uri.Scheme = "local"
+			}
 		}
 	}
 
@@ -98,7 +107,7 @@ func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
 		h.Repo = pkguri
 		h.PkgName = pkgname
 		if pkgname == "" {
-			return nil, fmt.Errorf("local packages need an explicit pkgname")
+			pkgname = filepath.Base(pkguri)
 		}
 		err = copytree(tmpdir, pkguri)
 		if err != nil {
