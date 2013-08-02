@@ -81,12 +81,17 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: add .hwaf/tools...\n", n)
 	}
 	hwaf_tools_dir := ""
-	if g_ctx.Root != "" {
+	switch g_ctx.Root {
+	default:
 		hwaf_tools_dir = filepath.Join(g_ctx.Root, "share", "hwaf", "tools")
-	} else {
+	case "":
 		hwaf_tools_dir = filepath.Join("${HOME}", ".config", "hwaf", "tools")
 	}
+
 	hwaf_tools_dir = os.ExpandEnv(hwaf_tools_dir)
+	if !quiet {
+		fmt.Printf("%s: using hwaf/tools from [%s]...\n", n, hwaf_tools_dir)
+	}
 	if !path_exists(hwaf_tools_dir) {
 		// first try the r/w url...
 		git := exec.Command(
@@ -128,12 +133,16 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 			fmt.Printf("%s: add .hwaf/bin...\n", n)
 		}
 		hwaf_bin_dir := ""
-		if g_ctx.Root != "" {
+		switch g_ctx.Root {
+		default:
 			hwaf_bin_dir = filepath.Join(g_ctx.Root, "bin")
-		} else {
+		case "":
 			hwaf_bin_dir = filepath.Join("${HOME}", ".config", "hwaf", "bin")
 		}
 		hwaf_bin_dir = os.ExpandEnv(hwaf_bin_dir)
+		if !quiet {
+			fmt.Printf("%s: using hwaf-bin from [%s]...\n", n, hwaf_bin_dir)
+		}
 		if !path_exists(hwaf_bin_dir) {
 			err = fmt.Errorf("no such hwaf-bin dir [%s]", hwaf_bin_dir)
 			handle_err(err)
