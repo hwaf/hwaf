@@ -952,9 +952,8 @@ def _get_env_for_subproc(self, os_env_keys=None):
 ### ------------------------------------------------------------------------
 @conf
 def _get_pkg_name(self):
-    # FIXME: should this be more explicit ?
-    pkg_name = self.path.name
-    return pkg_name
+    pkg_name = self.hwaf_pkg_name(self.path)
+    return osp.basename(pkg_name)
 
 ### ------------------------------------------------------------------------
 @conf
