@@ -167,8 +167,9 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             #          % (pkg, proj_dict['pkgs'][pkg]['deps']))
             ctx.hwaf_add_pkg(
                 pkg,
-                ppname,
-                deps=proj_dict['pkgs'][pkg]['deps']
+                projname=ppname,
+                deps=proj_dict['pkgs'][pkg]['deps'],
+                pkgdir=proj_dict['pkgs'][pkg]['dir'],
                 )
             pass
         
@@ -635,6 +636,15 @@ def hwaf_itr_projects(self, projname=None):
 
 ### API for package queries
 @waflib.Configure.conf
+def hwaf_pkg_name(self, pkgdir):
+    mod = waflib.Context.load_module(osp.join(pkgdir, waflib.Context.WSCRIPT_FILE))
+    try:
+        package = getattr(mod, 'PACKAGE')
+    except AttributeError:
+        raise waflib.Errors.WafError('package [%s] has not "PACKAGE" attribute' % pkgdir)
+    return package['name']
+
+@waflib.Configure.conf
 def hwaf_pkg_deps(self, pkgname, projname=None):
     #msg.info(">>> deps[%s]..." % (pkgname,))
     pkg = self.hwaf_find_pkg(pkgname, projname)
@@ -651,15 +661,18 @@ def hwaf_pkgs(self, projname=None):
     return pkgs
 
 @waflib.Configure.conf
-def hwaf_add_pkg(self, pkgname, projname=None, deps=None):
+def hwaf_add_pkg(self, pkgname, projname=None, deps=None, pkgdir=None):
     if deps is None:
         deps = []
+    if pkgdir is None:
+        pkgdir = osp.dirname(pkgname)
     proj = self._hwaf_get_project(projname)
     #msg.info(">>> add-pkg(%s, %s)..." % (pkgname, proj['name']))
     proj['pkgs'][pkgname] = {
         'deps': deps,
         'name': osp.basename(pkgname),
         'full_name': pkgname,
+        'dir': pkgdir,
         }
     return
 
@@ -713,9 +726,11 @@ def _hwaf_build_pkg_deps(ctx, pkgdir=None):
     pkgs = ctx.hwaf_find_subpackages(pkgdir.path_from(ctx.path))
     #ctx.msg("local packages", str(len(pkgs)))
     for pkg in pkgs:
-        #msg.info(" %s" % pkg.path_from(pkgdir))
-        pkgname = pkg.path_from(pkgdir)
-        ctx.hwaf_add_pkg(pkgname)
+        #msg.info(" %s" % pkg.path_from(ctx.path))
+        pkgpath = pkg.path_from(ctx.path)
+        pkgname = ctx.hwaf_pkg_name(pkgpath)
+        #msg.info(" => %s" % pkgdict['name'])
+        ctx.hwaf_add_pkg(pkgname, pkgdir=pkgpath)
         pass
     
     ctx.recurse([pkg.abspath() for pkg in pkgs], name='pkg_deps')
@@ -745,11 +760,11 @@ def _hwaf_build_pkg_deps(ctx, pkgdir=None):
     topdir = ctx.root.find_dir(topdir)
     for pkgname in pkglist:
         #msg.info("-- %s %s" % (pkgname, pkgdir.abspath()))
-        pkg = ctx.pkgdir.find_node(pkgname)
+        pkgdict = ctx.hwaf_find_pkg(pkgname)
         if not pkg: # not a local package...
             continue
-        pkgname = pkg.path_from(topdir)
-        ctx.hwaf_pkg_dirs().append(pkgname)
+        #pkgname = pkg.path_from(topdir)
+        ctx.hwaf_pkg_dirs().append(pkgdict['dir'])
     return
 
 ### ---------------------------------------------------------------------------
@@ -794,7 +809,7 @@ def use_pkg(ctx,
             pkgname, version=None,
             public=None, private=None,
             runtime=None):
-    pkg = ctx.path.path_from(ctx.root.find_dir(ctx.pkgdir.abspath()))
+    pkg = ctx.hwaf_pkg_name(ctx.path.abspath())
     # msg.info("========")
     # msg.info("ctx: %s" % ctx)
     # msg.info("pkg: %s" % pkg)
@@ -882,14 +897,9 @@ class ShowPkgTree(waflib.Build.BuildContext):
             
     def show_pkg_tree(self, projname):
         self.pkgdir = pkgdir = self.path.find_dir(self.env.CMTPKGS)
-        top_pkgs = self.hwaf_pkg_dirs(projname)
-        pkglist = []
-        for pkgname in top_pkgs:
-            pkg = self.path.find_dir(pkgname)
-            pkgname = pkg.path_from(pkgdir)
-            pkglist.append(pkgname)
+        pkglist = self.hwaf_pkgs(projname)
         msg.info('package dependency tree for [%s] (#pkgs=%s)' %
-                 (projname, len(top_pkgs)))
+                 (projname, len(pkglist)))
         for pkg in pkglist:
             self.do_display_pkg_uses(pkg)
         return
