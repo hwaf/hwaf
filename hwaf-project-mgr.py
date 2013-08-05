@@ -739,11 +739,16 @@ def _hwaf_build_pkg_deps(ctx, pkgdir=None):
     ctx.recurse([pkg.abspath() for pkg in pkgs], name='pkg_deps')
 
     pkglist = []
+    pkgstack = []
     def process_pkg(pkg, parent=None):
+        pkgstack.append(pkg)
         deps = ctx.hwaf_pkg_deps(pkg)
         for ppkg in deps:
             if ppkg in pkglist:
                 continue
+            if ppkg in pkgstack:
+                ctx.fatal('cycle detected: %s uses %s -> %s' % (pkg, ppkg, pkgstack))
+                
             try:
                 process_pkg(ppkg, pkg)
             except KeyError:
@@ -754,9 +759,11 @@ def _hwaf_build_pkg_deps(ctx, pkgdir=None):
                 ctx.fatal('package [%s] depends on *UNKNOWN* package [%s]' %
                           (parent, pkg,))
             pkglist.append(pkg)
+
     for pkg in ctx.hwaf_pkgs():
         #msg.info("--> %s" % pkg)
         process_pkg(pkg)
+        pkgstack = []
         pass
     
     topdir = os.path.dirname(waflib.Context.g_module.root_path)
