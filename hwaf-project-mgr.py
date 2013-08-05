@@ -8,6 +8,7 @@ import sys
 # waf imports ---
 import waflib.Configure
 import waflib.ConfigSet
+import waflib.Node
 import waflib.Utils
 import waflib.Logs as msg
 
@@ -636,7 +637,9 @@ def hwaf_itr_projects(self, projname=None):
 
 ### API for package queries
 @waflib.Configure.conf
-def hwaf_pkg_name(self, pkgdir):
+def hwaf_pkg_name(self, pkgdir=None):
+    if pkgdir is None: pkgdir = self.path
+    if isinstance(pkgdir, waflib.Node.Node): pkgdir = pkgdir.abspath()
     mod = waflib.Context.load_module(osp.join(pkgdir, waflib.Context.WSCRIPT_FILE))
     try:
         package = getattr(mod, 'PACKAGE')
