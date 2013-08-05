@@ -392,7 +392,7 @@ func TestHwafHepTuto(t *testing.T) {
 		{"hwaf", "init", "-q=0", "."},
 		{"hwaf", "setup", "-q=0"},
 		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-settings", "pkg-settings"},
-		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-aa", "pkg-aa"},
+		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-aa"}, // test dir-independant checkout
 		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-ab", "pkg-ab"},
 		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-ac", "pkg-ac"},
 		{"hwaf", "pkg", "ls"},
