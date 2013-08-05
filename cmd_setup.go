@@ -32,7 +32,8 @@ ex:
 	}
 	cmd.Flag.String("p", "", "List of paths to projects to setup against")
 	cmd.Flag.String("cfg", "", "Path to a configuration file")
-	cmd.Flag.String("cmtpkgdir", "src", "Directory under which to checkout packages")
+	cmd.Flag.String("pkgdir", "src", "Directory under which to checkout packages")
+	cmd.Flag.String("variant", "", "quadruplet (e.g. x86_64-slc6-gcc47-opt) identifying the target to build for")
 	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
 
 	return cmd
@@ -57,7 +58,8 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 
 	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
 	cfg_fname := cmd.Flag.Lookup("cfg").Value.Get().(string)
-	cmt_pkgdir := cmd.Flag.Lookup("cmtpkgdir").Value.Get().(string)
+	pkgdir := cmd.Flag.Lookup("pkgdir").Value.Get().(string)
+	variant := cmd.Flag.Lookup("variant").Value.Get().(string)
 
 	projdirs := []string{}
 	const pathsep = string(os.PathListSeparator)
@@ -139,9 +141,13 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
+	if variant != "" {
+		cmtcfg = variant
+	}
+
 	for k, v := range map[string]string{
 		"projects": strings.Join(projdirs, pathsep),
-		"cmtpkgs":  cmt_pkgdir,
+		"cmtpkgs":  pkgdir,
 		"cmtcfg":   cmtcfg,
 	} {
 		if lcfg.HasOption(section, k) {
