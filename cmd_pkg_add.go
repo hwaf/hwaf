@@ -129,8 +129,8 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	pkgdir := "src"
-	if cfg.HasOption("hwaf-cfg", "cmtpkgs") {
-		pkgdir, err = cfg.String("hwaf-cfg", "cmtpkgs")
+	if cfg.HasOption("hwaf-cfg", "pkgdir") {
+		pkgdir, err = cfg.String("hwaf-cfg", "pkgdir")
 		handle_err(err)
 	}
 

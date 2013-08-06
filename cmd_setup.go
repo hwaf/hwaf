@@ -147,7 +147,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 
 	for k, v := range map[string]string{
 		"projects": strings.Join(projdirs, pathsep),
-		"cmtpkgs":  pkgdir,
+		"pkgdir":   pkgdir,
 		"cmtcfg":   cmtcfg,
 	} {
 		if lcfg.HasOption(section, k) {

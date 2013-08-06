@@ -22,7 +22,7 @@ def options(ctx):
         default=None,
         help="The build type. ex: x86_64-linux-gcc-opt")
     ctx.add_option(
-        '--cmtpkgs',
+        '--pkgdir',
         default=None,
         help="The directory where pkgs are located")
 
@@ -102,14 +102,14 @@ def configure(ctx):
     if not ctx.env.HWAF_TAGS:        ctx.env['HWAF_TAGS'] = {}
     if not ctx.env.HWAF_ACTIVE_TAGS: ctx.env['HWAF_ACTIVE_TAGS'] = []
 
-    cmtpkgs = os.environ.get('CMTPKGS', None)
-    if not cmtpkgs and ctx.options.cmtpkgs:
-        cmtpkgs = ctx.options.cmtpkgs
+    pkgdir = os.environ.get('PKGDIR', None)
+    if not pkgdir and ctx.options.pkgdir:
+        cmtpkgs = ctx.options.pkgdir
         pass
-    if not cmtpkgs:
-        cmtpkgs = 'src'
+    if not pkgdir:
+        pkgdir = 'src'
         pass
-    ctx.env.CMTPKGS = cmtpkgs
+    ctx.env.PKGDIR = pkgdir
 
     if ctx.options.destdir:
         ctx.env.DESTDIR = ctx.options.destdir

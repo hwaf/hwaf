@@ -42,22 +42,22 @@ def _hwaf_configure_project(ctx):
     it setups the projects dependency tree and then configures each local
     package.
 
-    needs: ctx.env.CMTPKGS
+    needs: ctx.env.PKGDIR
            ctx.env.INSTALL_AREA
     '''
 
-    if not ctx.env.CMTPKGS:
-        ctx.fatal('CMTPKGS needs to be defined')
+    if not ctx.env.PKGDIR:
+        ctx.fatal('PKGDIR needs to be defined')
         pass
 
     if not ctx.env.INSTALL_AREA:
         ctx.fatal('INSTALL_AREA needs to be defined')
         pass
         
-    cmtpkgs = osp.abspath(ctx.env.CMTPKGS)
+    pkgdir = osp.abspath(ctx.env.PKGDIR)
     install_area = ctx.env.INSTALL_AREA
     
-    #ctx.msg("cmtpkgs", cmtpkgs)
+    #ctx.msg("pkg dir", pkgdir)
     #ctx.msg("install-area", install_area)
     
     ctx.env.INSTALL_AREA_INCDIR = os.path.join(install_area,'include')
@@ -268,7 +268,7 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                      'LIBDIR',
                      'BINDIR',
                      'VERSION',
-                     'CMTPKGS',
+                     'PKGDIR',
                      ):
                 continue
             # if k.startswith('HWAF_') or k.endswith('_PATTERN'):
@@ -394,7 +394,7 @@ def _hwaf_install_project_infos(ctx):
     destdir = None
     if ctx.env.DESTDIR: destdir = ctx.env.DESTDIR
 
-    pkgdir = ctx.env.CMTPKGS
+    pkgdir = ctx.env.PKGDIR
     pkgdir = ctx.path.find_node(pkgdir)
     if not pkgdir: ctx.fatal("could not find pkgdir node [%s]" % pkgdir)
     src_pkgdir = pkgdir.get_src().abspath()
@@ -527,7 +527,7 @@ def _hwaf_load_project_hwaf_module(ctx, fname=None, do_export=False):
 
 @waflib.Configure.conf
 def _hwaf_configure_packages(ctx):
-    ctx._hwaf_build_pkg_deps(pkgdir=ctx.env.CMTPKGS)
+    ctx._hwaf_build_pkg_deps(pkgdir=ctx.env.PKGDIR)
     return
 
 
@@ -719,7 +719,7 @@ def hwaf_pkg_dirs(self, projname=None):
 def _hwaf_build_pkg_deps(ctx, pkgdir=None):
     """process all packages and build the dependency graph"""
 
-    if pkgdir is None: pkgdir = ctx.env.CMTPKGS
+    if pkgdir is None: pkgdir = ctx.env.PKGDIR
     ctx.pkgdir = pkgdir = ctx.path.find_dir(pkgdir)
     if not pkgdir:
         ctx.msg("pkg-dir", "<N/A>")
@@ -786,9 +786,8 @@ class PkgList(waflib.Configure.ConfigurationContext):
 
     def execute(self):
         ctx = self
-        cmtpkgs = ctx.env.CMTPKGS
-        pkgdir = ctx.path.find_dir(cmtpkgs)
-        assert pkgdir, "no such directory: [%s]" % cmtpkgs
+        pkgdir = ctx.path.find_dir(ctx.env.PKGDIR)
+        assert pkgdir, "no such directory: [%s]" % ctx.env.PKGDIR
         msg.info("pkg-dir: %s" % pkgdir.abspath())
         pkgs = ctx.hwaf_find_subpackages(pkgdir.path_from(ctx.path))
         for pkg in pkgs:
@@ -906,7 +905,7 @@ class ShowPkgTree(waflib.Build.BuildContext):
                 self.do_display_pkg_uses(pkgdep, depth)
             
     def show_pkg_tree(self, projname):
-        self.pkgdir = pkgdir = self.path.find_dir(self.env.CMTPKGS)
+        self.pkgdir = pkgdir = self.path.find_dir(self.env.PKGDIR)
         pkglist = self.hwaf_pkgs(projname)
         msg.info('package dependency tree for [%s] (#pkgs=%s)' %
                  (projname, len(pkglist)))

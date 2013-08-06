@@ -153,7 +153,7 @@ def configure(ctx):
     if ctx.env.DESTDIR:
         ctx.msg('destdir',     ctx.env.DESTDIR)
         pass
-    ctx.msg('pkg dir',    ctx.env.CMTPKGS)
+    ctx.msg('pkg dir',    ctx.env.PKGDIR)
     ctx.msg('variant',    ctx.env.CMTCFG)
     ctx.msg('arch',       ctx.env.CFG_ARCH)
     ctx.msg('OS',         ctx.env.CFG_OS)
@@ -410,7 +410,7 @@ def read_cfg(ctx, fname):
     # top-level config
     if cfg.has_section('hwaf-cfg'):
         section = 'hwaf-cfg'
-        for k in ('cmtcfg', 'prefix', 'projects', 'cmtpkgs'):
+        for k in ('cmtcfg', 'prefix', 'projects', 'pkgdir'):
             if cfg.has_option(section, k):
                 #msg.info("....[%s]..." % k)
                 if not (None == getattr(ctx.options, k)):
