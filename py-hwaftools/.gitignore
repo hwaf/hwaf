@@ -1,0 +1,16 @@
+*~
+*.pyc
+*.pyo
+__pycache__
+*.root
+/__build__*
+
+# WAF files
+/.lock-waf*
+/.unittest-gtest/
+/.waf-*/
+/.waf3-*/
+
+# hwaf defaults
+/install-area
+.hwaf*

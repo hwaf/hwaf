@@ -1,0 +1,67 @@
+# -*- python -*-
+# @purpose the main entry point for driving the build and installation steps
+# @author Sebastien Binet <binet@cern.ch>
+
+# imports ---------------------------------------------------------------------
+import os
+import os.path as osp
+
+# globals ---------------------------------------------------------------------
+top = '.'
+out = '__build__'
+PREFIX = 'install-area'
+VERSION = '0.0.1' # FIXME: should take it from somewhere else
+APPNAME = 'hwaf-workarea'
+
+# imports ---------------------------------------------------------------------
+
+# waf imports --
+import waflib.Logs
+import waflib.Utils
+import waflib.Options
+import waflib.Context
+import waflib.Logs as msg
+
+# functions -------------------------------------------------------------------
+
+def go(ctx):
+    from waflib.Options import commands, options
+    options.prefix = osp.join(os.getcwd(), "install-area")
+    commands += ["configure", "clean", "build", "install"]
+
+def options(ctx):
+    ctx.load('hwaf')
+
+    ctx.add_option(
+        '--prefix',
+        default=PREFIX,
+        help="installation prefix [default: %r]"%PREFIX)
+
+    ctx.add_option(
+        '--local-cfg',
+        default="local.conf",
+        help="Path to the local config file listing all type of configuration infos")
+    return
+
+def configure(ctx):
+    ctx.load('hwaf')
+
+    ctx.hwaf_configure()
+    return
+
+def build(ctx):
+    ctx.load('hwaf')
+
+    ctx.hwaf_build()
+    return
+
+def check(ctx):
+    return
+
+def shell(ctx):
+    ctx.load('hwaf')
+    hwaf_ishell(ctx)
+    return
+
+def run(ctx):
+    return
