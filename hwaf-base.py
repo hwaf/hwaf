@@ -814,7 +814,13 @@ def hwaf_export_module(self, fname=WSCRIPT_FILE):
 @conf
 def _hwaf_load_fct(ctx, pkgname, fname):
     import imp
-    name = ctx.path.find_node(fname).abspath()
+    node = ctx.path.find_node(fname)
+    if not node:
+        ctx.fatal(
+            "pkg [%s (dir=%s)]: file [%s] does not exist" %
+            (pkgname, ctx.path.path_from(ctx.pkgdir), fname)
+            )
+    name = node.abspath()
     f = open(name, 'r')
     mod_name = '.'.join(['__hwaf__']+pkgname.split('/')+f.name[:-3].split('/'))
     mod = imp.load_source(mod_name, f.name, f)
