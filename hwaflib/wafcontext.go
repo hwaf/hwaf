@@ -148,15 +148,13 @@ func waf_validate_sections(data map[string]interface{}, sections ...string) erro
 			not_valid[0],
 			sections,
 		)
-	default:
-		return fmt.Errorf(
-			"invalid sections: %v\valid sections: %v",
-			not_valid,
-			sections,
-		)
 	}
 
-	return nil
+	return fmt.Errorf(
+		"invalid sections: %v\valid sections: %v",
+		not_valid,
+		sections,
+	)
 }
 
 func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
