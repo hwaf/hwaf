@@ -394,6 +394,14 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 							&stmt,
 						)
 					}
+				case []interface{}:
+					for _, v := range v {
+						switch v := v.(type) {
+						default:
+							return nil, fmt.Errorf("unknown type (%T) for 'configure.env[%v]' field", v, k)
+
+						}
+					}
 				default:
 					return nil, fmt.Errorf("unknown type (%T) for 'configure.env' field", v)
 				}

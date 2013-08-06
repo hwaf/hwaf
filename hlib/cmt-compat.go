@@ -77,6 +77,15 @@ type ApplyTagStmt struct {
 func (stmt *ApplyTagStmt) is_stmt() {
 }
 
+// TagExcludeStmt defines a new CMT tag with name Name and content Content
+type TagExcludeStmt struct {
+	Name    string
+	Content []string
+}
+
+func (stmt *TagExcludeStmt) is_stmt() {
+}
+
 type IncludeDirsStmt struct {
 	Value []string
 }
@@ -98,6 +107,13 @@ type SetStmt struct {
 func (stmt *SetStmt) is_stmt() {
 }
 
+type SetAppendStmt struct {
+	Value Value
+}
+
+func (stmt *SetAppendStmt) is_stmt() {
+}
+
 type AliasStmt struct {
 	Value Value
 }
@@ -110,6 +126,14 @@ type ActionStmt struct {
 }
 
 func (stmt *ActionStmt) is_stmt() {
+}
+
+type PatternStmt struct {
+	Name string
+	Def  string
+}
+
+func (stmt *PatternStmt) is_stmt() {
 }
 
 type ApplyPatternStmt struct {
@@ -145,10 +169,13 @@ var _ Stmt = (*MacroPrependStmt)(nil)
 var _ Stmt = (*MacroRemoveStmt)(nil)
 var _ Stmt = (*TagStmt)(nil)
 var _ Stmt = (*ApplyTagStmt)(nil)
+var _ Stmt = (*TagExcludeStmt)(nil)
 var _ Stmt = (*IncludeDirsStmt)(nil)
 var _ Stmt = (*IncludePathStmt)(nil)
 var _ Stmt = (*SetStmt)(nil)
+var _ Stmt = (*SetAppendStmt)(nil)
 var _ Stmt = (*AliasStmt)(nil)
+var _ Stmt = (*PatternStmt)(nil)
 var _ Stmt = (*ApplyPatternStmt)(nil)
 var _ Stmt = (*IgnorePatternStmt)(nil)
 var _ Stmt = (*ActionStmt)(nil)

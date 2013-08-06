@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -57,6 +58,9 @@ options: {
 		`
 configure: {
     tools: [{{range .Tools}}{{.}}{{end}}],
+    env: {
+{{.Stmts | gen_hscript_env}}
+    }
 }
 `,
 		wscript.Configure,
@@ -104,6 +108,7 @@ func h_tmpl(w io.Writer, text string, data interface{}) error {
 			return "[" + strings.Join(str, ", ") + "]"
 		},
 		"gen_hscript_pkg_deps": gen_hscript_pkg_deps,
+		"gen_hscript_env":      gen_hscript_env,
 		"gen_hscript_targets":  gen_hscript_targets,
 	})
 	template.Must(t.Parse(text))
@@ -159,6 +164,26 @@ func gen_hscript_pkg_deps(pkg Package_t) string {
 		str = append(str, "runtime: [],")
 	}
 
+	// reindent:
+	for i, s := range str {
+		str[i] = indent + indent + s
+	}
+
+	return strings.Join(str, "\n")
+}
+
+func gen_hscript_env(stmts []Stmt) string {
+	const indent = "    "
+	var str []string
+
+	for _, stmt := range stmts {
+		switch stmt := stmt.(type) {
+		case *MacroStmt:
+			str = append(str,
+				h_py_hlib_value(indent, stmt.Value)...,
+			)
+		}
+	}
 	// reindent:
 	for i, s := range str {
 		str[i] = indent + indent + s
@@ -251,6 +276,72 @@ func gen_hscript_targets(tgts Targets_t) string {
 	}
 
 	return strings.Join(str, "\n")
+}
+
+func h_py_hlib_value(indent string, x Value) []string {
+	str := make([]string, 0)
+
+	values := make([][2]string, 0, len(x.Set))
+	for _, v := range x.Set {
+		k := v.Tag
+		values = append(values, [2]string{k, w_py_strlist(v.Value)})
+	}
+	if len(x.Set) > 1 {
+		str = append(
+			str,
+			fmt.Sprintf(
+				"%s: %s,",
+				x.Name,
+				h_gen_valdict_switch_str(indent, values),
+			),
+		)
+	} else {
+		vv := fmt.Sprintf("%s", values[0][1])
+		vv, _ = strconv.Unquote(vv)
+		v_fmt := "%s: %q,"
+		// if values[0][1] == "" {
+		// 	v_fmt = "%s: %q,"
+		// }
+		str = append(
+			str,
+			fmt.Sprintf(
+				v_fmt,
+				x.Name,
+				vv,
+			),
+		)
+	}
+	return str
+}
+
+func h_gen_valdict_switch_str(indent string, values [][2]string) string {
+	o := make([]string, 0, len(values))
+	o = append(o, "[")
+	for _, v := range values {
+		tags := w_gen_taglist(v[0])
+		key_fmt := "(%s)"
+		if strings.Count(v[0], "&") <= 0 {
+			key_fmt = "%s"
+		}
+		val_fmt := "%s"
+		if strings.Count(v[1], ",") > 0 {
+			val_fmt = "[%s]"
+		}
+		if len(v[1]) == 0 {
+			val_fmt = "%q"
+		}
+
+		o = append(o,
+			fmt.Sprintf(
+				"%s  {%s: %s},",
+				indent,
+				fmt.Sprintf(key_fmt, w_py_strlist(tags)),
+				fmt.Sprintf(val_fmt, v[1]),
+			),
+		)
+	}
+	o = append(o, indent+"]")
+	return strings.Join(o, "\n")
 }
 
 // EOF
