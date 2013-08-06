@@ -656,28 +656,34 @@ def hwaf_declare_tag(self, name, content):
 
 ### ------------------------------------------------------------------------
 @conf
-def hwaf_apply_tag(self, name):
+def hwaf_apply_tag(self, *tag):
     '''
-    hwaf_apply_tag activates a tag with name `name`
-    @param name: a string
+    hwaf_apply_tag activates a tag with name `tag`
+    @param name: a string or a list of strings
 
     e.x:
       ctx.hwaf_apply_tag("x86_64-slc6-gcc46-dbg")
+      ctx.hwaf_apply_tag("tag1 tag2")
+      ctx.hwaf_apply_tag("tag1", "tag2")
     '''
-    try:
-        #msg.debug("applying tag [%s]..." % name)
-        content = self.env['HWAF_TAGS'][name]
-        self.env.append_unique('HWAF_ACTIVE_TAGS', [name])
-        # FIXME: recursively apply_tag for content as well ?
-        #        but then, a declare_tag for each tag content is needed!
-        # for tag in content:
-        #     if not tag in self.env.HWAF_ACTIVE_TAGS:
-        #         self.hwaf_apply_tag(tag)
-        self.env.append_unique('HWAF_ACTIVE_TAGS', content)
-        #msg.debug("applying tag content: %s..." % (content,))
-        #msg.debug("applying tag [%s]... [done]" % name)
-    except KeyError:
-        raise waflib.Errors.WafError("package [%s]: no such tag (%s) in HWAF_TAGS" % (self.path.name, name))
+    if isinstance(tag, type("")):
+        tag = waflib.Utils.to_list(tag)
+    for name in tag:
+        try:
+            #msg.debug("applying tag [%s]..." % name)
+            content = self.env['HWAF_TAGS'][name]
+            self.env.append_unique('HWAF_ACTIVE_TAGS', [name])
+            # FIXME: recursively apply_tag for content as well ?
+            #        but then, a declare_tag for each tag content is needed!
+            # for tag in content:
+            #     if not tag in self.env.HWAF_ACTIVE_TAGS:
+            #         self.hwaf_apply_tag(tag)
+            self.env.append_unique('HWAF_ACTIVE_TAGS', content)
+            #msg.debug("applying tag content: %s..." % (content,))
+            #msg.debug("applying tag [%s]... [done]" % name)
+        except KeyError:
+            raise waflib.Errors.WafError("package [%s]: no such tag (%s) in HWAF_TAGS" % (self.path.name, name))
+        pass
     pass
 
 ### ------------------------------------------------------------------------
