@@ -104,7 +104,7 @@ def configure(ctx):
 
     pkgdir = os.environ.get('PKGDIR', None)
     if not pkgdir and ctx.options.pkgdir:
-        cmtpkgs = ctx.options.pkgdir
+        pkgdir = ctx.options.pkgdir
         pass
     if not pkgdir:
         pkgdir = 'src'
