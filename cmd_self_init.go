@@ -2,11 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"net/http"
 	"os"
-	"os/exec"
-	"path/filepath"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
@@ -48,74 +44,18 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s...\n", n)
 	}
 
-	home := os.Getenv("HOME")
-	if home == "" {
-		err = fmt.Errorf("%s: no ${HOME} environment variable", n)
-		handle_err(err)
-	}
-
-	top := filepath.Join(home, ".config", "hwaf")
-	if !path_exists(top) {
-		err = os.MkdirAll(top, 0700)
-		handle_err(err)
-	}
-
-	// add hep-waftools cache
-	hwaf_tools := filepath.Join(top, "tools")
-	if path_exists(hwaf_tools) {
-		err = os.RemoveAll(hwaf_tools)
-		handle_err(err)
-	}
-	// first try the r/w url...
-	git := exec.Command(
-		"git", "clone", "git@github.com:hwaf/hep-waftools",
-		hwaf_tools,
-	)
-	// if !quiet {
-	// 	git.Stdout = os.Stdout
-	// 	git.Stderr = os.Stderr
-	// }
-
-	if git.Run() != nil {
-		git := exec.Command(
-			"git", "clone", "git://github.com/hwaf/hep-waftools",
-			hwaf_tools,
-		)
-		if !quiet {
-			git.Stdout = os.Stdout
-			git.Stderr = os.Stderr
+	hwaf_root := os.Getenv("HWAF_ROOT")
+	for _, dir := range []string{g_ctx.Root, hwaf_root} {
+		if dir != "" {
+			g_ctx.Warn("you are trying to 'hwaf self init' while running a HWAF_ROOT-based installation\n")
+			g_ctx.Warn("this is like crossing the streams in Ghostbusters (ie: it's bad.)\n")
+			g_ctx.Warn("if you think you know what you are doing, unset HWAF_ROOT and re-run 'hwaf self init'\n")
+			err = fmt.Errorf("${HWAF_ROOT} was set (%s)", dir)
+			handle_err(err)
 		}
-		err = git.Run()
-		handle_err(err)
 	}
 
-	// add bin dir
-	bin := filepath.Join(top, "bin")
-	if !path_exists(bin) {
-		err = os.MkdirAll(bin, 0700)
-		handle_err(err)
-	}
-
-	// add waf-bin
-	waf_fname := filepath.Join(bin, "waf")
-	if path_exists(waf_fname) {
-		err = os.Remove(waf_fname)
-		handle_err(err)
-	}
-	waf, err := os.OpenFile(waf_fname, os.O_WRONLY|os.O_CREATE, 0777)
-	handle_err(err)
-	defer func() {
-		err = waf.Sync()
-		handle_err(err)
-		err = waf.Close()
-		handle_err(err)
-	}()
-
-	resp, err := http.Get("https://github.com/hwaf/hwaf/raw/master/waf")
-	handle_err(err)
-	defer resp.Body.Close()
-	_, err = io.Copy(waf, resp.Body)
-	handle_err(err)
+	// 'hwaf self init' is now dummied out...
 
 	if !quiet {
 		fmt.Printf("%s... [ok]\n", n)
