@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	gocfg "github.com/gonuts/config"
+	"github.com/hwaf/gas"
 	"github.com/hwaf/hwaf/platform"
 )
 
@@ -379,17 +380,18 @@ func (ctx *Context) init() error {
 	}
 
 	ctx.lcfg, err = ctx.LocalCfg()
-	if ctx.lcfg != nil {
+	if ctx.lcfg != nil && err == nil {
 		err = ctx.load_env_from_cfg(ctx.lcfg)
 		if err != nil {
 			return fmt.Errorf("hwaf: problem loading environment from local config:\n%v", err)
 		}
 	}
+	err = nil
 
 	setup_env := func(topdir string) error {
 		topdir = os.ExpandEnv(topdir)
 		if !path_exists(topdir) {
-			return nil
+			return fmt.Errorf("hwaf: no such directory [%s]", topdir)
 		}
 		// add hepwaf-tools to the python environment
 		pypath := os.Getenv("PYTHONPATH")
@@ -397,7 +399,7 @@ func (ctx *Context) init() error {
 		if topdir == ctx.Root {
 			hwaftools = filepath.Join(topdir, "share", "hwaf", "tools")
 		} else {
-			hwaftools = filepath.Join(topdir, "tools")
+			hwaftools = filepath.Join(topdir, "py-hwaftools")
 		}
 		if !path_exists(hwaftools) {
 			return fmt.Errorf("hwaf: no such directory [%s]", hwaftools)
@@ -408,61 +410,27 @@ func (ctx *Context) init() error {
 			pypath = pypath + string(os.PathListSeparator) + hwaftools
 		}
 
-		// detect the python version we are running
-		py_version := "2"
-		{
-			py := os.Getenv("PYTHON")
-			if py == "" {
-				py = "python"
-			}
-			cmd := exec.Command(
-				py,
-				"-c", "import sys; print (sys.version_info[0])",
-			)
-			bout, err := cmd.Output()
-			if err != nil {
-				return fmt.Errorf("hwaf: could not detect python version: %v", err)
-			}
-			py_version = strings.Trim(string(bout), " \r\n")
-			if py_version == "" {
-				py_version = "2"
-			}
-		}
-		py_dir := "py" + py_version
-		if path_exists(filepath.Join(hwaftools, py_dir)) {
-			pypath = pypath + string(os.PathListSeparator) + filepath.Join(hwaftools, py_dir)
-			pypath = pypath + string(os.PathListSeparator) + filepath.Join(hwaftools, py_dir, "yaml")
-		}
 		os.Setenv("PYTHONPATH", pypath)
-
-		// add the git-tools to the environment
-		binpath := os.Getenv("PATH")
-		hwafbin := filepath.Join(topdir, "bin")
-		if !path_exists(hwafbin) {
-			return fmt.Errorf("hwaf: no such directory [%s]", hwafbin)
-		}
-
-		if binpath == "" {
-			binpath = hwafbin
-		} else {
-			binpath = binpath + string(os.PathListSeparator) + hwafbin
-		}
-		os.Setenv("PATH", binpath)
 		return nil
 	}
 
 	// setup environment.
 	// order matters:
-	//   first one wins (as we append to the xyzPATH)
-	err = setup_env(filepath.Join("${HOME}", ".config", "hwaf"))
-	if err != nil {
-		// ok... discard.
-	}
-
-	err = setup_env(ctx.Root)
-	if err != nil {
-		// this one is more critical
-		return err
+	switch ctx.Root {
+	default:
+		err = setup_env(ctx.Root)
+		if err != nil {
+			return err
+		}
+	case "":
+		topdir, err := gas.Abs("github.com/hwaf/hwaf")
+		if err != nil {
+			return err
+		}
+		err = setup_env(topdir)
+		if err != nil {
+			return err
+		}
 	}
 
 	// FIXME: get sitedir from globalcfg and/or localcfg.
@@ -509,7 +477,7 @@ func (ctx *Context) GlobalCfg() (*gocfg.Config, error) {
 	for _, fname := range []string{
 		filepath.Join(string(os.PathSeparator), "etc", "hwaf.conf"),
 		filepath.Join(ctx.Root, "etc", "hwaf.conf"),
-		filepath.Join("${HOME}", ".config", "hwaf.conf"),
+		filepath.Join("${HOME}", ".config", "hwaf", "local.conf"),
 	} {
 		fname = os.ExpandEnv(fname)
 		if !path_exists(fname) {

@@ -5,12 +5,12 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
+	"github.com/hwaf/gas"
 )
 
 func hwaf_make_cmd_init() *commander.Command {
@@ -85,7 +85,8 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	default:
 		hwaf_tools_dir = filepath.Join(g_ctx.Root, "share", "hwaf", "tools")
 	case "":
-		hwaf_tools_dir = filepath.Join("${HOME}", ".config", "hwaf", "tools")
+		hwaf_tools_dir, err = gas.Abs("github.com/hwaf/hwaf/py-hwaftools")
+		handle_err(err)
 	}
 
 	hwaf_tools_dir = os.ExpandEnv(hwaf_tools_dir)
@@ -93,28 +94,8 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: using hwaf/tools from [%s]...\n", n, hwaf_tools_dir)
 	}
 	if !path_exists(hwaf_tools_dir) {
-		// first try the r/w url...
-		git := exec.Command(
-			"git", "clone", "git@github.com:hwaf/hep-waftools",
-			hwaf_tools_dir,
-		)
-		if !quiet {
-			git.Stdout = os.Stdout
-			git.Stderr = os.Stderr
-		}
-
-		if git.Run() != nil {
-			git := exec.Command(
-				"git", "clone", "git://github.com/hwaf/hep-waftools",
-				hwaf_tools_dir,
-			)
-			if !quiet {
-				git.Stdout = os.Stdout
-				git.Stderr = os.Stderr
-			}
-			err = git.Run()
-			handle_err(err)
-		}
+		err = fmt.Errorf("no such directory [%s]", hwaf_tools_dir)
+		handle_err(err)
 	}
 	if !path_exists(".hwaf") {
 		err = os.MkdirAll(".hwaf", 0700)
@@ -137,7 +118,8 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		default:
 			hwaf_bin_dir = filepath.Join(g_ctx.Root, "bin")
 		case "":
-			hwaf_bin_dir = filepath.Join("${HOME}", ".config", "hwaf", "bin")
+			hwaf_bin_dir, err = gas.Abs("github.com/hwaf/hwaf")
+			handle_err(err)
 		}
 		hwaf_bin_dir = os.ExpandEnv(hwaf_bin_dir)
 		if !quiet {
