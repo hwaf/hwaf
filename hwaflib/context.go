@@ -126,24 +126,6 @@ func (ctx *Context) WafBin() (string, error) {
 		return waf, nil
 	}
 
-	// try from user .config
-	top = os.ExpandEnv(filepath.Join("${HOME}", ".config", "hwaf"))
-	waf = filepath.Join(top, "bin", "waf")
-	if !path_exists(waf) {
-		err = fmt.Errorf(
-			"no such file [%s]\nplease re-run 'hwaf self init'\n",
-			waf,
-		)
-		return "", err
-	} else {
-		err = ctx.init_waf_ctx()
-		if err != nil {
-			ctx.Warn("problem initializing waf: %v\n", err)
-			return "", err
-		}
-		return waf, nil
-	}
-
 	return "", fmt.Errorf("could not find 'waf' binary")
 }
 
