@@ -56,19 +56,16 @@ def find_cmake(ctx, **kwargs):
     ctx.find_program(
         "ccmake",
         var="CCMAKE",
-        path_list=path_list,
         **kwargs)
     
     ctx.find_program(
         "cpack",
         var="CPACK",
-        path_list=path_list,
         **kwargs)
     
     ctx.find_program(
         "ctest",
         var="CTEST",
-        path_list=path_list,
         **kwargs)
 
     version="N/A"
