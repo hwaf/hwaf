@@ -9,6 +9,11 @@ gen-version:
 	sed -e s/HWAF_VERSION/${HWAF_VERSION}/g cmd_version.go.tmpl \
 	>| cmd_version.go
 
+tag: gen-version
+	git add cmd_version.go
+	git commit -m "version: "${HWAF_VERSION}
+	git tag -f ${HWAF_VERSION}
+
 dist: gen-version
 	git fetch --all
 	git checkout master
