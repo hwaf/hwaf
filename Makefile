@@ -1,13 +1,18 @@
 .PHONY: release dist gen-version clean
 
 export HWAF_VERSION=`date +%Y%m%d`
+export HWAF_REVISION=`git rev-parse --short HEAD`
 
 MANIFEST=/afs/cern.ch/atlas/project/mana-fwk/www/hwaf-latest/MANIFEST
 
 gen-version:
 	echo "HWAF_VERSION=${HWAF_VERSION}"
+	echo "HWAF_REVISION=${HWAF_REVISION}"
 	sed -e s/HWAF_VERSION/${HWAF_VERSION}/g cmd_version.go.tmpl \
+	>| cmd_version.go.tmp
+	sed -e s/HWAF_REVISION/${HWAF_REVISION}/g cmd_version.go.tmp \
 	>| cmd_version.go
+	/bin/rm cmd_version.go.tmp
 
 tag: gen-version
 	git add cmd_version.go
