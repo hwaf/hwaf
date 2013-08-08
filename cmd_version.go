@@ -17,7 +17,7 @@ print version and exit.
 
 ex:
  $ hwaf version
- hwaf-20130808 (b0aa7e1)
+ hwaf-20130808 (4edef4b)
 `,
 		Flag: *flag.NewFlagSet("hwaf-version", flag.ExitOnError),
 	}
@@ -25,7 +25,7 @@ ex:
 }
 
 func hwaf_run_cmd_version(cmd *commander.Command, args []string) {
-	fmt.Printf("hwaf-20130808 (b0aa7e1)\n")
+	fmt.Printf("hwaf-20130808 (4edef4b)\n")
 }
 
 // EOF
