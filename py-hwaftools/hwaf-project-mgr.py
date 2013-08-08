@@ -637,7 +637,7 @@ def hwaf_itr_projects(self, projname=None):
 
 ### API for package queries
 @waflib.Configure.conf
-def hwaf_pkg_name(self, pkgdir=None):
+def hwaf_pkg_infos(self, pkgdir=None):
     if pkgdir is None: pkgdir = self.path
     if isinstance(pkgdir, waflib.Node.Node): pkgdir = pkgdir.abspath()
     mod = waflib.Context.load_module(osp.join(pkgdir, waflib.Context.WSCRIPT_FILE))
@@ -645,7 +645,11 @@ def hwaf_pkg_name(self, pkgdir=None):
         package = getattr(mod, 'PACKAGE')
     except AttributeError:
         raise waflib.Errors.WafError('package [%s] has not "PACKAGE" attribute' % pkgdir)
-    return package['name']
+    return package
+
+@waflib.Configure.conf
+def hwaf_pkg_name(self, pkgdir=None):
+    return self.hwaf_pkg_infos(pkgdir)['name']
 
 @waflib.Configure.conf
 def hwaf_pkg_deps(self, pkgname, projname=None):
