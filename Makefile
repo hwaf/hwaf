@@ -20,7 +20,7 @@ tag: gen-version
 	git tag -f ${HWAF_VERSION}
 	git push --tags
 
-dist: gen-version
+dist:
 	git fetch --all
 	git checkout master
 	git pull origin master
