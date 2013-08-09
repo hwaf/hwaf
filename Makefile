@@ -18,6 +18,7 @@ tag: gen-version
 	git add cmd_version.go
 	git commit -m "version: "${HWAF_VERSION}
 	git tag -f ${HWAF_VERSION}
+	git push --tags
 
 dist: gen-version
 	git fetch --all
