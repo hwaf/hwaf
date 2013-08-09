@@ -774,7 +774,8 @@ def _hwaf_build_pkg_deps(ctx, pkgdir=None):
     topdir = ctx.root.find_dir(topdir)
     for pkgname in pkglist:
         #msg.info("-- %s %s" % (pkgname, pkgdir.abspath()))
-        pkgdict = ctx.hwaf_find_pkg(pkgname)
+        pkgdict = ctx.hwaf_find_pkg(pkgname, projname=None)
+        pkg = ctx.path.find_dir(pkgdict['dir'])
         if not pkg: # not a local package...
             continue
         #pkgname = pkg.path_from(topdir)
