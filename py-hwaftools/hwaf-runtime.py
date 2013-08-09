@@ -60,7 +60,8 @@ def insert_project_level_bindir(self):
     _get = getattr(self, 'hwaf_get_install_path', None)
     if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
     d = _get('${INSTALL_AREA}/bin')
-    self.env.prepend_value('PATH', d)
+    if not d in self.env['PATH']:
+        self.env.prepend_value('PATH', d)
     return
 
 ### ---------------------------------------------------------------------------
@@ -76,8 +77,10 @@ def insert_project_level_libdir(self):
     _get = getattr(self, 'hwaf_get_install_path', None)
     if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
     d = _get('${INSTALL_AREA}/lib')
-    self.env.prepend_value('LD_LIBRARY_PATH', d)
-    self.env.prepend_value('DYLD_LIBRARY_PATH', d)
+    if not d in self.env['LD_LIBRARY_PATH']:
+        self.env.prepend_value('LD_LIBRARY_PATH', d)
+    if not d in self.env['DYLD_LIBRARY_PATH']:
+        self.env.prepend_value('DYLD_LIBRARY_PATH', d)
     return
 
 ### ---------------------------------------------------------------------------
@@ -89,11 +92,16 @@ def hwaf_setup_runtime_env(self):
     '''
     hwaf_setup_runtime_env crafts a correct os.environ from the ctx.env.
     '''
+    ## do not modify the os.environ repeatedly
+    ## to prevent hysteresis effects
+    if os.environ.get('HWAF_SETUP_RUNTIME_ENV', None):
+        return
     env = _hwaf_get_runtime_env(self.bld)
     for k in self.env.HWAF_RUNTIME_ENVVARS:
         v = env.get(k, None)
         if v is None: continue
         os.environ[k] = v
+    os.environ['HWAF_SETUP_RUNTIME_ENV'] = '1'
     return
 
 
