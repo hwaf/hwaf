@@ -165,7 +165,7 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         # add packages from this project...
         for pkg in proj_dict['pkgs'].keys():
             # msg.info("@@@ pkg=%s deps=%s"
-            #          % (pkg, proj_dict['pkgs'][pkg]['deps']))
+            #           % (pkg, proj_dict['pkgs'][pkg]['deps']))
             ctx.hwaf_add_pkg(
                 pkg,
                 projname=ppname,
@@ -736,7 +736,7 @@ def _hwaf_build_pkg_deps(ctx, pkgdir=None):
         #msg.info(" %s" % pkg.path_from(ctx.path))
         pkgpath = pkg.path_from(ctx.path)
         pkgname = ctx.hwaf_pkg_name(pkgpath)
-        #msg.info(" => %s" % pkgdict['name'])
+        #msg.info(" => %s" % pkgname)
         ctx.hwaf_add_pkg(pkgname, pkgdir=pkgpath)
         pass
     
