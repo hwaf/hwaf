@@ -12,6 +12,7 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
+	"github.com/hwaf/gas"
 )
 
 func hwaf_make_cmd_self_bdist() *commander.Command {
@@ -82,17 +83,13 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	}
 
 	// add hep-waftools cache
+	hwaf_dir, err := gas.Abs("github.com/hwaf/hwaf")
+	handle_err(err)
+
+	src_hwaf_tools := filepath.Join(hwaf_dir, "py-hwaftools")
 	hwaf_tools := filepath.Join(top, "share", "hwaf", "tools")
-	git := exec.Command(
-		"git", "clone", "git://github.com/hwaf/hep-waftools",
-		hwaf_tools,
-	)
-	git.Dir = tmpdir
-	if !quiet {
-		git.Stdout = os.Stdout
-		git.Stderr = os.Stderr
-	}
-	err = git.Run()
+
+	err = copytree(hwaf_tools, src_hwaf_tools)
 	handle_err(err)
 
 	// remove git stuff
