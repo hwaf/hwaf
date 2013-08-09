@@ -3,7 +3,7 @@
 export HWAF_VERSION=`date +%Y%m%d`
 export HWAF_REVISION=`git rev-parse --short HEAD`
 
-MANIFEST=/afs/cern.ch/atlas/project/mana-fwk/www/hwaf-latest/MANIFEST
+MANIFEST=/afs/cern.ch/atlas/project/hwaf/www/hwaf-latest/MANIFEST
 
 gen-version:
 	echo "HWAF_VERSION=${HWAF_VERSION}"

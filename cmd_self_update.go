@@ -174,7 +174,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	}
 
 	url := fmt.Sprintf(
-		"http://cern.ch/mana-fwk/downloads/bin/hwaf-%s-%s",
+		"http://cern.ch/hwaf/downloads/bin/hwaf-%s-%s",
 		runtime.GOOS, runtime.GOARCH,
 	)
 	tmp, err := ioutil.TempFile("", "hwaf-self-update-")

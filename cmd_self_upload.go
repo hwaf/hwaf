@@ -14,9 +14,9 @@ func hwaf_make_cmd_self_upload() *commander.Command {
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_self_upload,
 		UsageLine: "upload",
-		Short:     "upload hwaf to cern.ch/mana-fwk",
+		Short:     "upload hwaf to cern.ch/hwaf",
 		Long: `
-upload uploads hwaf to http://cern.ch/mana-fwk.
+upload uploads hwaf to http://cern.ch/hwaf.
 
 ex:
  $ hwaf self upload
@@ -48,7 +48,7 @@ func hwaf_run_cmd_self_upload(cmd *commander.Command, args []string) {
 
 	old, err := exec.LookPath(os.Args[0])
 	handle_err(err)
-	dst_dir := "binet@lxplus.cern.ch:~/dev/repos/mana-fwk/www/downloads/bin"
+	dst_dir := "binet@lxplus.cern.ch:/afs/cern.ch/atlas/project/hwaf/www/downloads/bin"
 	dst := fmt.Sprintf("%s/hwaf-%s-%s", dst_dir, runtime.GOOS, runtime.GOARCH)
 	scp := exec.Command("scp", old, dst)
 	scp.Stdin = os.Stdin
