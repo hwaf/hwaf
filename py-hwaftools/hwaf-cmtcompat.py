@@ -42,7 +42,8 @@ def _cmt_get_srcs_lst(self, source, root=None):
         if not srcs:
             # ok, try again from bldnode
             src_node = root.find_dir('src')
-            srcs = root.get_bld().ant_glob(source)
+            try:             srcs = root.get_bld().ant_glob(source)
+            except OSError:  srcs = None
             if srcs:
                 # OK. finders, keepers.
                 pass
