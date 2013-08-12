@@ -333,6 +333,21 @@ def gen_reflex_hook(self, node):
     if not self.env['GENREFLEX_DSOMAP']:
         # project with *no* Reflex target...
         return
+    if not self.env['GENREFLEX']:
+        # project configuration failed to find genreflex binary
+        self.bld.fatal(
+            'package [%s] requested a gen_reflex task but binary "genreflex" not found (re-check configuration options)' %
+            self.bld.hwaf_pkg_name(self.path)
+        )
+        return
+    if not self.env['HWAF_FOUND_GCCXML']:
+        # project configuration failed to find genreflex binary
+        self.bld.fatal(
+            'package [%s] requested a gen_reflex task but binary "gccxml" not found (re-check configuration options)' %
+            self.bld.hwaf_pkg_name(self.path)
+        )
+        return
+
     source = node.name
     out_node_dir = self.path.get_bld().make_node(
         "_reflex_dicts").make_node(
