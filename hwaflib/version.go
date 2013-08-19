@@ -6,7 +6,7 @@ func (ctx *Context) Version() string {
 }
 
 func (ctx *Context) Revision() string {
-	revision := "a80d1ae"
+	revision := "c980dad"
 	return revision
 }
 
