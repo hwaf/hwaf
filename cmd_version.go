@@ -8,24 +8,28 @@ import (
 )
 
 func hwaf_make_cmd_version() *commander.Command {
+	vers := g_ctx.Version()
+	rev := g_ctx.Revision()
 	cmd := &commander.Command{
 		Run:       hwaf_run_cmd_version,
 		UsageLine: "version",
 		Short:     "print version and exit",
-		Long: `
+		Long: fmt.Sprintf(`
 print version and exit.
 
 ex:
  $ hwaf version
- hwaf-20130814 (990d7df)
-`,
+ hwaf-%s (%s)
+`, vers, rev),
 		Flag: *flag.NewFlagSet("hwaf-version", flag.ExitOnError),
 	}
 	return cmd
 }
 
 func hwaf_run_cmd_version(cmd *commander.Command, args []string) {
-	fmt.Printf("hwaf-20130814 (990d7df)\n")
+	vers := g_ctx.Version()
+	rev := g_ctx.Revision()
+	fmt.Printf("hwaf-%s (%s)\n", vers, rev)
 }
 
 // EOF

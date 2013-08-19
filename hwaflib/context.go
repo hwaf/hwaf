@@ -393,6 +393,8 @@ func (ctx *Context) init() error {
 		}
 
 		os.Setenv("PYTHONPATH", pypath)
+		os.Setenv("HWAF_VERSION", ctx.Version())
+		os.Setenv("HWAF_REVISION", ctx.Revision())
 		return nil
 	}
 

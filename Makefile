@@ -8,14 +8,14 @@ MANIFEST=/afs/cern.ch/atlas/project/hwaf/www/hwaf-latest/MANIFEST
 gen-version:
 	echo "HWAF_VERSION=${HWAF_VERSION}"
 	echo "HWAF_REVISION=${HWAF_REVISION}"
-	sed -e s/HWAF_VERSION/${HWAF_VERSION}/g cmd_version.go.tmpl \
-	>| cmd_version.go.tmp
-	sed -e s/HWAF_REVISION/${HWAF_REVISION}/g cmd_version.go.tmp \
-	>| cmd_version.go
-	/bin/rm cmd_version.go.tmp
+	sed -e s/HWAF_VERSION/${HWAF_VERSION}/g hwaflib/version.go.tmpl \
+	>| hwaflib/version.go.tmp
+	sed -e s/HWAF_REVISION/${HWAF_REVISION}/g hwaflib/version.go.tmp \
+	>| hwaflib/version.go
+	/bin/rm hwaflib/version.go.tmp
 
 tag: gen-version
-	git add cmd_version.go
+	git add hwaflib/version.go
 	git commit -m "version: "${HWAF_VERSION}
 	git tag -f ${HWAF_VERSION}
 	git push --tags
