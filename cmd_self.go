@@ -15,7 +15,6 @@ func hwaf_make_cmd_self() *commander.Commander {
 			hwaf_make_cmd_self_bdist(),
 			hwaf_make_cmd_self_bdist_upload(),
 			hwaf_make_cmd_self_update(),
-			hwaf_make_cmd_self_upload(),
 		},
 		Flag: flag.NewFlagSet("hwaf-self", flag.ExitOnError),
 	}
