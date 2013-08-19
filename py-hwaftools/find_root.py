@@ -551,12 +551,12 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
 
     o = self(
         source=source,
+        target=target,
         defines=defines,
         **kw
         )
 
     o.name = 'genreflex-%s' % name
-    o.target = kw.get('target', name+'Dict')
     o.libpath = self.env.LD_LIBRARY_PATH + [self.path.get_bld().abspath()]
     o.install_path ='${INSTALL_AREA}/lib'
     o.reentrant = False
