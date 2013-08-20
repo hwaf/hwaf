@@ -63,6 +63,11 @@ def options(ctx):
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
+    ctx.start_msg("hwaf version")
+    ctx.end_msg(os.environ.get("HWAF_VERSION", "N/A"))
+    ctx.start_msg("hwaf revision")
+    ctx.end_msg(os.environ.get("HWAF_REVISION", "N/A"))
+    
     if ctx.options.local_cfg:
         fname = osp.abspath(ctx.options.local_cfg)
         ctx.start_msg("Manifest file")
