@@ -28,7 +28,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-self-update", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 
 	return cmd
 }
@@ -45,9 +45,9 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s...\n", n)
 	}
 
@@ -84,7 +84,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 				"github.com/hwaf/hwaf",
 			)
 
-			if !quiet {
+			if verbose {
 				git.Stdout = os.Stdout
 				git.Stderr = os.Stderr
 			}
@@ -95,7 +95,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 					"git://github.com/hwaf/hwaf",
 					"github.com/hwaf/hwaf",
 				)
-				if !quiet {
+				if verbose {
 					git.Stdout = os.Stdout
 					git.Stderr = os.Stderr
 				}
@@ -111,7 +111,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 
 		// fetch...
 		git := exec.Command("git", "fetch", "--all")
-		if !quiet {
+		if verbose {
 			git.Stdout = os.Stdout
 			git.Stderr = os.Stderr
 		}
@@ -120,14 +120,14 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 
 		// update...
 		git = exec.Command("git", "checkout", "master")
-		if !quiet {
+		if verbose {
 			git.Stdout = os.Stdout
 			git.Stderr = os.Stderr
 		}
 		err = git.Run()
 		handle_err(err)
 		git = exec.Command("git", "pull", "origin", "master")
-		if !quiet {
+		if verbose {
 			git.Stdout = os.Stdout
 			git.Stderr = os.Stderr
 		}
@@ -136,7 +136,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 
 		// make sure we have all deps
 		goget := exec.Command("go", "get", "-d", ".")
-		if !quiet {
+		if verbose {
 			goget.Stdout = os.Stdout
 			goget.Stderr = os.Stderr
 		}
@@ -145,7 +145,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 
 		// rebuild
 		goget = exec.Command("go", "build", ".")
-		if !quiet {
+		if verbose {
 			goget.Stdout = os.Stdout
 			goget.Stderr = os.Stderr
 		}
@@ -154,7 +154,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 
 		// self init
 		bin := filepath.Join(gosrc, "hwaf")
-		hwaf := exec.Command(bin, "self", "init", fmt.Sprintf("-q=%v", quiet))
+		hwaf := exec.Command(bin, "self", "init", fmt.Sprintf("-v=%v", verbose))
 		hwaf.Stderr = os.Stderr
 		hwaf.Stdout = os.Stdout
 		err = hwaf.Run()
@@ -167,7 +167,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 		err = mv.Run()
 		handle_err(err)
 
-		if !quiet {
+		if verbose {
 			fmt.Printf("%s... [ok]\n", n)
 		}
 		return
@@ -212,7 +212,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	// self-init
 	hwaf := exec.Command(
 		tmp.Name(),
-		"self", "init", fmt.Sprintf("-q=%v", quiet),
+		"self", "init", fmt.Sprintf("-v=%v", verbose),
 	)
 	hwaf.Stderr = os.Stderr
 	hwaf.Stdout = os.Stdout
@@ -226,7 +226,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	err = mv.Run()
 	handle_err(err)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: [%s] updated\n", n, old)
 		fmt.Printf("%s... [ok]\n", n)
 	}

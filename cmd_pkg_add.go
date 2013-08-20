@@ -34,7 +34,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-pkg-co", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 	cmd.Flag.String("b", "", "branch to checkout (default=master)")
 	cmd.Flag.String("f", "", "path to a file holding a list of packages to retrieve")
 
@@ -87,11 +87,11 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 			if err != nil && err != io.EOF {
 				handle_err(err)
 			}
-			quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+			verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 			for _, pkg := range pkgs {
 				args := []string{"pkg", "co"}
-				if !quiet {
-					args = append(args, "-q=0")
+				if verbose {
+					args = append(args, "-v=1")
 				}
 				switch len(pkg) {
 				case 1:
@@ -118,10 +118,10 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 	bname := cmd.Flag.Lookup("b").Value.Get().(string)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: checkout package [%s]...\n", n, pkguri)
 	}
 
@@ -157,7 +157,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	err = helper.Delete()
 	handle_err(err)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: checkout package [%s]... [ok]\n", n, pkguri)
 	}
 }

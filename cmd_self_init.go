@@ -21,7 +21,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-self-init", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 
 	return cmd
 }
@@ -38,9 +38,9 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s...\n", n)
 	}
 
@@ -57,7 +57,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 
 	// 'hwaf self init' is now dummied out...
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s... [ok]\n", n)
 	}
 }

@@ -27,11 +27,11 @@ func path_exists(name string) bool {
 }
 
 type asetup_t struct {
-	ctx   *hwaflib.Context
-	cmd   *commander.Command
-	args  []string
-	opts  options
-	quiet bool
+	ctx     *hwaflib.Context
+	cmd     *commander.Command
+	args    []string
+	opts    options
+	verbose bool
 }
 
 type options struct {
@@ -50,11 +50,11 @@ func new_options() options {
 
 func Run(ctx *hwaflib.Context, cmd *commander.Command, args []string) error {
 	cfg := asetup_t{
-		ctx:   ctx,
-		cmd:   cmd,
-		args:  args,
-		opts:  new_options(),
-		quiet: cmd.Flag.Lookup("q").Value.Get().(bool),
+		ctx:     ctx,
+		cmd:     cmd,
+		args:    args,
+		opts:    new_options(),
+		verbose: cmd.Flag.Lookup("v").Value.Get().(bool),
 	}
 	return cfg.run()
 }
@@ -65,13 +65,13 @@ func (a *asetup_t) run() error {
 	n := "hwaf-" + a.cmd.Name()
 
 	if len(a.args) == 0 {
-		if !a.quiet {
+		if a.verbose {
 			a.ctx.Info("re-using previously asetup'ed workarea...\n")
 		}
 		// case where we reuse a previously already asetup'ed workarea
 		_, err = a.ctx.LocalCfg()
 		if err == nil {
-			if !a.quiet {
+			if a.verbose {
 				a.ctx.Info("re-using previously asetup'ed workarea... [done]\n")
 			}
 			return nil
@@ -113,7 +113,7 @@ func (a *asetup_t) run() error {
 		}
 	}
 	{
-		sub := exec.Command("hwaf", "init", fmt.Sprintf("-q=%v", a.quiet), dirname)
+		sub := exec.Command("hwaf", "init", fmt.Sprintf("-v=%v", a.verbose), dirname)
 		sub.Stdin = os.Stdin
 		sub.Stdout = os.Stdout
 		sub.Stderr = os.Stderr
@@ -128,7 +128,7 @@ func (a *asetup_t) run() error {
 		return err
 	}
 
-	if !a.quiet {
+	if a.verbose {
 		fmt.Printf("%s: asetup workarea [%s]...\n", n, dirname)
 		fmt.Printf("%s: projects=%v\n", n, a.opts.projdir)
 		// if cfg_fname != "" {
@@ -138,7 +138,7 @@ func (a *asetup_t) run() error {
 
 	subcmd := exec.Command(
 		"hwaf", "setup",
-		fmt.Sprintf("-q=%v", a.quiet),
+		fmt.Sprintf("-v=%v", a.verbose),
 		"-p", a.opts.projdir,
 	)
 	subcmd.Stdin = os.Stdin
@@ -177,7 +177,7 @@ func (a *asetup_t) run() error {
 		return err
 	}
 
-	if !a.quiet {
+	if a.verbose {
 		fmt.Printf("%s: asetup workarea [%s]... [ok]\n", n, dirname)
 	}
 	return err
@@ -306,7 +306,7 @@ func (a *asetup_t) process(args []string) error {
 		a.ctx.Warn("no $HWAF_SITEDIR env. variable. will use [%s]\n", sitedir)
 	}
 
-	if !a.quiet {
+	if a.verbose {
 		a.ctx.Info("using sitedir: [%s]\n", sitedir)
 	}
 
@@ -322,7 +322,7 @@ func (a *asetup_t) process(args []string) error {
 		return err
 	}
 
-	if !a.quiet {
+	if a.verbose {
 		a.ctx.Info("using project root [%s]\n", proj_root)
 	}
 
@@ -344,7 +344,7 @@ func (a *asetup_t) process(args []string) error {
 		return err
 	}
 
-	if !a.quiet {
+	if a.verbose {
 		a.ctx.Info("using project dir [%s]\n", opts.projdir)
 	}
 
@@ -369,18 +369,18 @@ func (a *asetup_t) process(args []string) error {
 			continue
 		}
 		dir := filepath.Join(opts.projdir, cmtcfg)
-		if !a.quiet {
+		if a.verbose {
 			fmt.Printf("---> (%03d) [%s]... ", ii, dir)
 		}
 		if !path_exists(dir) {
-			if !a.quiet {
+			if a.verbose {
 				fmt.Printf("[err]\n")
 			}
 			continue
 		}
 		opts.projdir = dir
 		opts.cmtcfg = cmtcfg
-		if !a.quiet {
+		if a.verbose {
 			fmt.Printf("[ok]\n")
 		}
 		found = true

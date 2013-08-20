@@ -28,7 +28,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-pmgr-get", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 	cmd.Flag.String("o", "", "directory where to install the package")
 	return cmd
 }
@@ -36,7 +36,7 @@ ex:
 func hwaf_run_cmd_pmgr_get(cmd *commander.Command, args []string) {
 	var err error
 	n := "hwaf-pmgr-" + cmd.Name()
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 
 	pkguri := ""
 	switch len(args) {
@@ -50,13 +50,13 @@ func hwaf_run_cmd_pmgr_get(cmd *commander.Command, args []string) {
 	pkguri = strings.Replace(pkguri, "http://", "", 1)
 	pkguri = strings.Replace(pkguri, "https://", "", 1)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: get [%s]...\n", n, pkguri)
 	}
 
 	//manifest_url := path.Join(pkguri, "MANIFEST")
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: get [%s]... [ok]\n", n, pkguri)
 	}
 }

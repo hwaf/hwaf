@@ -26,8 +26,8 @@ func TestBasicSetup(t *testing.T) {
 	defer hwaf.Close()
 
 	for _, cmd := range [][]string{
-		{"hwaf", "init", "-q=0", "."},
-		{"hwaf", "setup", "-q=0"},
+		{"hwaf", "init", "-v=1", "."},
+		{"hwaf", "setup", "-v=1"},
 		{"hwaf", "configure"},
 		{"hwaf", "build"},
 		{"hwaf", "install"},
@@ -59,19 +59,19 @@ func TestBasicState(t *testing.T) {
 	}
 	defer hwaf.Close()
 
-	err = hwaf.Run("hwaf", "init", "-q=0", ".")
+	err = hwaf.Run("hwaf", "init", "-v=1", ".")
 	if err != nil {
 		hwaf.Display()
 		t.Fatalf("cmd %v failed: %v", hwaf.LastCmd(), err)
 	}
 
-	err = hwaf.Run("hwaf", "-q=0")
+	err = hwaf.Run("hwaf", "-v=1")
 	if err == nil {
 		hwaf.Display()
 		t.Fatalf("cmd %v should have failed!", hwaf.LastCmd())
 	}
 
-	err = hwaf.Run("hwaf", "setup", "-q=0", ".")
+	err = hwaf.Run("hwaf", "setup", "-v=1", ".")
 	if err != nil {
 		hwaf.Display()
 		t.Fatalf("cmd %v failed: %v", hwaf.LastCmd(), err)
@@ -97,8 +97,8 @@ func TestPkgCoRm(t *testing.T) {
 	defer hwaf.Close()
 
 	for _, cmd := range [][]string{
-		{"hwaf", "init", "-q=0", "."},
-		{"hwaf", "setup", "-q=0"},
+		{"hwaf", "init", "-v=1", "."},
+		{"hwaf", "setup", "-v=1"},
 		{"hwaf", "configure"},
 		{"hwaf", "build"},
 		{"hwaf", "install"},

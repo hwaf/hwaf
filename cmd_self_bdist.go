@@ -29,7 +29,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-self-bdist", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 	cmd.Flag.String("version", "", "version of the binary distribution (default: 'time now')")
 
 	return cmd
@@ -48,7 +48,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 
 	bdist_name := "hwaf"
 	bdist_vers := cmd.Flag.Lookup("version").Value.Get().(string)
@@ -61,7 +61,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	dirname := fmt.Sprintf("%s-%s-%s", bdist_name, bdist_vers, bdist_cmtcfg)
 	fname := dirname + ".tar.gz"
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s [%s]...\n", n, fname)
 	}
 
@@ -128,7 +128,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	} {
 		goget := exec.Command("go", "get", "-v", gopkg)
 		goget.Dir = gopath
-		if !quiet {
+		if verbose {
 			goget.Stdout = os.Stdout
 			goget.Stderr = os.Stderr
 		}
@@ -192,7 +192,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	err = _tar_gz(filepath.Join(pwd, fname), top)
 	handle_err(err)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s [%s]... [ok]\n", n, fname)
 	}
 }

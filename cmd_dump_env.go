@@ -28,7 +28,7 @@ ex:
 		Flag: *flag.NewFlagSet("hwaf-dump-env", flag.ExitOnError),
 		//CustomFlags: true,
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 	cmd.Flag.String("shell", "", "type of shell to print the environment for (default=sh)")
 	return cmd
 }
@@ -47,7 +47,7 @@ func hwaf_run_cmd_dump_env(cmd *commander.Command, args []string) {
 
 	var export_var func(k string) string
 	shell := cmd.Flag.Lookup("shell").Value.Get().(string)
-	//quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	//verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 
 	if shell == "" {
 		shell = "sh"

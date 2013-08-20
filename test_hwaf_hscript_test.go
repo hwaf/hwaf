@@ -28,9 +28,9 @@ func test_with_hscript(t *testing.T, t_name, content string, t_err error) {
 	defer hwaf.Close()
 
 	for _, cmd := range [][]string{
-		{"hwaf", "init", "-q=0", "."},
-		{"hwaf", "setup", "-q=0"},
-		{"hwaf", "pkg", "create", "-q=0", "mypkg"},
+		{"hwaf", "init", "-v=1", "."},
+		{"hwaf", "setup", "-v=1"},
+		{"hwaf", "pkg", "create", "-v=1", "mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)

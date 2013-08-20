@@ -29,7 +29,7 @@ ex:
 		Flag: *flag.NewFlagSet("hwaf-bdist", flag.ExitOnError),
 		//CustomFlags: true,
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 	cmd.Flag.String("name", "", "name of the binary distribution (default: project name)")
 	cmd.Flag.String("version", "", "version of the binary distribution (default: project version)")
 	cmd.Flag.String("cmtcfg", "", "CMTCFG quadruplet for the binary distribution (default: project CMTCFG)")

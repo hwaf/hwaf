@@ -33,9 +33,9 @@ func TestHwafTuto(t *testing.T) {
 	defer hwaf.Close()
 
 	for _, cmd := range [][]string{
-		{"hwaf", "init", "-q=0", "."},
-		{"hwaf", "setup", "-q=0"},
-		{"hwaf", "pkg", "create", "-q=0", "mytools/mypkg"},
+		{"hwaf", "init", "-v=1", "."},
+		{"hwaf", "setup", "-v=1"},
+		{"hwaf", "pkg", "create", "-v=1", "mytools/mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
@@ -213,9 +213,9 @@ func TestHwafTutoHscript(t *testing.T) {
 	defer hwaf.Close()
 
 	for _, cmd := range [][]string{
-		{"hwaf", "init", "-q=0", "."},
-		{"hwaf", "setup", "-q=0"},
-		{"hwaf", "pkg", "create", "-q=0", "mytools/mypkg"},
+		{"hwaf", "init", "-v=1", "."},
+		{"hwaf", "setup", "-v=1"},
+		{"hwaf", "pkg", "create", "-v=1", "mytools/mypkg"},
 		{"/bin/rm", "-f", "src/mytools/mypkg/wscript"},
 		{"hwaf", "pkg", "ls"},
 	} {
@@ -389,8 +389,8 @@ func TestHwafHepTuto(t *testing.T) {
 	defer hwaf.Close()
 
 	for _, cmd := range [][]string{
-		{"hwaf", "init", "-q=0", "."},
-		{"hwaf", "setup", "-q=0"},
+		{"hwaf", "init", "-v=1", "."},
+		{"hwaf", "setup", "-v=1"},
 		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-settings", "pkg-settings"},
 		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-aa"}, // test dir-independant checkout
 		{"hwaf", "pkg", "co", "git://github.com/hwaf/hwaf-tests-pkg-ab", "pkg-ab"},
@@ -404,7 +404,7 @@ func TestHwafHepTuto(t *testing.T) {
 		{"hwaf"},
 		{"hwaf", "run", "python", "-c", "import pkgaa"},
 		{"hwaf", "bdist"},
-		{"hwaf", "pkg", "create", "-q=0", "mytools/mypkg"},
+		{"hwaf", "pkg", "create", "-v=1", "mytools/mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)

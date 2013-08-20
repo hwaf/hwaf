@@ -34,7 +34,7 @@ ex:
 	cmd.Flag.String("cfg", "", "Path to a configuration file")
 	cmd.Flag.String("pkgdir", "src", "Directory under which to checkout packages")
 	cmd.Flag.String("variant", "", "quadruplet (e.g. x86_64-slc6-gcc47-opt) identifying the target to build for")
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 
 	return cmd
 }
@@ -56,7 +56,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	dirname = os.ExpandEnv(dirname)
 	dirname = filepath.Clean(dirname)
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 	cfg_fname := cmd.Flag.Lookup("cfg").Value.Get().(string)
 	pkgdir := cmd.Flag.Lookup("pkgdir").Value.Get().(string)
 	variant := cmd.Flag.Lookup("variant").Value.Get().(string)
@@ -71,7 +71,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 		}
 	}
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: setup workarea [%s]...\n", n, dirname)
 		fmt.Printf("%s: projects=%v\n", n, projdirs)
 		if cfg_fname != "" {
@@ -104,7 +104,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	err = os.Chdir(dirname)
 	handle_err(err)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: create local config...\n", n)
 	}
 
@@ -164,7 +164,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	err = lcfg.WriteFile(lcfg_fname, 0600, "")
 	handle_err(err)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: setup workarea [%s]... [ok]\n", n, dirname)
 	}
 }

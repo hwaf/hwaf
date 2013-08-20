@@ -31,7 +31,7 @@ ex:
 	}
 	//cmd.Flag.String("p", "", "List of paths to projects to setup against")
 	//cmd.Flag.String("cfg", "", "Path to a configuration file")
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose mode")
 	cmd.Flag.String("arch", "", "explicit architecture to use (32/64)")
 	cmd.Flag.String("comp", "", "explicit compiler name to use (ex: gcc44, clang32,...)")
 	cmd.Flag.String("os", "", "explicit system name to use (ex: slc6, slc5, centos6, darwin106,...)")

@@ -28,7 +28,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-init", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 	return cmd
 }
 
@@ -50,7 +50,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	dirname = os.ExpandEnv(dirname)
 	dirname = filepath.Clean(dirname)
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 	proj_name := dirname
 	if proj_name == "." {
 		pwd, err := os.Getwd()
@@ -60,7 +60,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		proj_name = filepath.Base(dirname)
 	}
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: creating workarea [%s]...\n", n, dirname)
 	}
 
@@ -77,7 +77,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	// setup hep-waf-tools
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: add .hwaf/tools...\n", n)
 	}
 	hwaf_tools_dir := ""
@@ -90,7 +90,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	}
 
 	hwaf_tools_dir = os.ExpandEnv(hwaf_tools_dir)
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: using hwaf/tools from [%s]...\n", n, hwaf_tools_dir)
 	}
 	if !path_exists(hwaf_tools_dir) {
@@ -110,7 +110,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 
 	// add waf-bin
 	{
-		if !quiet {
+		if verbose {
 			fmt.Printf("%s: add .hwaf/bin...\n", n)
 		}
 		hwaf_bin_dir := ""
@@ -122,7 +122,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 			handle_err(err)
 		}
 		hwaf_bin_dir = os.ExpandEnv(hwaf_bin_dir)
-		if !quiet {
+		if verbose {
 			fmt.Printf("%s: using hwaf-bin from [%s]...\n", n, hwaf_bin_dir)
 		}
 		if !path_exists(hwaf_bin_dir) {
@@ -161,7 +161,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	// add template wscript
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: add top-level wscript...\n", n)
 	}
 
@@ -196,7 +196,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: creating workarea [%s]... [ok]\n", n, dirname)
 	}
 }

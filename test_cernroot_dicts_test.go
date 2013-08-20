@@ -36,11 +36,11 @@ func TestCernRootCint(t *testing.T) {
 	defer hwaf.Close()
 
 	for _, cmd := range [][]string{
-		{"hwaf", "init", "-q=0", "."},
-		{"hwaf", "setup", "-q=0"},
-		{"hwaf", "pkg", "co", "-q=0", "git://github.com/hwaf/hwaf-tests-pkg-settings", "pkg-settings"},
-		{"hwaf", "pkg", "co", "-q=0", "git://github.com/hwaf/hwaf-tests-rootcint-pkg1", "pkg1"},
-		{"hwaf", "pkg", "co", "-q=0", "git://github.com/hwaf/hwaf-tests-rootcint-pkg2", "pkg2"},
+		{"hwaf", "init", "-v=1", "."},
+		{"hwaf", "setup", "-v=1"},
+		{"hwaf", "pkg", "co", "-v=1", "git://github.com/hwaf/hwaf-tests-pkg-settings", "pkg-settings"},
+		{"hwaf", "pkg", "co", "-v=1", "git://github.com/hwaf/hwaf-tests-rootcint-pkg1", "pkg1"},
+		{"hwaf", "pkg", "co", "-v=1", "git://github.com/hwaf/hwaf-tests-rootcint-pkg2", "pkg2"},
 		{"hwaf", "configure"},
 		{"hwaf"},
 		{"hwaf", "run", "root", "-l", "-b", "src/pkg2/share/run.C"},
@@ -86,11 +86,11 @@ func TestCernRootReflex(t *testing.T) {
 	defer hwaf.Close()
 
 	for _, cmd := range [][]string{
-		{"hwaf", "init", "-q=0", "."},
-		{"hwaf", "setup", "-q=0"},
-		{"hwaf", "pkg", "co", "-q=0", "git://github.com/hwaf/hwaf-tests-pkg-settings", "pkg-settings"},
-		{"hwaf", "pkg", "co", "-q=0", "git://github.com/hwaf/hwaf-tests-rootreflex-pkg1", "pkg1"},
-		{"hwaf", "pkg", "co", "-q=0", "git://github.com/hwaf/hwaf-tests-rootreflex-pkg2", "pkg2"},
+		{"hwaf", "init", "-v=1", "."},
+		{"hwaf", "setup", "-v=1"},
+		{"hwaf", "pkg", "co", "-v=1", "git://github.com/hwaf/hwaf-tests-pkg-settings", "pkg-settings"},
+		{"hwaf", "pkg", "co", "-v=1", "git://github.com/hwaf/hwaf-tests-rootreflex-pkg1", "pkg1"},
+		{"hwaf", "pkg", "co", "-v=1", "git://github.com/hwaf/hwaf-tests-rootreflex-pkg2", "pkg2"},
 		{"hwaf", "configure"},
 		{"hwaf"},
 		{"hwaf", "run", "root", "-l", "-b", "src/pkg2/share/run.C"},

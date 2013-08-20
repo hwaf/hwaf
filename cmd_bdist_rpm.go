@@ -32,7 +32,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-bdist-rpm", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 	cmd.Flag.String("name", "", "name of the binary distribution (default: project name)")
 	cmd.Flag.String("version", "", "version of the binary distribution (default: project version)")
 	cmd.Flag.String("release", "1", "release version of the binary distribution (default: 1)")
@@ -53,7 +53,7 @@ func hwaf_run_cmd_waf_bdist_rpm(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 
 	bdist_name := cmd.Flag.Lookup("name").Value.Get().(string)
 	bdist_vers := cmd.Flag.Lookup("version").Value.Get().(string)
@@ -225,7 +225,7 @@ rm -rf %{buildroot}
 		fname = fname + ".rpm"
 	}
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: building RPM [%s]...\n", n, fname)
 	}
 
@@ -237,7 +237,7 @@ rm -rf %{buildroot}
 		filepath.Join("SPECS", rpminfos.Name+".spec"),
 	)
 	rpm.Dir = rpmbldroot
-	if !quiet {
+	if verbose {
 		rpm.Stdin = os.Stdin
 		rpm.Stdout = os.Stdout
 		rpm.Stderr = os.Stderr
@@ -275,7 +275,7 @@ rm -rf %{buildroot}
 	err = dst.Sync()
 	handle_err(err)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: building RPM [%s]...[ok]\n", n, fname)
 	}
 }

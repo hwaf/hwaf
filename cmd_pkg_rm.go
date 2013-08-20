@@ -28,7 +28,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-pkg-rm", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 	cmd.Flag.Bool("f", false, "force removing the package (from disk and from internal db)")
 
 	return cmd
@@ -43,7 +43,7 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 	force := cmd.Flag.Lookup("f").Value.Get().(bool)
 
 	cfg, err := g_ctx.LocalCfg()
@@ -60,7 +60,7 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 
 		pkgname = os.ExpandEnv(pkgname)
 		pkgname = filepath.Clean(pkgname)
-		if !quiet {
+		if verbose {
 			fmt.Printf("%s: remove package [%s]...\n", n, pkgname)
 		}
 
@@ -155,7 +155,7 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 			}
 		}
 
-		if !quiet {
+		if verbose {
 			fmt.Printf("%s: remove package [%s]... [ok]\n", n, pkgname)
 		}
 		return nil

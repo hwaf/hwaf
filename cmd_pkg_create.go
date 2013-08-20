@@ -25,7 +25,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-pkg-create", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 	cmd.Flag.String("authors", "", "comma-separated list of authors for the new package")
 	return cmd
 }
@@ -42,7 +42,7 @@ func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 	authors := func() []string {
 		authors := cmd.Flag.Lookup("authors").Value.Get().(string)
 		out := make([]string, 0, 1)
@@ -67,7 +67,7 @@ func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
 		authors = []string{usrname}
 	}
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: create package [%s]...\n", n, pkgpath)
 	}
 
@@ -183,7 +183,7 @@ def build(ctx):
 	err = g_ctx.PkgDb.Add("local", "", dir)
 	handle_err(err)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: create package [%s]... [ok]\n", n, pkgpath)
 	}
 }

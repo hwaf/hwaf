@@ -22,7 +22,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-pkg-ls", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 
 	return cmd
 }
@@ -41,9 +41,9 @@ func hwaf_run_cmd_pkg_ls(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: listing packages [%s]...\n", n, pat)
 	}
 
@@ -59,7 +59,7 @@ func hwaf_run_cmd_pkg_ls(cmd *commander.Command, args []string) {
 		}
 	}
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: listing packages [%s]... [ok]\n", n, pat)
 	}
 }

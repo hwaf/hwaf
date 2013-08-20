@@ -32,7 +32,7 @@ ex:
 `,
 		Flag: *flag.NewFlagSet("hwaf-bdist-deb", flag.ExitOnError),
 	}
-	cmd.Flag.Bool("q", true, "only print error and warning messages, all other output will be suppressed")
+	cmd.Flag.Bool("v", false, "enable verbose output")
 	cmd.Flag.String("name", "", "name of the binary distribution (default: project name)")
 	cmd.Flag.String("version", "", "version of the binary distribution (default: project version)")
 	cmd.Flag.String("release", "1", "release version of the binary distribution (default: 1)")
@@ -53,7 +53,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	quiet := cmd.Flag.Lookup("q").Value.Get().(bool)
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 
 	bdist_name := cmd.Flag.Lookup("name").Value.Get().(string)
 	bdist_vers := cmd.Flag.Lookup("version").Value.Get().(string)
@@ -207,7 +207,7 @@ Description: hwaf generated DEB for {{.Name}}
 		fname = fname + ".deb"
 	}
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: building DEB [%s]...\n", n, fname)
 	}
 
@@ -219,7 +219,7 @@ Description: hwaf generated DEB for {{.Name}}
 		"debian",
 	)
 	deb.Dir = debtopdir
-	if !quiet {
+	if verbose {
 		deb.Stdin = os.Stdin
 		deb.Stdout = os.Stdout
 		deb.Stderr = os.Stderr
@@ -240,7 +240,7 @@ Description: hwaf generated DEB for {{.Name}}
 	err = dst.Sync()
 	handle_err(err)
 
-	if !quiet {
+	if verbose {
 		fmt.Printf("%s: building DEB [%s]...[ok]\n", n, fname)
 	}
 }
