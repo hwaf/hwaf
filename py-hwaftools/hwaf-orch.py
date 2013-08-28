@@ -12,10 +12,21 @@ import os.path as osp
 from waflib.Configure import conf
 
 def options(ctx):
-    ctx.load('orch')
+    ctx.add_option(
+        '--hwaf-worch-config',
+        default='worch.cfg',
+        help='Give an orchestration configuration file.',
+        )
+    ctx.add_option(
+        '--hwaf-worch-start',
+        action = 'store',
+        default = 'start',
+        help='Set the section to start the orchestration',
+        )
+
     # automatically load orch config
-    if osp.exists('orch.cfg'):
-        ctx.orch_config = 'orch.cfg'
+    if osp.exists('worch.cfg'):
+        ctx.hwaf_worch_config = 'worch.cfg'
         pass
     
     return
@@ -28,7 +39,11 @@ def build(ctx):
 
 @conf
 def hwaf_load_orch(ctx):
-    ctx.load('orch')
+    orch_cfg = getattr(ctx.options, 'hwaf_worch_config', None)
+    if orch_cfg and osp.exists(orch_cfg):
+        ctx.options.orch_config = ctx.options.hwaf_worch_config
+        ctx.options.orch_start = ctx.options.hwaf_worch_start
+        ctx.load('orch')
     return
 
 ## EOF ##

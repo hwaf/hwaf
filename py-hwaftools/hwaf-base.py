@@ -187,9 +187,7 @@ def configure(ctx):
         pass
 
     # configure orch, if needed
-    if getattr(ctx.options, 'orch_config', None):
-        ctx.hwaf_load_orch()
-        pass
+    ctx.hwaf_load_orch()
     
     # loading the tool which logs the environment modifications
     ctx.load('hwaf-spy-env', tooldir=_heptooldir)
@@ -210,9 +208,7 @@ def build(ctx):
     ctx._hwaf_load_project_hwaf_module(do_export=False)
 
     # build orch, if needed
-    if getattr(ctx.options, 'orch_config', None):
-        ctx.hwaf_load_orch()
-        pass
+    ctx.hwaf_load_orch()
     
     return
 
