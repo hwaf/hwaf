@@ -80,8 +80,13 @@ func init() {
 
 func main() {
 
-	if len(os.Args) == 1 && path_exists("wscript") {
-		os.Args = append(os.Args, "waf", "build+install")
+	if len(os.Args) == 1 {
+		if path_exists("wscript") {
+			os.Args = append(os.Args, "waf", "build+install")
+		} else {
+			g_ctx.Warn("'hwaf' needs a command to run. see 'hwaf help' for informations\n")
+			os.Exit(1)
+		}
 	}
 
 	var err error
