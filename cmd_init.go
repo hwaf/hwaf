@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/gonuts/commander"
@@ -101,12 +102,6 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		err = os.MkdirAll(".hwaf", 0700)
 		handle_err(err)
 	}
-	if path_exists(".hwaf/tools") {
-		err = os.RemoveAll(".hwaf/tools")
-		handle_err(err)
-	}
-	err = os.Symlink(hwaf_tools_dir, ".hwaf/tools")
-	handle_err(err)
 
 	// add waf-bin
 	{
@@ -142,8 +137,10 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		handle_err(err)
 		defer waf_bin.Close()
 
-		err = waf_bin.Chmod(0755)
-		handle_err(err)
+		if runtime.GOOS != "windows" {
+			err = waf_bin.Chmod(0755)
+			handle_err(err)
+		}
 
 		_, err = io.Copy(waf_bin, src_waf)
 		handle_err(err)
@@ -166,7 +163,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	}
 
 	if !path_exists("wscript") {
-		wscript_tmpl, err := os.Open(".hwaf/tools/hwaf-wscript")
+		wscript_tmpl, err := os.Open(filepath.Join(hwaf_tools_dir, "hwaf-wscript"))
 		handle_err(err)
 		defer wscript_tmpl.Close()
 
