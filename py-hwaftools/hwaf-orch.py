@@ -12,13 +12,15 @@ import os.path as osp
 from waflib.Configure import conf
 
 def options(ctx):
-    #_heptooldir = osp.dirname(osp.abspath(__file__))
-    ctx.load('hwaf-base')
     ctx.load('orch')
+    # automatically load orch config
+    if osp.exists('orch.cfg'):
+        ctx.orch_config = 'orch.cfg'
+        pass
+    
     return
 
 def configure(ctx):
-    ctx.load('hwaf-base')
     return
 
 def build(ctx):

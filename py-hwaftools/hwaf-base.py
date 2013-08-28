@@ -54,6 +54,7 @@ def options(ctx):
     ctx.load('hwaf-rules', tooldir=_heptooldir)
 
     ctx.load('hwaf-cmtcompat', tooldir=_heptooldir)
+    ctx.load('hwaf-orch', tooldir=_heptooldir)
 
     pkgdir = 'src'
     if osp.exists(pkgdir):
@@ -87,6 +88,7 @@ def configure(ctx):
     ctx.load('hwaf-rules', tooldir=_heptooldir)
 
     ctx.load('hwaf-cmtcompat', tooldir=_heptooldir)
+    ctx.load('hwaf-orch', tooldir=_heptooldir)
 
     # register a couple of runtime environment variables
     ctx.declare_runtime_env('PATH')
@@ -184,6 +186,11 @@ def configure(ctx):
         setattr(ctx.options, k, v)
         pass
 
+    # configure orch, if needed
+    if getattr(ctx.options, 'orch_config', None):
+        ctx.hwaf_load_orch()
+        pass
+    
     # loading the tool which logs the environment modifications
     ctx.load('hwaf-spy-env', tooldir=_heptooldir)
     ctx.hwaf_setup_spy_env()
@@ -201,6 +208,12 @@ def build(ctx):
     
     ctx._hwaf_create_project_hwaf_module()
     ctx._hwaf_load_project_hwaf_module(do_export=False)
+
+    # build orch, if needed
+    if getattr(ctx.options, 'orch_config', None):
+        ctx.hwaf_load_orch()
+        pass
+    
     return
 
 ### ---------------------------------------------------------------------------
