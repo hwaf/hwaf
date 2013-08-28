@@ -4,9 +4,13 @@
 ## stdlib imports
 from pprint import PrettyPrinter
 pp = PrettyPrinter(indent=2)
+try:    from urllib import request
+except: from urllib import urlopen
+else:   urlopen = request.urlopen
 
 ## waflib imports
 from waflib import TaskGen
+import waflib.Errors
 
 class PackageFeatureInfo(object):
     '''
@@ -20,6 +24,8 @@ class PackageFeatureInfo(object):
         self.feature_name = feature_name
         self.pkgdata = ctx.all_envs[''].orch_package_dict[package_name]
         self.env = ctx.all_envs[package_name]
+        environ = self.env.munged_env
+        self.env.env = environ
 
         self.ctx = ctx
 
@@ -91,6 +97,16 @@ class PackageFeatureInfo(object):
                               step=step,dep=','.join(mine)))
         return mine
 
+@TaskGen.feature('dumpenv')
+def feature_dumpenv(self):
+    '''
+    Dump the environment
+    '''
+    pfi = PackageFeatureInfo(self.package_name, 'dumpenv', self.bld, dict())
+
+    self.bld(name = pfi.format('{package}_dumpenv'),
+             rule = "/bin/env | sort",
+             env = pfi.env)
 
 
 def get_unpacker(filename, dirname):
@@ -142,13 +158,18 @@ def feature_tarball(self):
     def dl_task(task):
         src = task.inputs[0]
         tgt = task.outputs[0]
-        cmd = "curl --insecure --silent -L --output %s %s" % (tgt.abspath(), src.read())
-        o = task.exec_command(cmd)
-        if o != 0:
-            return o
+        url = src.read().strip()
+        try:
+            web = urlopen(url)
+            tgt.write(web.read(),'wb')
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            self.bld.fatal("[%s] problem downloading [%s]" % (pfi.format('{package}_download'), url))
+
         checksum = pfi.get_var('source_url_checksum')
         if not checksum:
-            return o
+            return
         hasher_name, ref = checksum.split(":")
         import hashlib
         # FIXME: check the hasher method exists. check for typos.
@@ -159,12 +180,13 @@ def feature_tarball(self):
             self.bld.fatal(
                 "[%s] invalid MD5 checksum:\nref: %s\nnew: %s"
                 % (pfi.format('{package}_download'), ref, data))
-        return o
+        return
 
     self.bld(name = pfi.format('{package}_download'),
              rule = dl_task,
              source = f_urlfile, 
              target = f_tarball,
+             update_outputs = True,
              depends_on = pfi.get_deps('download'),
              env = pfi.env)
 
@@ -207,18 +229,33 @@ def feature_patch(self):
     d_unpacked = pfi.get_node('source_unpacked', d_source)
     f_unpack = pfi.get_node('unpacked_target', d_unpacked)
     
-    self.bld(name = pfi.format('{package}_urlpatch'),
+    tsk = self.bld(name = pfi.format('{package}_urlpatch'),
              rule = "echo %s > ${TGT}" % pfi('patch_url'), 
              update_outputs = True,
              source = f_unpack,
              target = f_urlfile,
              depends_on = pfi.get_deps('patch') + [pfi.format('{package}_unpack')],
              env = pfi.env)
+    #tsk = self.bld.get_tgen_by_name()
+    tsk.depends_on.append(pfi.format('{package}_download'))
+
+    def dl_task(task):
+        src = task.inputs[0]
+        tgt = task.outputs[0]
+        url = src.read().strip()
+        try:
+            web = urlopen(url)
+            tgt.write(web.read(),'wb')
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            self.bld.fatal("[%s] problem downloading [%s]" % (pfi.format('{package}_dlpatch'), url))
 
     self.bld(name = pfi.format('{package}_dlpatch'),
-             rule = "curl --insecure --silent -L --output ${TGT} ${SRC[0].read()}",
+             rule = dl_task,
              source = f_urlfile,
              target = f_patch,
+             update_outputs = True,
              depends_on = pfi.get_deps('dlpatch'),
              env = pfi.env)
 
@@ -237,7 +274,8 @@ def feature_patch(self):
         o = task.exec_command(cmd)
         return o
     
-    self.bld(name = pfi.format('{package}_patch'), 
+    step_name = pfi.format('{package}_patch')
+    self.bld(name = step_name, 
              rule = apply_patch,
              source = f_patch,
              target = f_applied,
@@ -246,7 +284,7 @@ def feature_patch(self):
 
     # make sure {package}_prepare will wait for us to be done.
     tsk = self.bld.get_tgen_by_name(pfi.format('{package}_prepare'))
-    tsk.depends_on.append(pfi.format('{package}_patch'))
+    tsk.depends_on.append(step_name)
     return
 
 git_requirements = {
@@ -428,9 +466,6 @@ def feature_svn(self):
 autoconf_requirements = {
     'source_dir': 'sources',
     'source_unpacked': '{package}-{version}',
-    'patch_ext': 'patch', # or diff
-    'patch_package': '{package}-{version}.{patch_ext}',
-    'patch_target': '{package}-{version}.{patch_ext}.applied',
     'prepare_script': 'configure',
     'prepare_script_options': '--prefix={install_dir}',
     'prepare_target': 'config.status',
