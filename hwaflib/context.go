@@ -137,6 +137,17 @@ func (ctx *Context) Cmtcfg() string {
 	return ctx.cmtcfg
 }
 
+func (ctx *Context) pkgdir() string {
+	if ctx.lcfg == nil {
+		return "src"
+	}
+	pkgdir, err := ctx.lcfg.String("hwaf-cfg", "pkgdir")
+	if err != nil {
+		return "src"
+	}
+	return pkgdir
+}
+
 func (ctx *Context) Workarea() (string, error) {
 	if ctx.workarea != nil {
 		return *ctx.workarea, nil
