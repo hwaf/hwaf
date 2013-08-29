@@ -26,6 +26,7 @@ ex:
 		Flag: *flag.NewFlagSet("hwaf-pkg-create", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("v", false, "enable verbose output")
+	cmd.Flag.String("script", "hscript", "type of the hwaf script to use (hscript|wscript)")
 	cmd.Flag.String("authors", "", "comma-separated list of authors for the new package")
 	return cmd
 }
@@ -39,6 +40,15 @@ func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
 		pkgpath = args[0]
 	default:
 		err = fmt.Errorf("%s: you need to give a package (full) path", n)
+		handle_err(err)
+	}
+
+	script := cmd.Flag.Lookup("script").Value.Get().(string)
+	switch script {
+	case "hscript", "wscript":
+		// ok
+	default:
+		err = fmt.Errorf("%s: script type is either 'hscript' or 'wscript' (got: %q)", n, script)
 		handle_err(err)
 	}
 
@@ -96,26 +106,7 @@ func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
 
 	pkgname := filepath.Base(pkgpath)
 
-	// create generic structure...
-	for _, d := range []string{
-		//"cmt",
-		pkgname,
-		"src",
-	} {
-		err = os.MkdirAll(filepath.Join(dir, d), 0755)
-		handle_err(err)
-	}
-
-	wscript, err := os.Create(filepath.Join(dir, "wscript"))
-	handle_err(err)
-	defer func() {
-		err = wscript.Sync()
-		handle_err(err)
-		err = wscript.Close()
-		handle_err(err)
-	}()
-
-	const txt = `# -*- python -*-
+	const w_txt = `# -*- python -*-
 # automatically generated wscript
 
 import waflib.Logs as msg
@@ -148,6 +139,75 @@ def build(ctx):
     # ctx.install_joboptions(source=['share/*.py'])
     return
 `
+
+	const h_txt = `# -*- yaml -*-
+# automatically generated hscript
+
+package: {
+  name: "{{.FullName}}",
+  authors: [{{.Authors | printlst}}],
+
+  ## dependencies of this package
+  deps: {
+    public: [
+    ],
+
+    private: [
+    ],
+
+    # specify runtime dependencies
+    # e.g: python modules for scripts installed by this package
+    #      binaries used by scripts installed by this package
+    runtime: [
+    ],
+  },
+}
+
+options: {}
+configure: {}
+
+build: {
+  # build artifacts
+  # e.g.:
+  # {{.Name}}: {
+  #    source: "src/*.cxx src/components/*.cxx",
+  #    use: ["lib1", "lib2", "ROOT", "boost", ...],
+  # }
+}
+
+## EOF ##
+`
+	txt := h_txt
+	fname := "hscript.yml"
+
+	switch script {
+	case "hscript":
+		txt = h_txt
+		fname = "hscript.yml"
+	case "wscript":
+		txt = w_txt
+		fname = "wscript"
+	}
+
+	// create generic structure...
+	for _, d := range []string{
+		//"cmt",
+		pkgname,
+		"src",
+	} {
+		err = os.MkdirAll(filepath.Join(dir, d), 0755)
+		handle_err(err)
+	}
+
+	wscript, err := os.Create(filepath.Join(dir, fname))
+	handle_err(err)
+	defer func() {
+		err = wscript.Sync()
+		handle_err(err)
+		err = wscript.Close()
+		handle_err(err)
+	}()
+
 	/* fill the template */
 	pkg := struct {
 		FullName string
@@ -158,7 +218,7 @@ def build(ctx):
 		Name:     pkgname,
 		Authors:  authors,
 	}
-	tmpl := template.New("wscript").Funcs(template.FuncMap{
+	tmpl := template.New(script).Funcs(template.FuncMap{
 		"printlst": func(lst []string) string {
 			out := []string{}
 			for idx, s := range lst {
