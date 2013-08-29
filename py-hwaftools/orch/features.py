@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 ## stdlib imports
+import os.path as osp
 from pprint import PrettyPrinter
 pp = PrettyPrinter(indent=2)
 try:    from urllib import request
@@ -11,7 +12,39 @@ else:   urlopen = request.urlopen
 ## waflib imports
 from waflib import TaskGen
 import waflib.Errors
+import waflib.Logs as msg
 
+def _worch_exec_command(task, cmd, **kw):
+    '''
+    helper function to:
+     - run a command
+     - log stderr and stdout into worch_<taskname>.log.txt
+     - printout the content of that file when the command fails
+    '''
+    msg.debug('orch: %s...' % task.name)
+    cwd = getattr(task, 'cwd', task.generator.bld.path.abspath())
+    flog = open(osp.join(cwd, "worch_%s.log.txt" % task.name), 'w')
+    cmd_dict = dict(kw)
+    cmd_dict.update({
+        'cwd': cwd,
+        'stdout': flog,
+        'stderr': flog,
+        })
+    try:
+        o = task.exec_command(cmd, **cmd_dict)
+    except KeyboardInterrupt:
+        raise
+    finally:
+        flog.close()
+    if msg.verbose and o == 0 and 'orch' in msg.zones:
+        with open(flog.name) as f:
+            msg.pprint('NORMAL','orch: %s (%s)\n%s' % (task.name, flog.name, ''.join(f.readlines())))
+            pass
+        pass
+    if o != 0:
+        msg.error('orch: %s (%s)\n%s' % (task.name, flog.name, ''.join(open(flog.name).readlines())))
+    return o
+    
 class PackageFeatureInfo(object):
     '''
     Give convenient access to all info about a package for features.
@@ -39,7 +72,8 @@ class PackageFeatureInfo(object):
         group = self.get_var('group')
         self.ctx.set_group(group)
 
-        print ('Feature: "{feature}" for package "{package}/{version}" in group "{group}"'.\
+        msg.debug(
+            'orch: Feature: "{feature}" for package "{package}/{version}" in group "{group}"'.
             format(feature = feature_name, **self.pkgdata))
 
     def __call__(self, name):
@@ -72,8 +106,8 @@ class PackageFeatureInfo(object):
             #     full = ret.abspath()
             # except AttributeError:
             #     full = ''
-            #print 'Variable for {package}/{version}: {varname} = {value} ({full})'.\
-            #    format(varname=name, value=ret, full=full, **self._data)
+            #msg.debug('orch: Variable for {package}/{version}: {varname} = {value} ({full})'.\
+            #    format(varname=name, value=ret, full=full, **self._data))
             return ret
         raise ValueError(
             'Failed to get "%s" for package "%s"' % 
@@ -93,8 +127,10 @@ class PackageFeatureInfo(object):
             else:
                 mine.append(dep)
         if mine:
-            print (self.format('Package {package} step "{step}" depends: "{dep}"',
-                              step=step,dep=','.join(mine)))
+            msg.debug(
+                self.format('orch: Package {package} step "{step}" depends: "{dep}"',
+                            step=step,dep=','.join(mine))
+                )
         return mine
 
 @TaskGen.feature('dumpenv')
@@ -151,7 +187,8 @@ def feature_tarball(self):
 
     self.bld(name = pfi.format('{package}_seturl'),
              rule = "echo %s > ${TGT}" % pfi('source_url'), 
-             update_outputs = True, target = f_urlfile,
+             update_outputs = True,
+             target = f_urlfile,
              depends_on = pfi.get_deps('seturl'),
              env = pfi.env)
 
@@ -186,7 +223,6 @@ def feature_tarball(self):
              rule = dl_task,
              source = f_urlfile, 
              target = f_tarball,
-             update_outputs = True,
              depends_on = pfi.get_deps('download'),
              env = pfi.env)
 
@@ -229,15 +265,13 @@ def feature_patch(self):
     d_unpacked = pfi.get_node('source_unpacked', d_source)
     f_unpack = pfi.get_node('unpacked_target', d_unpacked)
     
-    tsk = self.bld(name = pfi.format('{package}_urlpatch'),
+    self.bld(name = pfi.format('{package}_urlpatch'),
              rule = "echo %s > ${TGT}" % pfi('patch_url'), 
              update_outputs = True,
              source = f_unpack,
              target = f_urlfile,
              depends_on = pfi.get_deps('patch') + [pfi.format('{package}_unpack')],
              env = pfi.env)
-    #tsk = self.bld.get_tgen_by_name()
-    tsk.depends_on.append(pfi.format('{package}_download'))
 
     def dl_task(task):
         src = task.inputs[0]
@@ -255,7 +289,6 @@ def feature_patch(self):
              rule = dl_task,
              source = f_urlfile,
              target = f_patch,
-             update_outputs = True,
              depends_on = pfi.get_deps('dlpatch'),
              env = pfi.env)
 
@@ -267,7 +300,7 @@ def feature_patch(self):
             pfi.get_var('patch_cmd_options'),
             src,
             )
-        o = task.exec_command(cmd, cwd=pfi.get_node('source_dir').abspath())
+        o = _worch_exec_command(task, cmd)
         if o != 0:
             return o
         cmd = "touch %s" % tgt
@@ -279,6 +312,7 @@ def feature_patch(self):
              rule = apply_patch,
              source = f_patch,
              target = f_applied,
+             cwd = pfi.get_node('source_dir').abspath(),
              depends_on = pfi.get_deps('patch'),
              env = pfi.env)
 
@@ -337,8 +371,14 @@ def feature_git(self):
              depends_on = pfi.get_deps('seturl'),
              env = pfi.env)
 
+    def checkout_task(task):
+        src = task.inputs[0]
+        tgt = task.outputs[0]
+        cmd = "%s" % (src.read(),)
+        return _worch_exec_command(task, cmd)
+
     self.bld(name = pfi.format('{package}_checkout'),
-             rule = "${SRC[0].read()}",
+             rule = checkout_task,
              source = f_urlfile,
              target = f_unpack,
              depends_on = pfi.get_deps('checkout'),
@@ -396,8 +436,14 @@ def feature_hg(self):
              depends_on = pfi.get_deps('seturl'),
              env = pfi.env)
 
+    def checkout_task(task):
+        src = task.inputs[0]
+        tgt = task.outputs[0]
+        cmd = "%s" % (src.read(),)
+        return _worch_exec_command(task, cmd)
+
     self.bld(name = pfi.format('{package}_checkout'),
-             rule = "${SRC[0].read()}",
+             rule = checkout_task,
              source = f_urlfile,
              target = f_unpack,
              depends_on = pfi.get_deps('checkout'),
@@ -454,8 +500,14 @@ def feature_svn(self):
              depends_on = pfi.get_deps('seturl'),
              env = pfi.env)
 
+    def checkout_task(task):
+        src = task.inputs[0]
+        tgt = task.outputs[0]
+        cmd = "%s" % (src.read(),)
+        return _worch_exec_command(task, cmd)
+
     self.bld(name = pfi.format('{package}_checkout'),
-             rule = "${SRC[0].read()}",
+             rule = checkout_task,
              source = f_urlfile,
              target = f_unpack,
              depends_on = pfi.get_deps('checkout'),
@@ -493,30 +545,50 @@ def feature_autoconf(self):
     d_prefix = pfi.get_node('install_dir')
     f_install_result = pfi.get_node('install_target', d_prefix)
 
+    def prepare_task(task):
+        src = task.inputs[0]
+        tgt = task.outputs[0]
+        
+        cmd = "%s %s" % (src.abspath(), pfi.get_var('prepare_script_options'))
+        return _worch_exec_command(task, cmd)
+        
+        
     self.bld(name = pfi.format('{package}_prepare'),
-             rule = "${SRC[0].abspath()} %s" % pfi.get_var('prepare_script_options'),
+             rule = prepare_task,
              source = f_prepare,
              target = f_prepare_result,
              cwd = d_build.abspath(),
              depends_on = pfi.get_deps('prepare'),
              env = pfi.env)
 
-    self.bld(name = pfi.format('{package}_build'),
-             rule = "%s %s" % (
+    def build_task(task):
+        src = task.inputs[0]
+        tgt = task.outputs[0]
+        cmd = "%s %s" % (
                  pfi.get_var('build_cmd'),
                  pfi.get_var('build_cmd_options') or '',
-                 ),
+            )
+        return _worch_exec_command(task, cmd)
+        
+    self.bld(name = pfi.format('{package}_build'),
+             rule = build_task,
              source = f_prepare_result,
              target = f_build_result,
              cwd = d_build.abspath(),
              depends_on = pfi.get_deps('build'),
              env = pfi.env)
 
-    self.bld(name = pfi.format('{package}_install'),
-             rule = "%s %s" % (
+    def install_task(task):
+        src = task.inputs[0]
+        tgt = task.outputs[0]
+        cmd = "%s %s" % (
                  pfi.get_var('install_cmd'),
                  pfi.get_var('install_cmd_options') or '',
-                 ),
+            )
+        return _worch_exec_command(task, cmd)
+        
+    self.bld(name = pfi.format('{package}_install'),
+             rule = install_task,
              source = f_build_result,
              target = f_install_result,
              cwd = d_build.abspath(),

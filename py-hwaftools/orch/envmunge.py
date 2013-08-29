@@ -5,6 +5,7 @@ This module provides the decompose() function.
 
 '''
 import os
+from collections import defaultdict
 
 def parse_val(val, orig = None):
     '''Parse and apply a value setting command: val = <action>:value to
@@ -32,8 +33,35 @@ def parse_val(val, orig = None):
         return delim.join([val] + orig)
 
     if val.startswith('set'):
-        val = val[len('set')+1]
+        val = val[len('set')+1:]
     return val
+
+def split_var_munger_command(cmdstr, cmd):
+    rest = cmdstr[len(cmd):]
+    return rest[0], rest[1:]
+
+def make_var_munger(cmdstr):
+
+    if cmdstr.startswith('append'):
+        delim,val = split_var_munger_command(cmdstr, 'append')
+        return lambda oldval: oldval + delim + val if oldval else val
+    if cmdstr.startswith('prepend'):
+        delim,val = split_var_munger_command(cmdstr, 'prepend')
+        return lambda oldval: val + delim + oldval if oldval else val
+    if cmdstr.startswith('set'):
+        delim,val = split_var_munger_command(cmdstr, 'set')
+        return lambda oldval: val
+    return lambda oldval: cmdstr
+
+def make_envmungers_from_package(pkg, prefix='export_'):
+    ret = defaultdict(list)
+    for key, value in pkg.items():
+        if not key.startswith(prefix):
+            continue
+        var = key.split('_',1)[1]
+        mun = make_var_munger(value)
+        ret[var].append(mun)
+    return ret
 
 def set_environment(environ, pkg, prefix = 'export_'):
     '''Apply any environment variable settings implied by
@@ -47,7 +75,7 @@ def set_environment(environ, pkg, prefix = 'export_'):
         val = parse_val(v, old)
         environ[var] = val
         #print 'Setting %s=%s (was:%s)' % (var, val, old)
-
+    return
 
 def packages_in_group(pkglist, group_name):
     '''
@@ -102,6 +130,36 @@ def make_environ(pkg, all_packages):
     set_environment(environ, pkg, prefix='buildenv_')
     return environ
         
+def collapse_envmungers(mungers):
+    ret = defaultdict(list)
+    for m in mungers:
+        for k,v in m.items():
+            ret[k].extend(v)
+    return ret
+
+def make_envmungers(pkg, all_packages):
+    '''Make a environment munger that will apply the export_VARIABLE
+    settings from all dependency packages indicated by the
+    "environment" package variable and any specified by
+    buildenv_VARIABLE in the package itself.
+    '''
+    mungers = list()
+    for other_pkg in resolve_packages(all_packages, pkg.get('environment')):
+        new = make_envmungers_from_package(other_pkg)
+        mungers.append(new)
+    new = make_envmungers_from_package(pkg, prefix='buildenv_')
+    mungers.append(new)
+    return collapse_envmungers(mungers)
+
+def apply_envmungers(environ, mungers):
+    environ = dict(environ)
+    for var,ms in mungers.items():
+        val = environ.get(var,'')
+        for m in ms:
+            val = m(val)
+        environ[var] = val
+    return environ
+
 def decompose(cfg, suite):
     '''Decompose suite into packages and groups of packages.  
 
@@ -134,9 +192,8 @@ def decompose(cfg, suite):
 
     for pkg_name, pkg in pd.items():
         cfg.setenv(pkg_name, base_env.derive())
-        environ = make_environ(pkg, pd)
-        cfg.env.environ = environ
-
+        mungers = make_envmungers(pkg, pd)
+        cfg.env.munged_env = apply_envmungers(os.environ, mungers)
 
     return
 
