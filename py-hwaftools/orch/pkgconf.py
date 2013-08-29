@@ -95,7 +95,10 @@ def host_description():
     ret['gcc_dumpversion'] = check_output(['gcc','-dumpversion']).strip()
     ret['gcc_dumpmachine'] = check_output(['gcc','-dumpmachine']).strip()
     try:
-        ma = check_output(['gcc','-print-multiarch']).strip() # debian-specific
+        ma = check_output(
+            ['gcc','-print-multiarch'],    # debian-specific
+            stderr=open('/dev/null', 'w')
+            ).strip()
     except CalledProcessError:
         ma = ""
     ret['gcc_multiarch'] = ma

@@ -20,11 +20,11 @@ from waflib import TaskGen
 def post_the_other(self):
     deps = getattr(self, 'depends_on', []) 
     for name in self.to_list(deps):
-        print ('DEPENDS_ON: %s %s' % ( self.name, name ))
+        msg.debug('orch: DEPENDS_ON: %s %s' % ( self.name, name ))
         other = self.bld.get_tgen_by_name(name) 
         other.post()
         for ot in other.tasks:
-            print ('OTHER TASK: %s before: %s' % (ot, ot.before))
+            msg.debug('orch: OTHER TASK: %s before: %s' % (ot, ot.before))
             ot.before.append(self.name)
 
 
@@ -49,7 +49,7 @@ def bind_functions(ctx):
 # using a customized wscript which needs to use "orch" as a tool
 
 def configure(cfg):
-    print ('ORCH CONFIG CALLED')
+    msg.debug('orch: CONFIG CALLED')
 
     if not cfg.options.orch_config:
         raise RuntimeError('No Orchestration configuration file given (--orch-config)')
@@ -57,22 +57,20 @@ def configure(cfg):
     for lst in cfg.options.orch_config.split(','):
         lst = lst.strip()
         orch_config += glob(lst)
-    cfg.start_msg('Orch configuration files')
-    cfg.end_msg(', '.join(orch_config))
+    cfg.msg('Orch configuration files', ', '.join(orch_config))
 
     extra = dict(cfg.env)
     suite = pkgconf.load(orch_config, start = cfg.options.orch_start, **extra)
 
     envmunge.decompose(cfg, suite)
 
-    cfg.start_msg('Orch configure envs')
-    cfg.end_msg(cfg.all_envs)
+    cfg.msg('Orch configure envs', cfg.all_envs)
 
     bind_functions(cfg)
     return
 
 def build(bld):
-    print ('ORCH BUILD CALLED')
+    msg.debug ('orch: BUILD CALLED')
 
     from waflib.Build import POST_LAZY, POST_BOTH, POST_AT_ONCE
     bld.post_mode = POST_BOTH # don't fuck with this
@@ -80,11 +78,11 @@ def build(bld):
     bind_functions(bld)
 
     for grpname in bld.env.orch_group_list:
-        msg.debug('Adding group: "%s"' % grpname)
+        msg.debug('orch: Adding group: "%s"' % grpname)
         bld.add_group(grpname)
         pass
     
-    msg.debug('Build envs: %s' % bld.all_envs)
+    msg.debug('orch: Build envs: %s' % bld.all_envs)
 
     to_recurse = []
     for pkgname in bld.env.orch_package_list:
@@ -94,7 +92,14 @@ def build(bld):
             to_recurse.append(pkgname)
             continue
         feat = pkgdata.get('features')
-        bld(name = '%s_%s' % (pkgname, feat.replace(' ','_')), features = feat, package_name = pkgname)
+        bld(
+            name = '%s_%s' % (pkgname, feat.replace(' ','_')),
+            features = feat,
+            package_name = pkgname,
+            )
     if to_recurse:
         bld.recurse(to_recurse)
+    #tsk = bld.get_tgen_by_name('bc_download')
+    #msg.debug('orch: task=%s' % tsk)
+    msg.debug ('orch: BUILD CALLED [done]')
 
