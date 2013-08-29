@@ -29,7 +29,7 @@ func TestHwafBoost(t *testing.T) {
 	for _, cmd := range [][]string{
 		{"hwaf", "init", "-v=1", "."},
 		{"hwaf", "setup", "-v=1"},
-		{"hwaf", "pkg", "create", "-v=1", "mypkg"},
+		{"hwaf", "pkg", "create", "-script=wscript", "-v=1", "mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
@@ -129,7 +129,7 @@ func TestHwafBoostBogusConfigureCmd(t *testing.T) {
 	for _, cmd := range [][]string{
 		{"hwaf", "init", "-v=1", "."},
 		{"hwaf", "setup", "-v=1"},
-		{"hwaf", "pkg", "create", "-v=1", "mypkg"},
+		{"hwaf", "pkg", "create", "-script=wscript", "-v=1", "mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
@@ -229,7 +229,7 @@ func TestHwafBoostEmptyLib(t *testing.T) {
 	for _, cmd := range [][]string{
 		{"hwaf", "init", "-v=1", "."},
 		{"hwaf", "setup", "-v=1"},
-		{"hwaf", "pkg", "create", "-v=1", "mypkg"},
+		{"hwaf", "pkg", "create", "-script=wscript", "-v=1", "mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)

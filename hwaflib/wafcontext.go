@@ -20,6 +20,8 @@ func (ctx *Context) init_waf_ctx() error {
 	if err != nil {
 		return err
 	}
+	// get pkgdir: we only need to look for 'hscript.yml' files under pkgdir.
+	root = filepath.Join(root, ctx.pkgdir())
 
 	fnames := make([]string, 0, 2)
 	err = filepath.Walk(
