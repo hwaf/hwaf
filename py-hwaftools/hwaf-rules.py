@@ -98,8 +98,10 @@ def hwaf_install_headers(self):
     relative_trick = getattr(self, 'relative_trick', True)
     postpone = getattr(self, "postpone", False)
     
+    if isinstance(cwd, (list, tuple)): cwd = cwd[0]
     if isinstance(cwd, type("")): cwd = self.path.find_dir(cwd)
     if cwd is None:               cwd = self.path
+
     includes = inc_node.ant_glob('**/*', dir=False)
     self.bld.install_files(
         '${INSTALL_AREA}/include',
