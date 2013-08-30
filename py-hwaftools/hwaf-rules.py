@@ -87,7 +87,7 @@ def hwaf_install_pkg_headers_task(self):
     if not inc_node:
         if self.path.find_dir('inc'):
             inc_node = self.path.find_dir('inc').find_dir(PACKAGE_NAME)
-        if ctx.path.find_dir('include'):
+        if self.path.find_dir('include'):
             inc_node = self.path.find_dir('inc').find_dir(PACKAGE_NAME)
         pass
     if not inc_node:
