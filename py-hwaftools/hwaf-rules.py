@@ -67,10 +67,11 @@ def add_install_copy(self):
     return
 
 ### ---------------------------------------------------------------------------
-@feature('hwaf_install_pkg_headers')
-def hwaf_install_pkg_headers_task(self):
+@before_method('process_source')
+@feature('hwaf_install_headers')
+def hwaf_install_headers(self):
     """
-    A task to install package header files.
+    A task to install header files.
     This assumes a package has one of the following layout:
      <pkgroot>
        /<pkgname>/hdr1.h
@@ -82,29 +83,35 @@ def hwaf_install_pkg_headers_task(self):
     """
     # extract package name
     pkgdir = self.path.abspath()
-    PACKAGE_NAME = self.bld.hwaf_pkg_name(pkgdir)
-    inc_node = self.path.find_dir(PACKAGE_NAME)
-    if not inc_node:
-        if self.path.find_dir('inc'):
-            inc_node = self.path.find_dir('inc').find_dir(PACKAGE_NAME)
-        if self.path.find_dir('include'):
-            inc_node = self.path.find_dir('inc').find_dir(PACKAGE_NAME)
-        pass
-    if not inc_node:
-        self.fatal('[%s]: could not find package headers' % (PACKAGE_NAME,))
-        pass
+    pkgname = self.bld.hwaf_pkg_name(pkgdir)
+    b_pkgname = osp.basename(pkgname)
+    if not hasattr(self, 'export_includes'):
+        return
     
+    include_dir = getattr(self, 'include_dir', b_pkgname)
+    inc_node = self.path.find_dir(include_dir)
+    if not inc_node:
+        self.bld.fatal('[%s]: could not find package headers' % (pkgname,))
+        pass
+
+    cwd = getattr(self, 'cwd', None)
+    relative_trick = getattr(self, 'relative_trick', True)
+    postpone = getattr(self, "postpone", False)
+    
+    if isinstance(cwd, type("")): cwd = self.path.find_dir(cwd)
+    if cwd is None:               cwd = self.path
     includes = inc_node.ant_glob('**/*', dir=False)
     self.bld.install_files(
-        '${INSTALL_AREA}/include', includes, 
-        relative_trick=True,
-        cwd=self.path,
-        postpone=False,
+        '${INSTALL_AREA}/include',
+        includes, 
+        relative_trick=relative_trick,
+        cwd=cwd,
+        postpone=postpone,
         )
 
     incpath = waflib.Utils.subst_vars('${INSTALL_AREA}/include',self.bld.env)
-    self.bld.env.append_unique('INCLUDES_%s' % PACKAGE_NAME,
-                           [incpath,inc_node.parent.abspath()])
+    self.bld.env.append_unique('INCLUDES_%s' % self.name,
+                               [incpath,inc_node.parent.abspath()])
     return
 
 ### -----------------------------------------------------------------------------
