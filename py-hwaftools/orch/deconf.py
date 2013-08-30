@@ -47,7 +47,16 @@ resolved.  Any unresolved ones will be retained.  This interpolation
 is done on intermediate dictionaries but it is only the ones at leafs
 of the hierarchy which are likely useful to the application.
 
+Either a single filename or a list of filenames can be given for
+parsing.  The [start] section may include a special key "includes" to
+specify a list of other configuration files to also parse.  The files
+are searched first in the current working directory, next in the
+directories holding the files already specified and next from any
+colon-separated list of directories specified by a DECONF_INCLUDE_PATH
+environment variable.
 '''
+
+import os
 
 def parse(filename):
     'Parse the filename, return an uninterpreted object'
@@ -56,6 +65,9 @@ def parse(filename):
     cfg = SafeConfigParser()
     cfg.optionxform = str       # want case sensitive
     cfg.read(filename)
+    if isinstance(filename, type("")):
+        filename = [filename]
+    cfg.files = filename
     return cfg
 
 def to_list(lst):
@@ -69,12 +81,70 @@ def get_first_typed_section(cfg, typ, name):
     raise ValueError('No section: <%s> %s' % (typ,name))
 
 
+def find_file(fname, others = None):
+    '''Find file <fname> in current working directory, in the "others"
+    directories and finally in a environment path variable
+    DECONF_INCLUDE_PATH.'''
+
+    dirs = ['.'] 
+    if others:
+        dirs += others
+    dirs += os.environ.get('DECONF_INCLUDE_PATH','').split(':')
+
+    for check in dirs:
+        maybe = os.path.join(check, fname)
+        if os.path.exists(maybe):
+            return maybe
+    return
+    
+
+def add_includes(cfg, sec):
+    '''
+    Resolves any "includes" item in section <sec> by reading the
+    specified files into the cfg object.
+    '''
+    if not cfg.has_option(sec,'includes'):
+        return
+
+    inc_val = cfg.get(sec,'includes')
+    inc_list = to_list(inc_val)
+    if not inc_list:
+        raise ValueError('Not includes: "%s"' % inc_val)
+        return
+
+    to_check = ['.']
+    if hasattr(cfg, 'files') and cfg.files:
+        already_read = cfg.files
+        if isinstance(already_read, type('')):
+            already_read = [already_read]
+        other_dirs = map(os.path.realpath, map(os.path.dirname, already_read))
+        to_check += other_dirs
+    to_check += os.environ.get('DECONF_INCLUDE_PATH','').split(':')
+
+    for fname in inc_list:
+        fpath = find_file(fname, other_dirs)
+        if not fpath:
+            raise ValueError(
+                'Failed to locate file: %s (%s)' % 
+                (fname, ':'.join(other_dirs))
+                )
+        cfg.read(fpath)
+        if hasattr(cfg, 'files'):
+            cfg.files.append(fpath)
+    return
+
 def resolve(cfg, sec, **kwds):
     'Recursively load the configuration starting at the given section'
-    keytype = dict(cfg.items('keytype'))
-    ret = {}
+
+    add_includes(cfg, sec)
+
     secitems = dict(cfg.items(sec))
+
     secitems.update(kwds)
+    # get special keytype section governing the hierarchy schema
+    keytype = dict(cfg.items('keytype'))
+
+    ret = {}
     for k,v in secitems.items():
         typ = keytype.get(k)
         if not typ:
@@ -98,7 +168,7 @@ def interpret(cfg, start = 'start', **kwds):
     interpretation.  Any additional keywords are override or otherwise
     added to the initial section.
     '''
-    return resolve(cfg, start)
+    return resolve(cfg, start, **kwds)
 
 def format_flat_dict(dat, formatter = str.format, **kwds):
     kwds = dict(kwds)

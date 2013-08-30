@@ -22,11 +22,12 @@ def _worch_exec_command(task, cmd, **kw):
      - printout the content of that file when the command fails
     '''
     msg.debug('orch: %s...' % task.name)
-    cwd = getattr(task, 'cwd', task.generator.bld.path.abspath())
+    cwd = getattr(task, 'cwd', task.generator.bld.out_dir)
     flog = open(osp.join(cwd, "worch_%s.log.txt" % task.name), 'w')
     cmd_dict = dict(kw)
     cmd_dict.update({
         'cwd': cwd,
+        'env': kw.get('env', task.env.env),
         'stdout': flog,
         'stderr': flog,
         })
@@ -55,18 +56,17 @@ class PackageFeatureInfo(object):
     def __init__(self, package_name, feature_name, ctx, defaults):
         self.package_name = package_name
         self.feature_name = feature_name
-        self.pkgdata = ctx.all_envs[''].orch_package_dict[package_name]
         self.env = ctx.all_envs[package_name]
         environ = self.env.munged_env
         self.env.env = environ
 
         self.ctx = ctx
 
-        # fixme: this is confusing
-        self.defs = defaults
-        f = dict(self.defs)
-        f.update(dict(self.ctx.env))
-        f.update(self.pkgdata)
+        # build up parameters starting with defaults from the "requirements"
+        f = dict(defaults)      
+        f.update(dict(self.ctx.env)) # waf env 
+        # and final override by the configuration file data
+        f.update(ctx.all_envs[''].orch_package_dict[package_name])
         self._data = f
 
         group = self.get_var('group')
@@ -74,7 +74,7 @@ class PackageFeatureInfo(object):
 
         msg.debug(
             'orch: Feature: "{feature}" for package "{package}/{version}" in group "{group}"'.
-            format(feature = feature_name, **self.pkgdata))
+            format(feature = feature_name, **self._data))
 
     def __call__(self, name):
         return self.get_var(name)
@@ -85,7 +85,7 @@ class PackageFeatureInfo(object):
         return string.format(**d)
 
     def get_var(self, name):
-        val = self.pkgdata.get(name, self.defs.get(name))
+        val = self._data.get(name)
         if not val: return
         return self.check_return(name, self.format(val))
 
@@ -110,12 +110,12 @@ class PackageFeatureInfo(object):
             #    format(varname=name, value=ret, full=full, **self._data))
             return ret
         raise ValueError(
-            'Failed to get "%s" for package "%s"' % 
-            (name, self.pkgdata['package'])
+            'Failed to get "%s" for package "%s" (keys: %s)' % 
+            (name, self._data['package'], ', '.join(sorted(self._data.keys())))
             )
 
     def get_deps(self, step):
-        deps = self.pkgdata.get('depends')
+        deps = self._data.get('depends')
         if not deps: return list()
         mine = []
         for dep in [x.strip() for x in deps.split(',')]:
@@ -185,6 +185,7 @@ def feature_tarball(self):
     d_unpacked = pfi.get_node('source_unpacked', d_source)
     f_unpack = pfi.get_node('unpacked_target', d_unpacked)
 
+    #print ('source_url: "%s" -> urlfile: "%s"' % (pfi('source_url'), f_urlfile))
     self.bld(name = pfi.format('{package}_seturl'),
              rule = "echo %s > ${TGT}" % pfi('source_url'), 
              update_outputs = True,
@@ -382,6 +383,7 @@ def feature_git(self):
              source = f_urlfile,
              target = f_unpack,
              depends_on = pfi.get_deps('checkout'),
+             cwd = d_source.abspath(),
              env = pfi.env)
 
     return
@@ -447,6 +449,7 @@ def feature_hg(self):
              source = f_urlfile,
              target = f_unpack,
              depends_on = pfi.get_deps('checkout'),
+             cwd = d_source.abspath(),
              env = pfi.env)
 
     return
@@ -511,6 +514,7 @@ def feature_svn(self):
              source = f_urlfile,
              target = f_unpack,
              depends_on = pfi.get_deps('checkout'),
+             cwd = d_source.abspath(),
              env = pfi.env)
 
     return

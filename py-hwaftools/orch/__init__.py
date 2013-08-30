@@ -12,6 +12,7 @@ from . import envmunge
 
 ## waf imports
 import waflib.Logs as msg
+import waflib.Utils
 
 # NOT from the waf book.  The waf book example for depends_on doesn't work
 from waflib import TaskGen
@@ -57,14 +58,14 @@ def configure(cfg):
     for lst in cfg.options.orch_config.split(','):
         lst = lst.strip()
         orch_config += glob(lst)
-    cfg.msg('Orch configuration files', ', '.join(orch_config))
+    cfg.msg('Orch configuration files', '"%s"' % '", "'.join(orch_config))
 
     extra = dict(cfg.env)
     suite = pkgconf.load(orch_config, start = cfg.options.orch_start, **extra)
 
     envmunge.decompose(cfg, suite)
 
-    cfg.msg('Orch configure envs', cfg.all_envs)
+    cfg.msg('Orch configure envs', '"%s"' % '", "'.join(cfg.all_envs.keys()))
 
     bind_functions(cfg)
     return
@@ -82,7 +83,7 @@ def build(bld):
         bld.add_group(grpname)
         pass
     
-    msg.debug('orch: Build envs: %s' % bld.all_envs)
+    msg.debug('orch: Build envs: %s' % ', '.join(bld.all_envs.keys()))
 
     to_recurse = []
     for pkgname in bld.env.orch_package_list:
