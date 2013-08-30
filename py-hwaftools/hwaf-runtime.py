@@ -86,6 +86,23 @@ def insert_project_level_libdir(self):
 ### ---------------------------------------------------------------------------
 import waflib.Utils
 from waflib.TaskGen import feature, before_method, after_method
+@feature('hwaf_runtime_tsk', '*')
+@before_method('process_rule')
+def insert_project_level_incdir(self):
+    '''
+    insert_project_level_incdir adds ${INSTALL_AREA}/include into the
+    ${INCLUDES} environment variable.
+    '''
+    _get = getattr(self, 'hwaf_get_install_path', None)
+    if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
+    d = _get('${INSTALL_AREA}/include')
+    if not d in self.env['INCLUDES']:
+        self.env.prepend_value('INCLUDES', d)
+    return
+
+### ---------------------------------------------------------------------------
+import waflib.Utils
+from waflib.TaskGen import feature, before_method, after_method
 @feature('*')
 @after_method('insert_project_level_bindir','insert_project_level_libdir')
 def hwaf_setup_runtime_env(self):

@@ -66,6 +66,47 @@ def add_install_copy(self):
         pass
     return
 
+### ---------------------------------------------------------------------------
+@feature('hwaf_install_pkg_headers')
+def hwaf_install_pkg_headers_task(self):
+    """
+    A task to install package header files.
+    This assumes a package has one of the following layout:
+     <pkgroot>
+       /<pkgname>/hdr1.h
+       /src
+
+     <pkgroot>
+       /inc/<pkgname>/hdr1.h
+       /src
+    """
+    # extract package name
+    pkgdir = self.path.abspath()
+    PACKAGE_NAME = self.bld.hwaf_pkg_name(pkgdir)
+    inc_node = self.path.find_dir(PACKAGE_NAME)
+    if not inc_node:
+        if self.path.find_dir('inc'):
+            inc_node = self.path.find_dir('inc').find_dir(PACKAGE_NAME)
+        if ctx.path.find_dir('include'):
+            inc_node = self.path.find_dir('inc').find_dir(PACKAGE_NAME)
+        pass
+    if not inc_node:
+        self.fatal('[%s]: could not find package headers' % (PACKAGE_NAME,))
+        pass
+    
+    includes = inc_node.ant_glob('**/*', dir=False)
+    self.bld.install_files(
+        '${INSTALL_AREA}/include', includes, 
+        relative_trick=True,
+        cwd=self.path,
+        postpone=False,
+        )
+
+    incpath = waflib.Utils.subst_vars('${INSTALL_AREA}/include',self.bld.env)
+    self.bld.env.append_unique('INCLUDES_%s' % PACKAGE_NAME,
+                           [incpath,inc_node.parent.abspath()])
+    return
+
 ### -----------------------------------------------------------------------------
 import waflib.Build
 class InstallContext(waflib.Build.InstallContext):

@@ -358,6 +358,8 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
     # msg.info(">"*80)
     # msg.info("INCPATHS: %s" % ctx.env['INCPATHS'])
     # msg.info("PYTHONPATH: %s" % ctx.env['PYTHONPATH'])
+    ctx.env.prepend_value('INCLUDES', ctx.env.INCPATHS)
+    
     return
 
 ### ---------------------------------------------------------------------------
