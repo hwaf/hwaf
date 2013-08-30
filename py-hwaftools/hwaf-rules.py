@@ -87,8 +87,13 @@ def hwaf_install_headers(self):
     b_pkgname = osp.basename(pkgname)
     if not hasattr(self, 'export_includes'):
         return
-    
-    include_dir = getattr(self, 'include_dir', b_pkgname)
+
+    dirname = getattr(self, 'export_includes', b_pkgname)
+    # FIXME: handle all dirs ?
+    if isinstance(dirname , (list,tuple)): dirname = dirname[0]
+    if dirname == '.': dirname = b_pkgname
+
+    include_dir = dirname
     inc_node = self.path.find_dir(include_dir)
     if not inc_node:
         self.bld.fatal('[%s]: could not find package headers' % (pkgname,))
