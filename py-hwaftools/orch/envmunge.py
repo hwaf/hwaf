@@ -7,34 +7,6 @@ This module provides the decompose() function.
 import os
 from collections import defaultdict
 
-def parse_val(val, orig = None):
-    '''Parse and apply a value setting command: val = <action>:value to
-    original value <orig>.  <action> can be "append", "prepend" or
-    "set".  If no "<action>:" is given, "set:" is assumed.
-    '''
-    if val.startswith('append'):
-        val = val[len('append'):]
-        delim = val[0]
-        val = val[1:]
-        if not orig: return val
-        orig = orig.split(delim)
-        while val in orig:
-            orig.remove(val)
-        return delim.join(orig + [val])
-
-    if val.startswith('prepend'):
-        val = val[len('prepend'):]
-        delim = val[0]
-        val = val[1:]
-        if not orig: return val
-        orig = orig.split(delim)
-        while val in orig:
-            orig.remove(val)
-        return delim.join([val] + orig)
-
-    if val.startswith('set'):
-        val = val[len('set')+1:]
-    return val
 
 def split_var_munger_command(cmdstr, cmd):
     rest = cmdstr[len(cmd):]
@@ -64,20 +36,6 @@ def make_envmungers_from_package(pkg, prefix='export_'):
         ret[var].append(mun)
     return ret
 
-def set_environment(environ, pkg, prefix = 'export_'):
-    '''Apply any environment variable settings implied by
-    <prefix>_VARIABLE to the <environ> dictionary
-    '''
-    for k,v in pkg.items():
-        if not k.startswith(prefix):
-            continue
-        var = k.split('_',1)[1]
-        old = environ.get(var)
-        val = parse_val(v, old)
-        environ[var] = val
-        #print 'Setting %s=%s (was:%s)' % (var, val, old)
-    return
-
 def packages_in_group(pkglist, group_name):
     '''
     Given a list of all packages, return a list of those in the named group.
@@ -101,6 +59,7 @@ def resolve_packages(all_packages, desclist):
     if isinstance(desclist, type("")):
         desclist = [x.strip() for x in desclist.split(',')]
     ret = []
+
     for req in desclist:
         what,name = req.split(':')
         if what == 'package':
@@ -117,19 +76,6 @@ def resolve_packages(all_packages, desclist):
         continue
     return ret
 
-
-def make_environ(pkg, all_packages):
-    '''Add an environ to a waf <env> for given package.  The environ
-    starts with os.environ, adds any settings specified by
-    'export_VARIABLE' in any dependent packages or groups of packages
-    indicated by an "environment" package variable and finally by any
-    specified by "buildenv_VARIABLE" in the package itself.
-    '''
-    environ = dict(os.environ)
-    for other_pkg in resolve_packages(all_packages, pkg.get('environment')):
-        set_environment(environ, other_pkg)
-    set_environment(environ, pkg, prefix='buildenv_')
-    return environ
         
 def collapse_envmungers(mungers):
     ret = defaultdict(list)
@@ -141,8 +87,10 @@ def collapse_envmungers(mungers):
 def make_envmungers(pkg, all_packages):
     '''Make a environment munger that will apply the export_VARIABLE
     settings from all dependency packages indicated by the
-    "environment" package variable (and the export_VAR from 'depends' packages)
-    and any specified by buildenv_VARIABLE in the package itself.
+    "environment" package variable (and the export_VAR from 'depends'
+    packages) and any specified by buildenv_VARIABLE in the package
+    itself.  Note, that the export_* variables from a given package
+    are explicitly NOT applied to the package itself.
     '''
     mungers = list()
     autoenv = []
@@ -158,7 +106,8 @@ def make_envmungers(pkg, all_packages):
             autoenv.append('group:%s' % what)
 
     if pkg.get('environment'):
-        autoenv.extend(pkg.get('environment'))
+        en = pkg.get('environment')
+        autoenv.extend([x.strip() for x in en.split(',')])
         
     for other_pkg in resolve_packages(all_packages, autoenv):
         new = make_envmungers_from_package(other_pkg)
@@ -168,8 +117,7 @@ def make_envmungers(pkg, all_packages):
     new = make_envmungers_from_package(pkg, prefix='buildenv_')
     mungers.append(new)
 
-    new = make_envmungers_from_package(pkg, prefix='export_')
-    mungers.append(new)
+    # Do NOT append export_ mungers for the current pkg.
 
     return collapse_envmungers(mungers)
 

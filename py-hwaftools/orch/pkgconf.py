@@ -5,58 +5,10 @@ Package specific interpretation layered on deconf.
 
 import os
 
-import subprocess
-from subprocess import CalledProcessError
-
-try:
-    from subprocess import check_output
-except ImportError:
-    class CalledProcessError(Exception):
-        """This exception is raised when a process run by check_call() or
-        check_output() returns a non-zero exit status.
-        The exit status will be stored in the returncode attribute;
-        check_output() will also store the output in the output attribute.
-        """
-        def __init__(self, returncode, cmd, output=None):
-            self.returncode = returncode
-            self.cmd = cmd
-            self.output = output
-        def __str__(self):
-            return "Command '%s' returned non-zero exit status %d" % (self.cmd, self.returncode)
-
-    def check_output(*popenargs, **kwargs):
-        r"""Run command with arguments and return its output as a byte string.
-
-        If the exit code was non-zero it raises a CalledProcessError.  The
-        CalledProcessError object will have the return code in the returncode
-        attribute and output in the output attribute.
-
-        The arguments are the same as for the Popen constructor.  Example:
-
-        >>> check_output(["ls", "-l", "/dev/null"])
-        'crw-rw-rw- 1 root root 1, 3 Oct 18  2007 /dev/null\n'
-
-        The stdout argument is not allowed as it is used internally.
-        To capture standard error in the result, use stderr=STDOUT.
-
-        >>> check_output(["/bin/sh", "-c",
-        ...               "ls -l non_existent_file ; exit 0"],
-        ...              stderr=STDOUT)
-        'ls: non_existent_file: No such file or directory\n'
-        """
-        if 'stdout' in kwargs:
-            raise ValueError('stdout argument not allowed, it will be overridden.')
-        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
-        output, unused_err = process.communicate()
-        retcode = process.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = popenargs[0]
-            raise CalledProcessError(retcode, cmd, output=output)
-        return output
     
 from . import deconf
+from .util import check_output, CalledProcessError, update_if
+from . import features as featmod
 
 def ups_flavor():
     '''
@@ -92,6 +44,13 @@ def host_description():
         flavor = ups_flavor()
     ret['ups_flavor'] = flavor
 
+    bits = '32'
+    libbits = 'lib'
+    if uname[-1] in ['x86_64']: # fixme: mac os x?
+        bits = '64'
+        libbits = 'lib64'
+    ret['bits'] = bits
+    ret['libbits'] = libbits
     ret['gcc_dumpversion'] = check_output(['gcc','-dumpversion']).strip()
     ret['gcc_dumpmachine'] = check_output(['gcc','-dumpmachine']).strip()
     try:
@@ -118,11 +77,10 @@ class PkgFormatter(object):
 
     def __call__(self, string, **kwds):
         if not string: return string
-        tags = kwds.get('tags')
-        if tags:
-            tags = [x.strip() for x in tags.split(',')]
-            kwds.setdefault('tagsdashed',  '-'.join(tags))
-            kwds.setdefault('tagsunderscore', '_'.join(tags))
+        tags = kwds.get('tags') or ''
+        tags = [x.strip() for x in tags.split(',')]
+        kwds.setdefault('tagsdashed',  '-'.join(tags))
+        kwds.setdefault('tagsunderscore', '_'.join(tags))
 
         version = kwds.get('version')
         if version:
@@ -132,39 +90,45 @@ class PkgFormatter(object):
         vars = dict(self.vars)
         vars.update(kwds)
         ret = string.format(**vars)
-
-        # print 'formatting "%s" with:' %string
-        # from pprint import PrettyPrinter
-        # pp = PrettyPrinter(indent=2)
-        # pp.pprint(vars)
-        # print 'got: "%s"' % ret
         return ret
 
 
 def load(filename, start='start', formatter = None, **kwds):
-    if not formatter:
-        formatter = PkgFormatter()
+
+    # load in initial configuration but delay formatting
     suite = deconf.load(filename, start=start, formatter=formatter, **kwds)
     
     # post-process
     install_dirs = {}
     for group in suite['groups']:
+
+        new_package_list = list()
         for package in group['packages']:
+
+            # generate a per-package install_dir variable for reference by others
             pkgname = package['package']
             install_dir = package['install_dir']
             install_dirs['%s_install_dir'%pkgname] = install_dir
 
-    for group in suite['groups']:
-        to_replace = []
-        for package in group['packages']:
-            new = deconf.format_flat_dict(package,**install_dirs)
-            to_replace.append(new)
-        group['packages'] = to_replace
+            # fold in any missing defaults from the feature requirements
+            featlist = package.get('features').split()
+            #print 'Adding features to "%s" : %s' % (pkgname, featlist)
+            featcfg = featmod.feature_requirements(featlist)
+            package = update_if(featcfg, None, **package)            
+
+            new_package_list.append(package)
+
+        for package in new_package_list:
+            package.update(**install_dirs)
+
+        group['packages'] = new_package_list
+
+
+    if not formatter:
+        formatter = PkgFormatter()
+    suite = deconf.format_any(suite, formatter=formatter, **kwds)
+
     return suite
-
-
-
-
 
 
 # testing

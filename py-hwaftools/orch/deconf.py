@@ -182,6 +182,9 @@ def format_flat_dict(dat, formatter = str.format, **kwds):
                 new_v = formatter(v, **kwds)
             except KeyError:
                 continue        # maybe next time
+            except TypeError:   # can't be formatted
+                new_v = v       # pretend we just did
+
             changed = True
             formatted[k] = new_v
             kwds[k] = new_v
@@ -195,6 +198,8 @@ def format_flat_dict(dat, formatter = str.format, **kwds):
     return formatted
 
 def format_any(dat, formatter = str.format, **kwds):
+    if dat is None:
+        return dat
     if isinstance(dat, type("")):
         try:
             return formatter(dat, **kwds)
@@ -245,6 +250,8 @@ def load(filename, start = 'start', formatter = str.format, **kwds):
     cfg = parse(filename)
     data = interpret(cfg, start, **kwds)
     data2 = inflate(data)
+    if not formatter:
+        return data2
     data3 = format_any(data2, formatter=formatter, **kwds)
     return data3
 
