@@ -140,7 +140,6 @@ def resolve(cfg, sec, **kwds):
 
     secitems = dict(cfg.items(sec))
 
-    secitems.update(kwds)
     # get special keytype section governing the hierarchy schema
     keytype = dict(cfg.items('keytype'))
 
@@ -153,7 +152,7 @@ def resolve(cfg, sec, **kwds):
         lst = []
         for name in to_list(v):
             other_sec = get_first_typed_section(cfg, typ, name)
-            other = resolve(cfg, other_sec)
+            other = resolve(cfg, other_sec, **kwds)
             other.setdefault(typ,name)
             lst.append(other)
         ret[k] = lst
