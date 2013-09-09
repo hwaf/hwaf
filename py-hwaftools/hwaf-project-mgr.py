@@ -557,8 +557,10 @@ def hwaf_add_project(self, projdict):
             )
     projname = projdict['name']
     if projname in self.env['HWAF_PROJECTS'].keys():
-        raise RuntimeError("project with name [%s] already in project-db !" %
-                           projname)
+        msg.warn(
+            'hwaf: project with name [%s] already in project-db ! (ignoring the re-import)' %
+            projname)
+        return
     self.env['HWAF_PROJECTS'][projname] = projdict
 
 @waflib.Configure.conf
