@@ -215,13 +215,13 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         # msg.info("destdir: %s" % _proj_destdir)
         # msg.info("pypath:  %s" % denv['PYTHONPATH'])
         
-        def _un_massage(v):
+        def _un_massage(k, v):
             if isinstance(v, type("")):
                 return v.replace('@@HWAF_RELOCATE@@', _proj_topdir)
             elif isinstance(v, (list, tuple)):
                 vv = []
                 for ii in v:
-                    vv.append(_un_massage(ii))
+                    vv.append(_un_massage(k,ii))
                     pass
                 return type(v)(vv)
             elif isinstance(v, (int, float)):
@@ -229,11 +229,11 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             elif isinstance(v ,(dict,)):
                 vv = {}
                 for kk in v.keys():
-                    vv[kk] = _un_massage(v[kk])
+                    vv[kk] = _un_massage(kk, v[kk])
                     pass
                 return vv
             else:
-                ctx.fatal('unhandled type %s' % type(v))
+                ctx.fatal('unhandled type %s (key=%r, value=%r)' % (type(v),k, v))
                 pass
             return v
 
@@ -245,13 +245,13 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         vv = tuple([ii+"_" for ii in vv])
         for k in denv.keys():
             if k in ('INSTALL_AREA_INCDIR', 'INCPATHS'):
-                env.prepend_value('INCPATHS', _un_massage(denv[k]))
+                env.prepend_value('INCPATHS', _un_massage(k,denv[k]))
                 continue
             if k in ('INSTALL_AREA_LIBDIR', 'LIBPATH'):
-                env.prepend_value('LIBPATH', _un_massage(denv[k]))
+                env.prepend_value('LIBPATH', _un_massage(k,denv[k]))
                 continue
             if k in ('INSTALL_AREA_BINDIR', 'PATH'):
-                env.prepend_value('PATH', _un_massage(denv[k]))
+                env.prepend_value('PATH', _un_massage(k,denv[k]))
                 continue
 
             if k in envvars:
@@ -279,7 +279,7 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                    not k.startswith(('HWAF_FOUND_',)):
                 continue
             # print "-- import [%s] from [%s] %r" % (k, ppname, denv[k])
-            v = _un_massage(denv[k])
+            v = _un_massage(k,denv[k])
             if isinstance(v, list):
                 #env.prepend_unique(k, v)
                 env.prepend_value(k, v)
@@ -289,7 +289,7 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             pass
 
         # import hwaf modules from this project, if any
-        hwaf_mod_dir = osp.join(_un_massage(denv["INSTALL_AREA"]),
+        hwaf_mod_dir = osp.join(_un_massage('INSTALL_AREA',denv["INSTALL_AREA"]),
                                 "share", "hwaf")
         hwaf_mod_name = g_HWAF_MODULE_FMT % (ppname.replace("-","_"),)
         hwaf_fname = osp.join(hwaf_mod_dir, hwaf_mod_name+".py")
@@ -403,7 +403,7 @@ def _hwaf_install_project_infos(ctx):
     bld_pkgdir = pkgdir.get_bld().abspath()
     
     relocate = ctx.env.HWAF_RELOCATE
-    def _massage(v):
+    def _massage(k,v):
         if isinstance(v, type("")):
             # prevent hysteresis: remove $DESTDIR we might have added
             if destdir and v.startswith(destdir) and 1:
@@ -423,7 +423,7 @@ def _hwaf_install_project_infos(ctx):
         elif isinstance(v, (list, tuple)):
             vv = []
             for ii in v:
-                ii = _massage(ii)
+                ii = _massage(k, ii)
                 if ii: vv.append(ii)
                 pass
             return type(v)(vv)
@@ -432,27 +432,37 @@ def _hwaf_install_project_infos(ctx):
         elif isinstance(v ,(dict,)):
             vv = {}
             for kk in v.keys():
-                vv[kk] = _massage(v[kk])
+                vv[kk] = _massage(kk, v[kk])
                 pass
             return vv
+        elif v is None:
+            return v
         else:
-            ctx.fatal('unhandled type %s' % type(v))
+            ctx.fatal('unhandled type %s (key=%r, value=%r)' % (type(v), k, v))
             pass
         return v
     
     # massage env to make it relocate-able...
     for k in env.keys():
-        env[k] = _massage(env[k])
+        env[k] = _massage(k, env[k])
         pass
 
     env.store(node.abspath())
     node.sig = waflib.Utils.h_file(node.abspath())
 
-    ctx.install_files('${INSTALL_AREA}', [node])
+    ctx.install_files(
+        '${INSTALL_AREA}',
+        [node],
+        postpone=False,
+        )
 
     hwaf = ctx._hwaf_create_project_hwaf_module()
     hwaf.sig = waflib.Utils.h_file(hwaf.abspath())
-    ctx.install_files('${INSTALL_AREA}/share/hwaf/', [hwaf])
+    ctx.install_files(
+        '${INSTALL_AREA}/share/hwaf', [hwaf],
+        postpone=False,
+        )
+    #msg.info('_hwaf_install_project_infos(%s)... [done]' % ctx.cmd)
     return
 
 @waflib.Configure.conf

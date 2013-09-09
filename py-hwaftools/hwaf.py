@@ -46,10 +46,10 @@ def hwaf_build(ctx):
         ctx.add_post_fun(ctx.hwaf_utest_summary)
         ctx.add_post_fun(ctx.hwaf_utest_set_exit_code)
         pass
-    
+
     dirs = ctx.hwaf_pkg_dirs()
     ctx.recurse(dirs)
-    ctx._hwaf_install_project_infos()
+    ctx.add_post_fun(lambda _ : ctx._hwaf_install_project_infos())
     return
 
 ## EOF ##
