@@ -23,7 +23,7 @@ def make(bld):
              getattr(tg, 'depends_on', 'none')))
 
 
-    maingraph = Graph('worch', rankdir='TB')
+    maingraph = Graph('worch', rankdir='LR')
 
     tsk2graph = dict()
     pkg2features = dict()
