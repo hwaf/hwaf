@@ -110,6 +110,10 @@ def load(filename, start='start', formatter = None, **kwds):
             install_dir = package['install_dir']
             install_dirs['%s_install_dir'%pkgname] = install_dir
 
+            # generate a per-package dest_install_dir variable for reference by others
+            dest_install_dir = package.get('dest_install_dir', install_dir)
+            install_dirs['%s_dest_install_dir'%pkgname] = dest_install_dir
+
             # fold in any missing defaults from the feature requirements
             featlist = package.get('features').split()
             #print 'Adding features to "%s" : %s' % (pkgname, featlist)
