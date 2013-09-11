@@ -65,6 +65,8 @@ reqdesc_list = [
             doc='base of where to build'),
     ReqDesc('install_dir', '{PREFIX}/{package}/{version}/{tagsdashed}', typecode='d',
             doc='base of where to install'),
+    ReqDesc('dest_install_dir', '{DESTDIR}{install_dir}', typecode='d',
+            doc='directory where to stage install artifacts'),
 
     # package source archive related
     ReqDesc('source_url', None,
@@ -96,7 +98,7 @@ reqdesc_list = [
             doc='The patch file to apply'),
     ReqDesc('patch_cmd', None,  # patching feature should supply
             doc='The patch command, the patch file will be appended'),
-    ReqDesc('patch_cmd_opions',None,
+    ReqDesc('patch_cmd_options',None,
             doc='Patch command options, appended to patch command + patch file'),
     ReqDesc('patch_target','{package}-{version}.applied', typecode='f', relative='{patchfile_dir}',
             doc='A file indicating a successful application of the patch'),
@@ -122,7 +124,7 @@ reqdesc_list = [
             doc='Command to install the built package'),
     ReqDesc('install_cmd_options', '',
             doc='Options for the build command'),
-    ReqDesc('install_target', None, typecode='f', relative='{install_dir}',
+    ReqDesc('install_target', None, typecode='f', relative='{dest_install_dir}',
             doc='File that is produced upon successful installation'),
 
     ]

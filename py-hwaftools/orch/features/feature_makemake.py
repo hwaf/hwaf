@@ -14,7 +14,7 @@ requirements = {
     'build_target': None,
 
     'install_cmd' : 'make install',
-    'install_cmd_options' : '',
+    'install_cmd_options' : 'DESTDIR={DESTDIR}',
     'install_target': None,
 
 }

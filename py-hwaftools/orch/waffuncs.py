@@ -56,6 +56,7 @@ def configure(cfg):
 
     extra = dict(cfg.env)
     extra['top'] = cfg.path.abspath()
+    extra['DESTDIR'] = getattr(cfg.options, 'destdir', '')
     suite = pkgconf.load(orch_config, start = cfg.options.orch_start, **extra)
 
     envmunge.decompose(cfg, suite)
