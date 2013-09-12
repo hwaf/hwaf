@@ -78,6 +78,8 @@ def find_c_compiler(ctx, **kwargs):
         pass
     else:
         comp = os.environ.get('CC', comp)
+        try:              comp = ctx.cmd_and_log(["which", comp])
+        except Exception: pass
         ctx.env['CC'] = comp
         pass
     kwargs['path_list']=path_list
@@ -145,6 +147,8 @@ def find_cxx_compiler(ctx, **kwargs):
         pass
     else:
         comp = os.environ.get('CXX', comp)
+        try:              comp = ctx.cmd_and_log(["which", comp])
+        except Exception: pass
         ctx.env.CXX = comp
         pass
     kwargs['path_list']=path_list
