@@ -2,6 +2,7 @@
 from .pfi import feature
 
 from orch.util import urlopen
+from orch.wafutil import exec_command
 
 def get_unpacker(filename, dirname):
     if filename.endswith('.zip'): 
@@ -49,7 +50,8 @@ def feature_tarball(info):
         except Exception:
             import traceback
             traceback.print_exc()
-            info.fatal("[{package_}_download] problem downloading [{source_url}]")
+            info.error("[{package}_download] problem downloading [{source_url}]")
+            return 1
 
         checksum = info.source_archive_checksum
         if not checksum:
@@ -61,8 +63,8 @@ def feature_tarball(info):
         hasher.update(tgt.read('rb'))
         data= hasher.hexdigest()
         if data != ref:
-            info.fatal("[{pacakge}_download] invalid MD5 checksum:\nref: %s\nnew: %s", ref, data)
-
+            info.error("[{package}_download] invalid checksum:\nref: %s\nnew: %s" % (ref, data))
+            return 1
         return
 
     info.task('download',
@@ -71,9 +73,13 @@ def feature_tarball(info):
               target = info.source_archive_file)
 
 
+    def unpack_task(task):
+        cmd = get_unpacker(info.source_archive_file.abspath(), 
+                           info.source_dir.abspath())
+        return exec_command(task, cmd)
+
     info.task('unpack',
-              rule = get_unpacker(info.source_archive_file.abspath(), 
-                                  info.source_dir.abspath()),
+              rule = unpack_task,
               source = info.source_archive_file, 
               target = info.unpacked_target)
 
