@@ -85,6 +85,7 @@ def feature_vcs(info):
               rule = checkout_task,
               source = info.source_urlfile,
               target = info.unpacked_target,
+              cwd = info.source_dir.abspath(),
               )
     
     return
