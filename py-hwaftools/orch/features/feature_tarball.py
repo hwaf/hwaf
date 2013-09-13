@@ -64,6 +64,8 @@ def feature_tarball(info):
         data= hasher.hexdigest()
         if data != ref:
             info.error("[{package}_download] invalid checksum:\nref: %s\nnew: %s" % (ref, data))
+            try:            os.remove(tgt.abspath())
+            except IOError: pass
             return 1
         return
 
