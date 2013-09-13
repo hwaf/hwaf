@@ -334,4 +334,213 @@ build: {
 	}
 }
 
+func TestHscriptHwafCall(t *testing.T) {
+
+	workdir, err := ioutil.TempDir("", "hwaf-test-")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer os.RemoveAll(workdir)
+	//fmt.Printf(">>> test: %s\n", workdir)
+
+	err = os.Chdir(workdir)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	hwaf, err := newlogger("hwaf.log")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer hwaf.Close()
+
+	const hscript_settings_tmpl = `
+## -*- yaml -*-
+
+package: {
+  name: "settings",
+  authors: ["my"],
+}
+
+configure: {
+  tools: ["compiler_c", "compiler_cxx", "python"],
+  env: {
+    PYTHONPATH: "${INSTALL_AREA}/python:${PYTHONPATH}"
+  },
+  hwaf-call: [
+    "my_feature.py",
+  ],
+}
+
+build: {
+  hwaf-call: [
+    "my_feature.py",
+  ],
+}
+`
+	const myfeat_tmpl = `
+# -*- python -*-
+
+# stdlib imports
+#import os
+import os.path as osp
+#import sys
+
+# waf imports ---
+import waflib.Utils
+import waflib.Logs as msg
+import waflib.Configure
+import waflib.Build
+import waflib.Task
+from waflib.TaskGen import feature, before_method, after_method, extension, after
+
+
+def configure(ctx):
+    msg.info("configure: hello from feature my_feature")
+    return
+
+def build(ctx):
+    msg.info("build: hello from feature my_feature")
+    return
+
+@extension('.foo')
+def foo_hook(self, node):
+    msg.info('foo_hook: node=%s' % node.abspath())
+    return
+
+def my_feature_foo(self, name, source, target, **kw):
+    """A test task to copy input into output
+    """
+    kw['rule'] = '/bin/cp ${SRC} ${TGT}'
+    kw['source'] = source
+    kw['target'] = target
+    kw['name'] = name
+    o = self(**kw)
+
+    msg.info("in: %s" % source)
+    msg.info("out: %s" % target)
+
+    self.install_files(
+       '${INSTALL_AREA}/data',
+       target,
+       relative_trick = False,
+    )
+    return
+waflib.Build.BuildContext.my_feature_foo = my_feature_foo
+`
+
+	const hscript_pkg1_tmpl = `
+## -*- yaml -*-
+
+package: {
+   name: "pkg1",
+   authors: ["me"],
+   deps: {
+     public: [
+       "settings",
+     ],
+   }
+}
+
+configure: {
+   tools: ["compiler_c", "compiler_cxx", "find_python"],
+   env: {
+      PYTHONPATH: "${INSTALL_AREA}/python:${PYTHONPATH}",
+   },
+}
+
+build: {
+   mytask: {
+      features: "my_feature_foo",
+      source: "data.foo",
+      target: "data.out",
+   },
+}
+`
+
+	// build project
+	for _, cmd := range [][]string{
+		{"hwaf", "init", "-v=1", "."},
+		{"hwaf", "setup", "-v=1"},
+		{"hwaf", "pkg", "create", "-v=1", "settings"},
+		{"hwaf", "pkg", "create", "-v=1", "pkg1"},
+	} {
+		err := hwaf.Run(cmd[0], cmd[1:]...)
+		if err != nil {
+			hwaf.Display()
+			t.Fatalf("cmd %v failed: %v", cmd, err)
+		}
+	}
+
+	err = ioutil.WriteFile(
+		"src/settings/hscript.yml",
+		[]byte(hscript_settings_tmpl),
+		0777,
+	)
+	if err != nil {
+		hwaf.Display()
+		t.Fatalf("error creating src/settings/hscript.yml: %v\n", err)
+	}
+
+	err = ioutil.WriteFile(
+		"src/settings/my_feature.py",
+		[]byte(myfeat_tmpl),
+		0777,
+	)
+	if err != nil {
+		hwaf.Display()
+		t.Fatalf("error creating src/settings/my_feature.py: %v\n", err)
+	}
+
+	err = ioutil.WriteFile(
+		"src/pkg1/hscript.yml",
+		[]byte(hscript_pkg1_tmpl),
+		0777,
+	)
+	if err != nil {
+		hwaf.Display()
+		t.Fatalf("error creating src/pkg1/hscript.yml: %v\n", err)
+	}
+
+	err = ioutil.WriteFile(
+		"src/pkg1/data.foo",
+		[]byte("## my data\n"),
+		0444,
+	)
+	if err != nil {
+		hwaf.Display()
+		t.Fatalf("error creating src/pkg1/hscript.yml: %v\n", err)
+	}
+
+	for _, cmd := range [][]string{
+		{"hwaf", "configure"},
+		{"hwaf", "build", "install", "-vv"},
+	} {
+		err := hwaf.Run(cmd[0], cmd[1:]...)
+		if err != nil {
+			hwaf.Display()
+			t.Fatalf("cmd %v failed: %v", cmd, err)
+		}
+	}
+
+	path_exists := func(name string) bool {
+		_, err := os.Stat(name)
+		if err == nil {
+			return true
+		}
+		if os.IsNotExist(err) {
+			return false
+		}
+		return false
+	}
+
+	fname := "install-area/data/data.out"
+	if !path_exists(fname) {
+		hwaf.Display()
+		t.Fatalf("no such file installed: %v", fname)
+	}
+
+	//hwaf.Display()
+}
+
 // EOF
