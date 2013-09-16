@@ -523,9 +523,9 @@ def copy_uselib_defs(ctx, dst, src):
 
 ### ---------------------------------------------------------------------------
 @conf
-def define_uselib(self, name, libpath, libname, incpath, incname):
+def hwaf_define_uselib(self, name, libpath, libname, incpath, incname):
     """
-    define_uselib creates the proper uselib variables based on the ``name``
+    hwaf_define_uselib creates the proper uselib variables based on the ``name``
     with the correct library-path ``libpath``, library name ``libname``,
     include-path ``incpath`` and header file ``incname``
     """
@@ -569,7 +569,7 @@ def hwaf_declare_runtime_env(self, k):
 
 ### ------------------------------------------------------------------------
 @conf
-def hwaf_hwaf_declare_runtime_alias(self, dst, src):
+def hwaf_declare_runtime_alias(self, dst, src):
     '''
     hwaf_declare_runtime_alias declares an alias, alive at runtime.
     ex:

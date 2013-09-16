@@ -53,7 +53,7 @@ def find_xrootd(ctx, **kwargs):
     path_list.append(bindir)
     kwargs['path_list'] = path_list
     
-    ctx.define_uselib(
+    ctx.hwaf_define_uselib(
         name="xrootd-posix", 
         libpath=libdir,
         libname="XrdPosix",
@@ -61,7 +61,7 @@ def find_xrootd(ctx, **kwargs):
         incname="xrootd/XrdPosix/XrdPosix.hh",
         )
 
-    ctx.define_uselib(
+    ctx.hwaf_define_uselib(
         name="xrootd-client",
         libpath=libdir,
         libname="XrdClient",
@@ -69,7 +69,7 @@ def find_xrootd(ctx, **kwargs):
         incname="xrootd/XrdClient/XrdClient.hh",
         )
 
-    ctx.define_uselib(
+    ctx.hwaf_define_uselib(
         name="xrootd-utils",
         libpath=libdir,
         libname="XrdUtils",
