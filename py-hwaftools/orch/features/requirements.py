@@ -83,6 +83,13 @@ reqdesc_list = [
     ReqDesc('unpacked_target','README', typecode='f', relative='{source_dir}/{source_unpacked}',
             doc='A file which indicates successful unpacking'),
 
+    ReqDesc('vcs_flavor', None,
+            doc='The flavor of the VCS repository (git/svn/hg/cvs)'),
+    ReqDesc('vcs_tag', None, 
+            doc='The tag to use to checkout/clone'),
+    ReqDesc('vcs_module', None,
+            doc='The "module" interpreted on a per-flavor manner'),
+
     # source archive files, package sources in the form of a single archive file (tar/zip)
     ReqDesc('source_archive_checksum', '', 
             doc='expected checksum of source archive file prefixed with hash type (eg "md5:")'),

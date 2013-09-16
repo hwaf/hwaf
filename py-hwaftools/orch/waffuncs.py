@@ -52,6 +52,15 @@ def configure(cfg):
     for lst in cfg.options.orch_config.split(','):
         lst = lst.strip()
         orch_config += glob(lst)
+    okay = True
+    for maybe in orch_config:
+        if os.path.exists(maybe):
+            continue
+        msg.error('No such file: %s' % maybe)
+        okay = False
+    if not okay or not orch_config:
+        raise ValueError('missing configuration files')
+            
     cfg.msg('Orch configuration files', '"%s"' % '", "'.join(orch_config))
 
     extra = dict(cfg.env)

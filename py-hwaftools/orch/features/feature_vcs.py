@@ -20,6 +20,7 @@ requirements = {
 
     'vcs_flavor': None,
     'vcs_tag' : '',
+    'vcs_module': None,
 }
 
 # all three flavors 
@@ -43,7 +44,22 @@ def make_cloner(flavor):
         return info.format(pat, vcs_tag_opt=tag, vcs_command = command)
     return cloner
 
+def cvser(info):
+    '''
+    Return a cvs checkout command
+    '''
+    tag = info.vcs_tag or ''
+    if tag:
+        tag = '-r ' + tag
+    module = info.vcs_module or ''
+    if not module:
+        module = info.package
+
+    pat = '{vcs_flavor} -d {source_url} checkout {vcs_tag_opt} -d {source_unpacked} {module}'
+    return info.format(pat, vcs_tag_opt=tag, module=module)
+
 vcs_commands = dict(
+    cvs = cvser,
     git = make_cloner('git'),
     hg = make_cloner('hg'),
     svn = make_cloner('svn'),
@@ -70,7 +86,7 @@ def feature_vcs(info):
     info.debug('VCS: urlfile: %s %s --> %s' % (info.package, info.source_url, info.source_urlfile))
     def create_urlfile(task):
         tgt = task.outputs[0]
-        tgt.write(info.format('source_url'))
+        tgt.write(info.format('{source_url}'))
         return 0
     info.task('seturl',
               rule = create_urlfile,

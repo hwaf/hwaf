@@ -19,6 +19,14 @@ requirements = {
 
 @feature('cmake', **requirements)
 def feature_cmake(info):
+    tags = [x.strip() for x in info.tags.split(',')]
+    if 'debug' in tags and 'opt' in tags:
+        info.prepare_cmd += ' -DCMAKE_BUILD_TYPE=RelWithDebInfo'
+    elif 'debug' in tags:
+        info.prepare_cmd += ' -DCMAKE_BUILD_TYPE=Debug'
+    elif 'opt' in tags:
+        info.prepare_cmd += ' -DCMAKE_BUILD_TYPE=Release'
+        
     return generic(info)
 
 

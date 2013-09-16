@@ -54,9 +54,26 @@ are searched first in the current working directory, next in the
 directories holding the files already specified and next from any
 colon-separated list of directories specified by a DECONF_INCLUDE_PATH
 environment variable.
+
+The section "defaults" may provide additional configuration items to
+place in the "start" section.  This allows a single file to specify
+defaults used by multiple main configuration files
 '''
 
 import os
+
+def merge_defaults(cfg, start = 'start', sections = 'defaults'):
+    if isinstance(sections, type('')):
+        sections = [x.strip() for x in sections.split(',')]
+    #print 'CFG sections:', cfg.sections()
+    for sec in sections:
+        if not cfg.has_section(sec):
+            continue
+        for k,v in cfg.items(sec):
+            if cfg.has_option(start, k):
+                continue
+            #print 'DECONF: merging',k,v
+            cfg.set(start,k,v)
 
 def parse(filename):
     'Parse the filename, return an uninterpreted object'
@@ -68,6 +85,7 @@ def parse(filename):
     if isinstance(filename, type("")):
         filename = [filename]
     cfg.files = filename
+
     return cfg
 
 def to_list(lst):
@@ -246,7 +264,12 @@ def load(filename, start = 'start', formatter = str.format, **kwds):
     '''
     Return the fully parsed, interpreted, inflated and formatted suite.
     '''
+    if not filename:
+        raise ValueError('deconf.load not given any files to load')
+
     cfg = parse(filename)
+    add_includes(cfg,start)
+    merge_defaults(cfg, start)
     data = interpret(cfg, start, **kwds)
     data2 = inflate(data)
     if not formatter:
