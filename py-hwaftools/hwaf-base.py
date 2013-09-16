@@ -412,6 +412,10 @@ def read_cfg(ctx, fname):
         ctx.fatal("no such file [%s]" % fname)
         return False
 
+    # make sure we initialize some waf-envs
+    if not ctx.env.HWAF_TAGS:        ctx.env['HWAF_TAGS'] = {}
+    if not ctx.env.HWAF_ACTIVE_TAGS: ctx.env['HWAF_ACTIVE_TAGS'] = []
+            
     try: from ConfigParser import SafeConfigParser as CfgParser
     except ImportError: from configparser import ConfigParser as CfgParser
     cfg = CfgParser()
@@ -432,6 +436,18 @@ def read_cfg(ctx, fname):
                     #ctx.msg(k, v)
                     pass
                 pass
+        # bootstrap-level tags
+        if cfg.has_option(section, 'tags'):
+            tags = cfg.get(section, 'tags')
+            tags = waflib.Utils.to_list(tags)
+            msg.debug('hwaf: enabling tags %r (from [hwaf-cfg/tags])...' % (tags,))
+            for tag in tags:
+                # first declare an empty tag
+                ctx.hwaf_declare_tag(tag, content=[])
+                # now, apply.
+                ctx.hwaf_apply_tag(tag)
+                pass
+            pass
         pass
 
     # env-level config
