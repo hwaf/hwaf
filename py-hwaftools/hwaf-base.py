@@ -854,6 +854,8 @@ def hwaf_subst_vars(self, value, env=None):
     i = 1024
     while i > 0:
         i -= 1
+        value = " ".join(waflib.Utils.to_list(value))
+        msg.debug("hwaf: subst_vars(%r)" % (value,))
         value = waflib.Utils.subst_vars(value, env)
         if value.count('${') <= 0:
             return value
