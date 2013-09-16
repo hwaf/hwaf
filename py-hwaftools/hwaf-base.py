@@ -64,18 +64,14 @@ def options(ctx):
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
-    ctx.start_msg("hwaf version")
-    ctx.end_msg(os.environ.get("HWAF_VERSION", "N/A"))
-    ctx.start_msg("hwaf revision")
-    ctx.end_msg(os.environ.get("HWAF_REVISION", "N/A"))
+    ctx.msg("hwaf version", os.environ.get("HWAF_VERSION", "N/A"))
+    ctx.msg("hwaf revision", os.environ.get("HWAF_REVISION", "N/A"))
     
     if ctx.options.local_cfg:
         fname = osp.abspath(ctx.options.local_cfg)
-        ctx.start_msg("Manifest file")
-        ctx.end_msg(fname)
+        ctx.msg("Manifest file", fname)
         ok = ctx.read_cfg(fname)
-        ctx.start_msg("Manifest file processing")
-        ctx.end_msg(ok)
+        ctx.msg("Manifest file processing", ok)
         pass
 
     if not ctx.env.HWAF_MODULES: ctx.env.HWAF_MODULES = []
@@ -663,8 +659,8 @@ def hwaf_declare_tag(self, name, content):
     '''
     self.env['HWAF_TAGS'][name] = content
     if name in self.env['HWAF_ACTIVE_TAGS']:
-        #msg.debug("re-applying tag [%s]..." % name)
-        #msg.debug("re-applying tag [%s] - content: %s" % (name,content))
+        msg.debug("hwaf: re-applying tag [%s]..." % name)
+        msg.debug("hwaf: re-applying tag [%s] - content: %s" % (name,content))
         self.hwaf_apply_tag(name)
     return
 
@@ -684,7 +680,7 @@ def hwaf_apply_tag(self, *tag):
         tag = waflib.Utils.to_list(tag)
     for name in tag:
         try:
-            #msg.debug("applying tag [%s]..." % name)
+            msg.debug("hwaf: applying tag [%s]..." % name)
             content = self.env['HWAF_TAGS'][name]
             self.env.append_unique('HWAF_ACTIVE_TAGS', [name])
             # FIXME: recursively apply_tag for content as well ?
@@ -693,8 +689,8 @@ def hwaf_apply_tag(self, *tag):
             #     if not tag in self.env.HWAF_ACTIVE_TAGS:
             #         self.hwaf_apply_tag(tag)
             self.env.append_unique('HWAF_ACTIVE_TAGS', content)
-            #msg.debug("applying tag content: %s..." % (content,))
-            #msg.debug("applying tag [%s]... [done]" % name)
+            msg.debug("hwaf: applying tag content: %s..." % (content,))
+            msg.debug("hwaf: applying tag [%s]... [done]" % name)
         except KeyError:
             raise waflib.Errors.WafError("package [%s]: no such tag (%s) in HWAF_TAGS" % (self.path.name, name))
         pass
@@ -711,7 +707,7 @@ def _hwaf_select_value(self, value):
     default = None
     for d in value:
         v = list((k,v) for k,v in d.items())[0]
-        #msg.debug('list= %s' % (v,))
+        #msg.debug('hwaf: list= %s' % (v,))
         if isinstance(v[1], type("")):
             if v[0] in tags:
                 return waflib.Utils.subst_vars(v[1], self.env)
@@ -729,7 +725,7 @@ def _hwaf_select_value(self, value):
                 pass
             pass
         pass
-    #msg.debug('select default value: %s' % (value,))
+    #msg.debug('hwaf: select default value: %s' % (value,))
     if isinstance(default, type("")):
         return waflib.Utils.subst_vars(default, self.env)
     out = []
@@ -821,7 +817,7 @@ def hwaf_export_module(self, fname=WSCRIPT_FILE):
     if osp.isabs(fname): node = self.root.find_or_declare(fname)
     else:                node = self.path.find_node(fname)
     if not node: self.fatal("could not find [%s]" % fname)
-    #msg.info("::: exporting [%s]" % node.abspath())
+    msg.debug("hwaf: exporting [%s]" % node.abspath())
     self.env.append_unique('HWAF_MODULES', node.abspath())
     
 ### ------------------------------------------------------------------------

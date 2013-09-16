@@ -228,7 +228,7 @@ class BdistRpmCmd(waflib.Configure.ConfigurationContext):
                     dst=dst_rpm.abspath())
         
         shutil.rmtree(self.tmp.abspath())
-        msg.info('New RPM created: %s' % dst_rpm)
+        msg.info('hwaf: New RPM created: %s' % dst_rpm)
         
         return rc
         

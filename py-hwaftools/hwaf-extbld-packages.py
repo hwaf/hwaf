@@ -73,7 +73,7 @@ def download_archive(self, src, dst):
         else:
             tmp = self.root.make_node(dst)
             tmp.write(web.read(),'wb')
-            msg.warn('Downloaded %s from %s' % (tmp.abspath(), url))
+            msg.warn('hwaf: Downloaded %s from %s' % (tmp.abspath(), url))
             break
     else:
         self.fatal('Could not get the package %s' % src)
@@ -227,7 +227,7 @@ def declare_build_external(
         url = waflib.Utils.subst_vars(url, self.env)
         pkg_src = download_dir.make_node(os.path.basename(url))
         if not os.path.exists(pkg_src.abspath()):
-            msg.info("[%s] retrieving sources..." % name)
+            msg.info("hwaf: [%s] retrieving sources..." % name)
             self.download_archive(src=url, dst=pkg_src.abspath())
             if url_md5:
                 import hashlib
@@ -243,7 +243,7 @@ def declare_build_external(
     ## unpack the sources...
     # find the correct unpacker...
     if not os.path.exists(unpack_stamp.abspath()):
-        msg.info('[%s] unpacking...' % name)
+        msg.info('hwaf: [%s] unpacking...' % name)
         unpack_dir = tmp_dir.make_node("unpack-dir")
         unpack_dir.mkdir()
         import tarfile
@@ -257,7 +257,7 @@ def declare_build_external(
             o.extractall(unpack_dir.abspath())
             o.close()
         else:
-            msg.info('[%s] file [%s] is not a recognized archive format'
+            msg.info('hwaf: [%s] file [%s] is not a recognized archive format'
                       % (name, pkg_src.abspath()))
             pass
         unpack_content = unpack_dir.ant_glob("*", dir=True)
@@ -279,7 +279,7 @@ def declare_build_external(
     if patch_cmd and not os.path.exists(patch_stamp.abspath()):
         cmd = _get_cmd(patch_cmd)
         cwd=build_dir.abspath()
-        msg.info('[%s] patching...' % name)
+        msg.info('hwaf: [%s] patching...' % name)
         fout = open(patch_log.abspath(), 'w')
         fout.write('++ cd %s\n' % cwd)
         fout.write('++ %s\n' % cmd)
@@ -297,7 +297,7 @@ def declare_build_external(
         patch_stamp.write('')
 
     if 1:
-        msg.info('[%s] configuring...' % name)
+        msg.info('hwaf: [%s] configuring...' % name)
         cmd = _get_cmd(configure_cmd)
         cwd=build_dir.abspath()
         fout = open(configure_log.abspath(), 'w')
@@ -343,7 +343,7 @@ def declare_build_external(
         }
 
     if 0 and not os.path.exists(make_stamp.abspath()):
-        msg.info('[%s] building...' % name)
+        msg.info('hwaf: [%s] building...' % name)
         cmd = _get_cmd(build_cmd)
         cwd=build_dir.abspath()
         fout = open(make_log.abspath(), 'w')
@@ -364,7 +364,7 @@ def declare_build_external(
         make_stamp.write('')
 
     if 0 and not os.path.exists(make_install_stamp.abspath()):
-        msg.info('[%s] installing...' % name)
+        msg.info('hwaf: [%s] installing...' % name)
         cmd = _get_cmd(install_cmd)
         cwd=build_dir.abspath()
         fout = open(make_install_log.abspath(), 'w')
@@ -451,7 +451,7 @@ class build_external_pkg(waflib.Task.Task):
             pass
         ext_env = ext_env[ctx.cmd]
         if ctx.cmd == 'build':
-            msg.info('[%s] building...' % tsk_name)
+            msg.info('hwaf: [%s] building...' % tsk_name)
             pass
 
         try:    os.remove(ext_env['stamp'])

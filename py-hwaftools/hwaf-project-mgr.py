@@ -18,7 +18,7 @@ g_HWAF_PROJECT_INFO = 'project.info'
 g_HWAF_MODULE_FMT = '__hwaf_module__%s'
 
 def options(ctx):
-    #msg.info("[options] hwaf-project-mgr...")
+    #msg.info("hwaf: [options] hwaf-project-mgr...")
     #grp = ctx.add_option_group('hepwaf options')
     ctx.add_option(
         "--projects",
@@ -29,7 +29,7 @@ def options(ctx):
     return
 
 def configure(ctx):
-    # msg.info("[configure] hwaf-project-mgr...")
+    # msg.info("hwaf: [configure] hwaf-project-mgr...")
     return
 
 def build(ctx):
@@ -98,8 +98,8 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
     if projpath is None: projpath = ctx.hwaf_project_root()
 
     all_good = True
-    #msg.info("projname: %s" % projname)
-    #msg.info("projpath: %s" % projpath)
+    #msg.info("hwaf: projname: %s" % projname)
+    #msg.info("hwaf: projpath: %s" % projpath)
     ctx.hwaf_set_project_path(projname, projpath)
 
     projdeps = ctx.options.projects
@@ -117,7 +117,7 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
     for projpath in projpaths:
         if not projpath:
             continue
-        #msg.info(">>>>>>>>> %s" % projpath)
+        #msg.info("hwaf: >>>>>>>>> %s" % projpath)
         projpath = osp.expanduser(osp.expandvars(projpath))
         projpath = osp.abspath(projpath)
         proj_dir = ctx.root.find_dir(projpath)
@@ -128,23 +128,23 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             proj_dir = ctx.root.find_dir(pp)
             pass
         if not proj_dir:
-            msg.warn("could not locate project at [%s]" % projpath)
+            msg.warn("hwaf: could not locate project at [%s]" % projpath)
             continue
         try:
             proj_infos = proj_dir.ant_glob('**/%s' % g_HWAF_PROJECT_INFO)
         except:
             all_good = False
-            msg.warn("could not locate project at [%s]" % projpath)
+            msg.warn("hwaf: could not locate project at [%s]" % projpath)
             continue
 
         if not proj_infos:
-            msg.error("could not locate %s file at [%s]"
+            msg.error("hwaf: could not locate %s file at [%s]"
                       % (g_HWAF_PROJECT_INFO, proj_dir.abspath()))
             all_good = False
             continue
         
         if len(proj_infos) != 1:
-            msg.error("invalid project infos at [%s] (got %s file(s))" %
+            msg.error("hwaf: invalid project infos at [%s] (got %s file(s))" %
                       (proj_dir.abspath(), len(proj_infos)))
             all_good = False
             continue
@@ -164,7 +164,7 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
 
         # add packages from this project...
         for pkg in proj_dict['pkgs'].keys():
-            # msg.info("@@@ pkg=%s deps=%s"
+            # msg.info("hwaf: @@@ pkg=%s deps=%s"
             #           % (pkg, proj_dict['pkgs'][pkg]['deps']))
             ctx.hwaf_add_pkg(
                 pkg,
@@ -182,9 +182,9 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             _proj_prefix = proj_dir.abspath()
             if _relocate_topdir == "": _relocate_topdir = '/'
             if _relocate_prefix == "": _relocate_prefix = '/'
-            # msg.info("_relocate_topdir: %s" % _relocate_topdir)
-            # msg.info("_relocate_prefix: %s" % _relocate_prefix)
-            # msg.info("_delta:           %s" % osp.relpath(_relocate_topdir, _relocate_prefix))
+            # msg.info("hwaf: _relocate_topdir: %s" % _relocate_topdir)
+            # msg.info("hwaf: _relocate_prefix: %s" % _relocate_prefix)
+            # msg.info("hwaf: _delta:           %s" % osp.relpath(_relocate_topdir, _relocate_prefix))
             _proj_topdir = osp.realpath(
                 osp.join(_proj_prefix,
                          osp.relpath(_relocate_topdir, _relocate_prefix))
@@ -195,25 +195,25 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         # automatically prepend DESTDIR if PREFIX does not exist...
         if _proj_destdir and not ctx.root.find_dir(_proj_prefix):
             # msg.info("="*80)
-            # msg.info(":: massaging following destdir...")
-            # msg.info(":: destdir: [%s]" % _proj_destdir)
-            # msg.info(":: -prefix: [%s]" % _proj_prefix)
+            # msg.info("hwaf: :: massaging following destdir...")
+            # msg.info("hwaf: :: destdir: [%s]" % _proj_destdir)
+            # msg.info("hwaf: :: -prefix: [%s]" % _proj_prefix)
             pp = osp.abspath(_proj_destdir) + osp.abspath(_proj_prefix)
             pp = ctx.root.find_dir(pp)
             if not pp:
-                msg.error("could not locate project at [%s]" % _proj_prefix)
+                msg.error("hwaf: could not locate project at [%s]" % _proj_prefix)
                 all_good = False
                 continue
-            # msg.info(":: +prefix: [%s]" % pp)
+            # msg.info("hwaf: :: +prefix: [%s]" % pp)
             _proj_prefix = pp
             pass
 
         # msg.info("="*80)
-        # msg.info("project: %s" % ppname)
-        # msg.info("topdir:  %s" % _proj_topdir)
-        # msg.info("prefix:  %s" % _proj_prefix)
-        # msg.info("destdir: %s" % _proj_destdir)
-        # msg.info("pypath:  %s" % denv['PYTHONPATH'])
+        # msg.info("hwaf: project: %s" % ppname)
+        # msg.info("hwaf: topdir:  %s" % _proj_topdir)
+        # msg.info("hwaf: prefix:  %s" % _proj_prefix)
+        # msg.info("hwaf: destdir: %s" % _proj_destdir)
+        # msg.info("hwaf: pypath:  %s" % denv['PYTHONPATH'])
         
         def _un_massage(k, v):
             if isinstance(v, type("")):
