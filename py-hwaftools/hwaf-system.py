@@ -48,7 +48,7 @@ def configure(ctx):
     cfg_type = None
     
     if not cmtcfg or cmtcfg == 'default':
-        msg.debug('detecting default CMTCFG...')
+        msg.debug('hwaf: detecting default CMTCFG...')
         cfg_type = 'opt'
         if ctx.is_darwin():    cfg_os = 'darwin'
         elif ctx.is_linux():   cfg_os = 'linux'

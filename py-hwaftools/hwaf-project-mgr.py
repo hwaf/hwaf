@@ -355,9 +355,8 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         ctx.env.PATH = os.pathsep.join(ctx.env.PATH)
         pass
 
-    # msg.info(">"*80)
-    # msg.info("INCPATHS: %s" % ctx.env['INCPATHS'])
-    # msg.info("PYTHONPATH: %s" % ctx.env['PYTHONPATH'])
+    msg.debug("hwaf: INCPATHS: %s" % ctx.env['INCPATHS'])
+    msg.debug("hwaf: PYTHONPATH: %s" % ctx.env['PYTHONPATH'])
     ctx.env.prepend_value('INCLUDES', ctx.env.INCPATHS)
     
     return
@@ -378,8 +377,7 @@ def hwaf_schedule_project_infos(self):
 @waflib.Configure.conf
 def _hwaf_install_project_infos(ctx):
 
-    #msg.info('>'*80)
-    #msg.info('_hwaf_install_project_infos(%s)...' % ctx.cmd)
+    msg.debug('hwaf: _hwaf_install_project_infos(%s)...' % ctx.cmd)
     if ctx.cmd in ('clean',):
         return
 
@@ -407,13 +405,13 @@ def _hwaf_install_project_infos(ctx):
         if isinstance(v, type("")):
             # prevent hysteresis: remove $DESTDIR we might have added
             if destdir and v.startswith(destdir) and 1:
-                #msg.info("destdir: %s" % destdir)
-                #msg.info("v: %s" % v)
+                msg.debug("hwaf: destdir: %s" % destdir)
+                msg.debug("hwaf: v: %s" % v)
                 v = v[len(destdir):]
                 pass
             # remove local paths
             if v.startswith((src_pkgdir, bld_pkgdir)):
-                #msg.info("::: discarding [%s]" % v)
+                msg.debug("hwaf: discarding [%s]" % v)
                 return None
             # only replace when it *starts* with relocate
             # to prevent hysteresis effects.
@@ -462,7 +460,7 @@ def _hwaf_install_project_infos(ctx):
         '${INSTALL_AREA}/share/hwaf', [hwaf],
         postpone=False,
         )
-    #msg.info('_hwaf_install_project_infos(%s)... [done]' % ctx.cmd)
+    msg.debug('hwaf: _hwaf_install_project_infos(%s)... [done]' % ctx.cmd)
     return
 
 @waflib.Configure.conf
@@ -480,11 +478,8 @@ def _hwaf_get_project_hwaf_module(ctx, fname=None):
         if not hwaf: hwaf = ctx.path.find_node(fname)
         pass
     if not hwaf:
-        msg.info("could not find hwaf-module [%s]" % (fname,))
+        msg.info("hwaf: could not find hwaf-module [%s]" % (fname,))
         return None
-        aaa
-        ctx.fatal("could not find hwaf-module [%s]" % (fname,))
-        pass
     return hwaf
 
 @waflib.Configure.conf
@@ -501,7 +496,7 @@ def _hwaf_create_project_hwaf_module(ctx):
     for mod in ctx.env.HWAF_MODULES:
         mnode = ctx.root.find_node(mod)
         if not mnode:ctx.fatal("could not find hwaf-module [%s]" % mod)
-        #msg.info(">>> %s" % mod)
+        msg.debug("hwaf: create_project_hwaf_module: %s" % mod)
         hwaf.write("\n", flags="a")
         hwaf.write("#"*80, flags="a")
         mod_name = mnode.srcpath()
@@ -688,7 +683,7 @@ def hwaf_add_pkg(self, pkgname, projname=None, deps=None, pkgdir=None):
     if pkgdir is None:
         pkgdir = osp.dirname(pkgname)
     proj = self._hwaf_get_project(projname)
-    #msg.info(">>> add-pkg(%s, %s)..." % (pkgname, proj['name']))
+    msg.debug("hwaf: add-pkg(%s, %s)..." % (pkgname, proj['name']))
     proj['pkgs'][pkgname] = {
         'deps': deps,
         'name': osp.basename(pkgname),
@@ -710,7 +705,7 @@ def hwaf_has_pkg(self, pkgname, projname=None):
 def hwaf_find_pkg(self, pkgname, projname=None):
     '''finds the first package ``pkgname`` honoring project-deps'''
     #msg.info("*"*80)
-    #msg.info("--> looking for pkg[%s]..." % pkgname)
+    msg.debug("hwaf: --> looking for pkg[%s]..." % pkgname)
     for proj in self.hwaf_itr_projects(projname):
         #msg.info("??? proj [%s]..." % proj['name'])
         pkgs = proj['pkgs']
@@ -721,10 +716,10 @@ def hwaf_find_pkg(self, pkgname, projname=None):
         except KeyError:
             pass
     from pprint import pformat
-    errmsg = "no such package [%s] in any of the projects\n%s" % \
+    errmsg = "hwaf: no such package [%s] in any of the projects\n%s" % \
              (pkgname, pformat(self.hwaf_projects()))
     msg.error(errmsg)
-    raise KeyError("no such package [%s]" % pkgname)
+    raise KeyError("hwaf: no such package [%s]" % pkgname)
 
 @waflib.Configure.conf
 def hwaf_pkg_dirs(self, projname=None):
@@ -807,7 +802,7 @@ class PkgList(waflib.Configure.ConfigurationContext):
         ctx = self
         pkgdir = ctx.path.find_dir(ctx.env.PKGDIR)
         assert pkgdir, "no such directory: [%s]" % ctx.env.PKGDIR
-        msg.info("pkg-dir: %s" % pkgdir.abspath())
+        msg.debug("hwaf: pkg-dir: %s" % pkgdir.abspath())
         pkgs = ctx.hwaf_find_subpackages(pkgdir.path_from(ctx.path))
         for pkg in pkgs:
             msg.info(" %s" % pkg.path_from(pkgdir))

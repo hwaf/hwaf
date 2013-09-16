@@ -37,14 +37,14 @@ class hwaf_runtime_tsk(waflib.Task.Task):
 def hwaf_setup_runtime(self):
     feats = waflib.TaskGen.feats['hwaf_runtime_tsk']
     for fctname in feats:
-        #msg.info("triggering [%s]..." % fctname)
+        msg.debug("hwaf: triggering [%s]..." % fctname)
         fct = getattr(waflib.TaskGen.task_gen, fctname, None)
         if fct:
             # extract un-decorated function...
             fct = getattr(fct, '__func__', fct)
             fct(self)
             pass
-        #msg.info("triggering [%s]... [done]" % fctname)
+        msg.debug("hwaf: triggering [%s]... [done]" % fctname)
     return
 
 ### ---------------------------------------------------------------------------
@@ -143,7 +143,7 @@ class RunCmdContext(waflib.Build.BuildContext):
         finally:
             msg.log.setLevel(lvl)
 
-        #msg.info("args: %s" % waflib.Options.commands)
+        msg.debug("hwaf: run-cmd options: %s" % waflib.Options.commands)
         if not waflib.Options.commands:
             self.fatal('%s expects at least one package name. got: %s' %
                        (self.cmd, waflib.Options.commands))
@@ -151,11 +151,10 @@ class RunCmdContext(waflib.Build.BuildContext):
         args = []
         while waflib.Options.commands:
             arg = waflib.Options.commands.pop(0)
-            #msg.info("arg: %r" % arg)
             args.append(arg)
             pass
         
-        #msg.info("args: %s" % args)
+        msg.debug("hwaf: run-cmd args: %s" % args)
         self.hwaf_setup_runtime()
         ret = hwaf_run_cmd_with_runtime_env(self, args)
         return ret
@@ -168,7 +167,7 @@ def _hwaf_get_runtime_env(ctx):
     cwd = os.getcwd()
     root = os.path.realpath(ctx.env.PREFIX)
     root = os.path.abspath(os.path.realpath(ctx.env.INSTALL_AREA))
-    #msg.info(":::root:::"+root)
+    msg.debug("hwaf: :::root:::"+root)
     if ctx.env.DESTDIR:
         root = ctx.env.DESTDIR + os.sep + ctx.env.INSTALL_AREA
         pass
@@ -248,7 +247,7 @@ def _hwaf_get_runtime_env(ctx):
     for k in env:
         v = env[k]
         if not isinstance(v, str):
-            msg.warning('env[%s]=%r (%s)' % (k,v,type(v)))
+            msg.warning('hwaf: env[%s]=%r (%s)' % (k,v,type(v)))
             del env[k]
 
     for k in (
@@ -385,7 +384,7 @@ def hwaf_ishell(ctx):
     dotrc = None
     dotrc_fname = None
     shell_cmd = [shell,]
-    msg.info("---> shell: %s" % shell)
+    msg.debug("hwaf: ---> shell: %s" % shell)
 
     shell_alias = '='
     if 'zsh' in os.path.basename(shell):
@@ -401,7 +400,7 @@ def hwaf_ishell(ctx):
             '-i',
             ]
     elif 'csh' in os.path.basename(shell):
-        msg.info('sorry, c-shells not handled at the moment: fallback to bash')
+        msg.info('hwaf: sorry, c-shells not handled at the moment: fallback to bash')
         dotrc_fname = os.path.join(tmpdir, '.bashrc')
         shell_cmd += [
             '--init-file',
@@ -488,7 +487,7 @@ def hwaf_ishell(ctx):
         import shutil
         shutil.rmtree(tmpdir)
     except Exception:
-        msg.verbose('could not remove directory [%s]' % tmpdir)
+        msg.debug('hwaf: could not remove directory [%s]' % tmpdir)
         pass
 
     if retval:
@@ -502,10 +501,10 @@ def hwaf_ishell(ctx):
                         break
         if signame:
             raise waflib.Errors.WafError(
-                "Command %s terminated with signal %s." % (shell_cmd, signame))
+                "hwaf: Command %s terminated with signal %s." % (shell_cmd, signame))
         else:
             raise waflib.Errors.WafError(
-                "Command %s exited with code %i" % (shell_cmd, retval))
+                "hwaf: Command %s exited with code %i" % (shell_cmd, retval))
     return retval
 
 ### ---------------------------------------------------------------------------

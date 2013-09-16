@@ -31,8 +31,7 @@ def build(ctx):
 def hwaf_configure(ctx):
     dirs = ctx.hwaf_pkg_dirs()
     for d in dirs:
-        ctx.start_msg("configuring")
-        ctx.end_msg(d)
+        ctx.msg("configuring", d)
         ctx.recurse(d)
     return
 
