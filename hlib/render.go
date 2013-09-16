@@ -426,10 +426,17 @@ func gen_wscript_stmts(stmt Stmt) string {
 
 	case *ApplyTagStmt:
 		str = []string{fmt.Sprintf("## apply_tag %v", stmt)}
-		str = append(
-			str,
-			fmt.Sprintf("ctx.hwaf_apply_tag(%v)", w_py_strlist(x.Value.Set[0].Value)),
-		)
+		if len(x.Value.Set) > 0 {
+			str = append(
+				str,
+				fmt.Sprintf("ctx.hwaf_apply_tag(%v)", w_py_strlist(x.Value.Set[0].Value)),
+			)
+		} else {
+			str = append(
+				str,
+				fmt.Sprintf("ctx.hwaf_apply_tag(%q)", x.Value.Name),
+			)
+		}
 
 	case *PathStmt:
 		str = []string{fmt.Sprintf("## path %v", stmt)}
