@@ -585,18 +585,19 @@ def hwaf_declare_runtime_alias(self, dst, src):
 
 ### ------------------------------------------------------------------------
 @conf
-def hwaf_declare_macro(self, name, value):
+def hwaf_declare_macro(self, name, value, override=False):
     '''
     hwaf_declare_macro declares a macro with name `name` and value `value`
     @param name: a string
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
+    @param override: if True, force value even if already pre-existing
     '''
     value = self._hwaf_select_value(value)
     if self.env[name]:
         old_value = self.hwaf_subst_vars(self.env[name])
         new_value = self.hwaf_subst_vars(value)
-        if old_value != new_value:
+        if old_value != new_value and not override:
             raise waflib.Errors.WafError(
                 "package [%s] re-declares pre-existing macro [%s]\n old-value=%r\n new-value=%r"
                 % (self.path.name, name, old_value, new_value)
