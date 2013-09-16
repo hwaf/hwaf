@@ -255,7 +255,7 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                 continue
 
             if k in envvars:
-                ctx.declare_runtime_env(k)
+                ctx.hwaf_declare_runtime_env(k)
                 pass
             
             if k in ('ARCH_ST', 'DEFINES_ST',

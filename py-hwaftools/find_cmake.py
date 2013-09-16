@@ -80,7 +80,7 @@ def find_cmake(ctx, **kwargs):
     ctx.start_msg("CMake version")
     ctx.end_msg(version)
 
-    ctx.declare_runtime_env('CMAKE')
+    ctx.hwaf_declare_runtime_env('CMAKE')
 
     ctx.env.CMAKE_HOME = osp.dirname(osp.dirname(ctx.env.CMAKE))
     ctx.env.CMAKE_VERSION = version

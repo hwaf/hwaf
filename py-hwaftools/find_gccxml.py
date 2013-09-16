@@ -72,8 +72,8 @@ def find_gccxml(ctx, **kwargs):
     ctx.env.GCCXML_BINDIR = osp.dirname(ctx.env.GCCXML)
     ctx.env.GCCXML_HOME = osp.dirname(ctx.env.GCCXML_BINDIR)
     
-    ctx.declare_runtime_env('GCCXML')
-    ctx.declare_runtime_env('GCCXML_BINDIR')
+    ctx.hwaf_declare_runtime_env('GCCXML')
+    ctx.hwaf_declare_runtime_env('GCCXML_BINDIR')
 
     ctx.env.HWAF_FOUND_GCCXML = 1
     return

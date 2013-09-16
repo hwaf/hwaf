@@ -242,7 +242,7 @@ def find_root(ctx, **kwargs):
         ctx.fatal("No $ROOTSYS environment variable")
         pass
     ctx.env.ROOTSYS = ctx.hwaf_subst_vars(rootsys)
-    ctx.declare_runtime_env('ROOTSYS')
+    ctx.hwaf_declare_runtime_env('ROOTSYS')
 
     ctx.env.prepend_value('PATH', osp.join(ctx.env.ROOTSYS, 'bin'))
     ctx.env.prepend_value('LD_LIBRARY_PATH', osp.join(ctx.env.ROOTSYS, 'lib'))

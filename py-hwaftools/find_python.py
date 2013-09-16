@@ -91,7 +91,7 @@ def find_python(ctx, **kwargs):
     try:    ctx.find_program('python2', var='PYTHON', **kwargs)
     except: ctx.find_program('python',  var='PYTHON', **kwargs)
 
-    ctx.declare_runtime_env('PYTHON')
+    ctx.hwaf_declare_runtime_env('PYTHON')
     try:
         # temporary hack for clang and glibc-2.16
         # see: 

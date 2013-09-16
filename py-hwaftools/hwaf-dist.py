@@ -170,7 +170,7 @@ class BdistRpmCmd(waflib.Configure.ConfigurationContext):
 
         for k in dict(self.env).keys():
             if k.startswith(('RPM','HWAF_')):
-                self.declare_runtime_env(k)
+                self.hwaf_declare_runtime_env(k)
                 pass
             pass
 

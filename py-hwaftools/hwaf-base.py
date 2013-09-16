@@ -91,15 +91,15 @@ def configure(ctx):
     ctx.load('hwaf-orch', tooldir=_heptooldir)
 
     # register a couple of runtime environment variables
-    ctx.declare_runtime_env('PATH')
-    ctx.declare_runtime_env('RPATH')
-    ctx.declare_runtime_env('LD_LIBRARY_PATH')
-    ctx.declare_runtime_env('PYTHONPATH')
+    ctx.hwaf_declare_runtime_env('PATH')
+    ctx.hwaf_declare_runtime_env('RPATH')
+    ctx.hwaf_declare_runtime_env('LD_LIBRARY_PATH')
+    ctx.hwaf_declare_runtime_env('PYTHONPATH')
     if ctx.is_darwin():
-        ctx.declare_runtime_env('DYLD_LIBRARY_PATH')
+        ctx.hwaf_declare_runtime_env('DYLD_LIBRARY_PATH')
         pass
-    ctx.declare_runtime_env('PKG_CONFIG_PATH')
-    ctx.declare_runtime_env('CMTCFG')
+    ctx.hwaf_declare_runtime_env('PKG_CONFIG_PATH')
+    ctx.hwaf_declare_runtime_env('CMTCFG')
 
     for k in ['CPPFLAGS',
               'CFLAGS',
@@ -146,7 +146,7 @@ def configure(ctx):
               'OLDPWD',
               'DISPLAY',
               ]:
-        ctx.declare_runtime_env(k)
+        ctx.hwaf_declare_runtime_env(k)
         pass
 
     # configure project
@@ -360,7 +360,7 @@ def check_with(ctx, check, what, *args, **kwargs):
             #print ">> found %s at %s" % (what, path)
             ctx.in_msg = 0
             ctx.msg("Found %s at" % what, path, color="WHITE")
-            ctx.declare_runtime_env(WHAT + "_HOME")
+            ctx.hwaf_declare_runtime_env(WHAT + "_HOME")
             return
         pass
 
@@ -370,7 +370,7 @@ def check_with(ctx, check, what, *args, **kwargs):
     ctx.msg("Found %s at" % what, "(local environment)", color="WHITE")
     # FIXME: handle windows ?
     ctx.env[WHAT + "_HOME"] = "/usr"
-    ctx.declare_runtime_env(WHAT + "_HOME")
+    ctx.hwaf_declare_runtime_env(WHAT + "_HOME")
     return
 
 ### ---------------------------------------------------------------------------
@@ -552,9 +552,9 @@ def define_uselib(self, name, libpath, libname, incpath, incname):
 
 ### ------------------------------------------------------------------------
 @conf
-def declare_runtime_env(self, k):
+def hwaf_declare_runtime_env(self, k):
     '''
-    declare_runtime_env register a particular key ``k`` as the name of an
+    hwaf_declare_runtime_env registers a particular key ``k`` as the name of an
     environment variable the project will need at runtime.
     '''
     if not self.env.HWAF_RUNTIME_ENVVARS:
@@ -756,7 +756,7 @@ def hwaf_declare_path(self, name, value):
                 % (self.path.name, name, old_value, new_value)
                 )
     self.env[name] = value
-    self.declare_runtime_env(name)
+    self.hwaf_declare_runtime_env(name)
     return
 
 ### ------------------------------------------------------------------------
