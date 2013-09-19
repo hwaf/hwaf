@@ -67,6 +67,10 @@ def find_python(ctx, **kwargs):
     
     ctx.load('hwaf-base', tooldir=_heptooldir)
 
+    # prevent hysteresis
+    if ctx.env.HWAF_FOUND_PYTHON and not kwargs.get('override', False):
+        return
+
     if not ctx.env.HWAF_FOUND_C_COMPILER:
         ctx.fatal('load a C compiler first')
         pass
@@ -76,7 +80,7 @@ def find_python(ctx, **kwargs):
         pass
 
     # FIXME: take it from a user configuration file ?
-    pyversion = kwargs.get("version", (2,6))
+    pyversion = kwargs.get("version", None)
 
     # find python
     path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
@@ -115,7 +119,8 @@ def find_python(ctx, **kwargs):
         pass
 
     ctx.load('python')
-    ctx.check_python_version(pyversion)
+    if pyversion:
+        ctx.check_python_version(pyversion)
     # we remove the -m32 and -m64 options from these flags as they
     # can confuse 'check_python_headers' on darwin...
     save_flags = {}
