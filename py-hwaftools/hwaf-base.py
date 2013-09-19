@@ -118,8 +118,10 @@ def configure(ctx):
 
               'CC',
               'CXX',
+              'FC'
               'LINK_CC',
               'LINK_CXX',
+              'LINK_FC',
 
               'LIBPATH',
               'DEFINES',
