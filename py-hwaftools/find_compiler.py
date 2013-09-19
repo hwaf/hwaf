@@ -48,7 +48,7 @@ def configure(ctx):
 @conf
 def find_c_compiler(ctx, **kwargs):
     # prevent hysteresis
-    if ctx.env.HWAF_FOUND_C_COMPILER:
+    if ctx.env.HWAF_FOUND_C_COMPILER and not kwargs.get('override', False):
         return
 
     comp = ctx.env.CFG_COMPILER
@@ -78,7 +78,7 @@ def find_c_compiler(ctx, **kwargs):
         pass
     else:
         comp = os.environ.get('CC', comp)
-        try:              comp = ctx.cmd_and_log(["which", comp])
+        try:              comp = ctx.cmd_and_log(["which", comp]).strip()
         except Exception: pass
         ctx.env['CC'] = comp
         pass
@@ -116,7 +116,7 @@ def find_c_compiler(ctx, **kwargs):
 @conf
 def find_cxx_compiler(ctx, **kwargs):
     # prevent hysteresis
-    if ctx.env.HWAF_FOUND_CXX_COMPILER:
+    if ctx.env.HWAF_FOUND_CXX_COMPILER and not kwargs.get('override', False):
         return
 
     comp = ctx.env.CFG_COMPILER
@@ -147,7 +147,7 @@ def find_cxx_compiler(ctx, **kwargs):
         pass
     else:
         comp = os.environ.get('CXX', comp)
-        try:              comp = ctx.cmd_and_log(["which", comp])
+        try:              comp = ctx.cmd_and_log(["which", comp]).strip()
         except Exception: pass
         ctx.env.CXX = comp
         pass
@@ -185,7 +185,7 @@ def find_cxx_compiler(ctx, **kwargs):
 @conf
 def find_fortran_compiler(ctx, **kwargs):
     # prevent hysteresis
-    if ctx.env.HWAF_FOUND_FORTRAN_COMPILER:
+    if ctx.env.HWAF_FOUND_FORTRAN_COMPILER and not kwargs.get('override', False):
         return
 
     comp = ctx.env.CFG_COMPILER
@@ -216,7 +216,9 @@ def find_fortran_compiler(ctx, **kwargs):
         pass
     else:
         comp = os.environ.get('FC', comp)
-        ctx.env.FCC = comp
+        try:              comp = ctx.cmd_and_log(["which", comp]).strip()
+        except Exception: pass
+        ctx.env.FC = comp
         pass
     kwargs['path_list']=path_list
     
@@ -244,7 +246,7 @@ def find_fortran_compiler(ctx, **kwargs):
 @conf
 def find_toolchain(ctx, **kw):
     # prevent hysteresis
-    if ctx.env.HWAF_FOUND_TOOLCHAIN:
+    if ctx.env.HWAF_FOUND_TOOLCHAIN and not kw.get('override', False):
         return
 
     topdir = getattr(ctx.options, 'with_hwaf_toolchain', None)
