@@ -46,7 +46,7 @@ def find_xrootd(ctx, **kwargs):
         )
 
     bindir = osp.join(ctx.env.XROOTD_HOME, 'bin')
-    libdir = osp.join(ctx.env.XROOTD_HOME, 'lib')
+    libdir = osp.join(ctx.env.XROOTD_HOME, kwargs.get('libdir_name','lib'))
     incdir = osp.join(ctx.env.XROOTD_HOME, 'include')
 
     path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
