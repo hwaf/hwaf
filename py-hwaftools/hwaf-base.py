@@ -728,19 +728,29 @@ def _hwaf_select_value(self, value):
     hwaf_select_value selects a value from the dict `value` corresponding
     to the set of currently live tags.
     '''
+    msg.debug('hwaf: select default value: %s' % (value,))
     tags = self.env['HWAF_ACTIVE_TAGS']
     default = None
+    def _select_tags(tag, tag_list):
+        if isinstance(tag, type("")):
+            return tag in tag_list
+        for t in tag:
+            if not t in tag_list:
+                return False
+        return True
+    if isinstance(value, type("")):
+        value = ({"default":value},)
     for d in value:
         v = list((k,v) for k,v in d.items())[0]
-        #msg.debug('hwaf: list= %s' % (v,))
+        msg.debug('hwaf: list= %s' % (v,))
         if isinstance(v[1], type("")):
-            if v[0] in tags:
+            if _select_tags(v[0], tags):
                 return waflib.Utils.subst_vars(v[1], self.env)
             if v[0] == "default":
                 default = v[1]
                 pass
         else:
-            if v[0] in tags:
+            if _select_tags(v[0], tags):
                 out = []
                 for o in v[1]:
                     out.append(waflib.Utils.subst_vars(o, self.env))
