@@ -854,6 +854,12 @@ def hwaf_export_module(self, fname=WSCRIPT_FILE):
     if not node: self.fatal("could not find [%s]" % fname)
     msg.debug("hwaf: exporting [%s]" % node.abspath())
     self.env.append_unique('HWAF_MODULES', node.abspath())
+    if fname == WSCRIPT_FILE:
+        return
+    basename = node.name
+    if basename.endswith('.py'): basename = basename[:-len('.py')]
+    tooldir = node.parent.abspath()
+    self.load(basename, tooldir=tooldir)
     
 ### ------------------------------------------------------------------------
 @conf
