@@ -67,6 +67,12 @@ def configure(ctx):
     ctx.msg("hwaf version", os.environ.get("HWAF_VERSION", "N/A"))
     ctx.msg("hwaf revision", os.environ.get("HWAF_REVISION", "N/A"))
     
+    # transfer all env.vars from OS to hwaf.ctx.env
+    for k in os.environ:
+        ctx.env[k] = os.environ[k]
+        pass
+    ##
+
     if ctx.options.local_cfg:
         fname = osp.abspath(ctx.options.local_cfg)
         ctx.msg("Manifest file", fname)
