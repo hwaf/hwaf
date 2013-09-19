@@ -97,12 +97,24 @@ def configure(ctx):
     ctx.hwaf_declare_runtime_env('RPATH')
     ctx.hwaf_declare_runtime_env('LD_LIBRARY_PATH')
     ctx.hwaf_declare_runtime_env('PYTHONPATH')
+    ctx.hwaf_declare_runtime_env('MANPATH')
     if ctx.is_darwin():
         ctx.hwaf_declare_runtime_env('DYLD_LIBRARY_PATH')
         pass
     ctx.hwaf_declare_runtime_env('PKG_CONFIG_PATH')
     ctx.hwaf_declare_runtime_env('CMTCFG')
 
+    # explicitly declare paths
+    ctx.hwaf_declare_path('PATH')
+    ctx.hwaf_declare_path('RPATH')
+    ctx.hwaf_declare_path('LD_LIBRARY_PATH')
+    ctx.hwaf_declare_path('PYTHONPATH')
+    ctx.hwaf_declare_path('MANPATH')
+    if ctx.is_darwin():
+        ctx.hwaf_declare_path('DYLD_LIBRARY_PATH')
+        pass
+    ctx.hwaf_declare_path('PKG_CONFIG_PATH')
+    
     for k in ['CPPFLAGS',
               'CFLAGS',
               'CCFLAGS',
@@ -770,13 +782,16 @@ def _hwaf_select_value(self, value):
 
 ### ------------------------------------------------------------------------
 @conf
-def hwaf_declare_path(self, name, value):
+def hwaf_declare_path(self, name, value=None):
     '''
     hwaf_declare_path declares a path `name` with value `value`
     @param name: a string
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
+    self.hwaf_declare_runtime_env(name)
+    if value is None:
+        return
     value = self._hwaf_select_value(value)
     if self.env[name]:
         old_value = self.hwaf_subst_vars(self.env[name])
@@ -787,7 +802,6 @@ def hwaf_declare_path(self, name, value):
                 % (self.path.name, name, old_value, new_value)
                 )
     self.env[name] = value
-    self.hwaf_declare_runtime_env(name)
     return
 
 ### ------------------------------------------------------------------------
