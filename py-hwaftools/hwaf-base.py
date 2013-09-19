@@ -735,6 +735,24 @@ def hwaf_apply_tag(self, *tag):
 
 ### ------------------------------------------------------------------------
 @conf
+def hwaf_has_tag(self, tag):
+    '''
+    hwaf_has_tag returns True if ``tag`` is a defined tag. (but not necessarily active)
+    '''
+    tag = self.hwaf_subst_vars(tag)
+    return tag in self.env['HWAF_TAGS']
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_enabled_tag(self, tag):
+    '''
+    hwaf_enabled_tag returns True if ``tag`` is a currently enabled tag
+    '''
+    tag = self.hwaf_subst_vars(tag)
+    return tag in self.env['HWAF_ACTIVE_TAGS']
+
+### ------------------------------------------------------------------------
+@conf
 def _hwaf_select_value(self, value):
     '''
     hwaf_select_value selects a value from the dict `value` corresponding
