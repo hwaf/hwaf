@@ -108,7 +108,7 @@ def find_boost(ctx, **kwargs):
         libdirs.append(dirname)
         pass
     kwargs['libs'] = libdirs[:]
-
+        
     # also clean-up non existing directories in options.boost_{includes,libs}
     for k in ('boost_includes', 'boost_libs'):
         v = getattr(ctx.options, k, None)
@@ -129,6 +129,8 @@ def find_boost(ctx, **kwargs):
     # set with_boost_xxx variables for 'check_with' benefit
     setattr(ctx.options, 'with_boost_incdir', kwargs['includes'])
     setattr(ctx.options, 'with_boost_libdir',     kwargs['libs'])
+    setattr(ctx.options, 'boost_includes', kwargs['includes'])
+    setattr(ctx.options, 'boost_libs',     kwargs['libs'])
     def _get_with_boost():
         o = getattr(ctx.options, 'with_boost', [])
         if o:
