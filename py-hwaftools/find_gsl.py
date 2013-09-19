@@ -38,6 +38,23 @@ def find_gsl(ctx, **kwargs):
         pass
 
 
+    # find GSL
+    gsl_cfg = "gsl-config"
+    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
+    if getattr(ctx.options, 'with_gsl', None):
+        topdir = ctx.options.with_gsl
+        topdir = ctx.hwaf_subst_vars(topdir)
+        gsl_cfg = osp.abspath(osp.join(topdir, "bin", "gsl-config"))
+        path_list.append(osp.join(topdir, "bin"))
+        pass
+    kwargs['path_list']=path_list
+    
+    ctx.find_program(
+        gsl_cfg, 
+        var='GSL-CONFIG',
+        **kwargs)
+    gsl_cfg = ctx.env['GSL-CONFIG']
+
     ctx.check_with(
         ctx.check_cfg,
         "gsl",
@@ -65,8 +82,7 @@ def find_gsl(ctx, **kwargs):
         execute  = True,
         mandatory=True,
         )
-    ctx.start_msg("GSL version")
-    ctx.end_msg(version)
+    ctx.msg("GSL version", version)
 
     ctx.env.GSL_VERSION = version
     ctx.env.HWAF_FOUND_GSL = 1
