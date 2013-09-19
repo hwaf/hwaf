@@ -895,8 +895,9 @@ def hwaf_subst_vars(self, value, env=None):
     while i > 0:
         i -= 1
         value = " ".join(waflib.Utils.to_list(value))
-        msg.debug("hwaf: subst_vars(%r)" % (value,))
+        tmp = value
         value = waflib.Utils.subst_vars(value, env)
+        msg.debug("hwaf: subst_vars(%r) -> %s" % (tmp, value,))
         if value.count('${') <= 0:
             return value
     self.fatal('package [%s] reached maximum recursive limit when resolving value %r' % orig_value)
