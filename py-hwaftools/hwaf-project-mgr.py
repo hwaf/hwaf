@@ -342,7 +342,9 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         v = env[k]
         if isinstance(v, list):
             ctx.env[k] = _regroup(ctx.env[k])
-            ctx.env.append_unique(k, _regroup(v))
+            for vv in _regroup(v):
+                if not vv in ctx.env[k]:
+                    ctx.env.prepend_value(k, vv)
             ctx.env[k] = _flatten(ctx.env[k])
         else:
             #ctx.fatal('invalid type (%s) for [%s]' % (type(v), k))
@@ -354,12 +356,25 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
     #ctx.hwaf_project_deps(projname).extend(projdeps)
     #ctx.env['HWAF_PROJECT_DEPS_%s' % projname] = projdeps
     if ctx.env.PATH:
-        ctx.env.PATH = os.pathsep.join(ctx.env.PATH)
+        #ctx.env.PATH = os.pathsep.join(ctx.env.PATH)
         pass
 
     # bootstrap the toolchain
     ctx.load('find_compiler')
-    ctx.find_toolchain()
+    if ctx.env.HWAF_FOUND_TOOLCHAIN:
+        # reimport
+        if ctx.env.HWAF_FOUND_C_COMPILER:
+            os.environ['CC'] = ctx.env.get_flat('CC')
+            ctx.find_c_compiler(override=True)
+        if ctx.env.HWAF_FOUND_CXX_COMPILER:
+            os.environ['CXX'] = ctx.env.get_flat('CXX')
+            ctx.find_cxx_compiler(path_list=[osp.dirname(ctx.env.CXX)], override=True)
+        if ctx.env.HWAF_FOUND_FC_COMPILER:
+            os.environ['FC'] = ctx.env.get_flat('FC')
+            ctx.find_fortran_compiler(path_list=[osp.dirname(ctx.env.FC)], override=True)
+        pass
+    else:
+        ctx.find_toolchain()
     
     msg.debug("hwaf: INCPATHS: %s" % ctx.env['INCPATHS'])
     msg.debug("hwaf: PYTHONPATH: %s" % ctx.env['PYTHONPATH'])
