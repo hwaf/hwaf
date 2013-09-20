@@ -717,6 +717,7 @@ def hwaf_apply_tag(self, *tag):
         tag = waflib.Utils.to_list(tag)
     for name in tag:
         try:
+            name = self.hwaf_subst_vars(name)
             msg.debug("hwaf: applying tag [%s]..." % name)
             content = self.env['HWAF_TAGS'][name]
             self.env.append_unique('HWAF_ACTIVE_TAGS', [name])
