@@ -363,15 +363,28 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
     ctx.load('find_compiler')
     if ctx.env.HWAF_FOUND_TOOLCHAIN:
         # reimport
+        kw_c_args = {}
         if ctx.env.HWAF_FOUND_C_COMPILER:
-            os.environ['CC'] = ctx.env.get_flat('CC')
-            ctx.find_c_compiler(override=True)
+            cc = os.environ['CC'] = ctx.env.get_flat('CC')
+            kw_c_args = dict(override=True, path_list=[osp.dirname(cc)])
+            pass
+        ctx.find_c_compiler(**kw_c_args)
+
+        kw_cxx_args = {}
         if ctx.env.HWAF_FOUND_CXX_COMPILER:
-            os.environ['CXX'] = ctx.env.get_flat('CXX')
-            ctx.find_cxx_compiler(path_list=[osp.dirname(ctx.env.CXX)], override=True)
+            cxx = os.environ['CXX'] = ctx.env.get_flat('CXX')
+            kw_cxx_args = dict(path_list=[osp.dirname(cxx)], override=True)
+            pass
+        ctx.find_cxx_compiler(**kw_cxx_args)
+
+        kw_fc_args = {"mandatory": False}
         if ctx.env.HWAF_FOUND_FC_COMPILER:
-            os.environ['FC'] = ctx.env.get_flat('FC')
-            ctx.find_fortran_compiler(path_list=[osp.dirname(ctx.env.FC)], override=True)
+            fc = os.environ['FC'] = ctx.env.get_flat('FC')
+            kw_fc_args = dict(path_list=[osp.dirname(fc)], 
+                              mandatory=True,
+                              override=True)
+            pass
+        ctx.find_fortran_compiler(**kw_fc_args)
         pass
     else:
         ctx.find_toolchain()
