@@ -132,11 +132,6 @@ def configure(ctx):
     ctx.hwaf_declare_tag(ctx.env.CMTCFG, content=ctx.env.CMTCFG.split("-"))
     ctx.hwaf_apply_tag(ctx.env.CMTCFG)
 
-    # bootstrap the toolchain
-
-    ctx.load('find_compiler')
-    ctx.find_toolchain()
-    
     return
 
 ### ---------------------------------------------------------------------------
