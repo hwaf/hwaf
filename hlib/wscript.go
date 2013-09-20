@@ -23,6 +23,8 @@ type Author string
 type Manager string
 type Version string
 
+type Branches []string
+
 type Dep_t struct {
 	Name    string
 	Version Version
