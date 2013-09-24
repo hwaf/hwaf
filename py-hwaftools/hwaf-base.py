@@ -1031,8 +1031,10 @@ def _get_env_for_subproc(self, os_env_keys=None):
 
               'CC',
               'CXX',
+              'FC',
               'LINK_CC',
               'LINK_CXX',
+              'LINK_FC',
               ):
         v = self.env.get_flat(k)
         env[k] = str(v)
