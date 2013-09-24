@@ -490,14 +490,7 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         bld_node = self.root.make_node(self.env['BUILD_INSTALL_AREA'])
     kw['includes'].append(bld_node.parent.abspath())
 
-    defines = kw.get('defines', [])
-    _defines = []
-    for d in self.env.CPPFLAGS:
-        if d.startswith('-D'):
-            _defines.append(d[len('-D'):])
-        else:
-            _defines.append(d)
-    defines = _defines + defines
+    defines = waflib.Utils.to_list(kw.get('defines', []))
     kw['defines'] = defines + self._get_pkg_version_defines() + ['__REFLEX__',]
     if self.is_dbg():
         #print(":"*80)

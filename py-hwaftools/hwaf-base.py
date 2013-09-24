@@ -1017,9 +1017,6 @@ def _get_env_for_subproc(self, os_env_keys=None):
                 +[os.environ.get('DYLD_LIBRARY_PATH','')])
             pass
         pass
-    if not self.is_windows():
-        env['CPPFLAGS'] = ' '.join('-D'+k for k in self.env['DEFINES'])
-        pass
     for k in (#'CPPFLAGS',
               'CFLAGS',
               'CCFLAGS',
