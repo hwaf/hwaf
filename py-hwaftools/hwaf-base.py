@@ -85,8 +85,8 @@ def configure(ctx):
 
     ctx.load('hwaf-system', tooldir=_heptooldir)
     ctx.load('hwaf-dist',   tooldir=_heptooldir)
-    ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
     ctx.load('hwaf-runtime', tooldir=_heptooldir)
+    ctx.load('hwaf-project-mgr', tooldir=_heptooldir)
     ctx.load('hwaf-rules', tooldir=_heptooldir)
 
     ctx.load('hwaf-cmtcompat', tooldir=_heptooldir)

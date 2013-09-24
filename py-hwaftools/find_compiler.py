@@ -83,9 +83,17 @@ def find_c_compiler(ctx, **kwargs):
         ctx.env['CC'] = comp
         pass
     kwargs['path_list']=path_list
-    
-    ctx.load('c_config')
-    ctx.load('compiler_c')
+
+    try:
+        ctx.env.stash()
+        env = ctx._hwaf_get_runtime_env()
+        ctx.env.env = env
+        ctx.load('c_config')
+        ctx.load('compiler_c')
+    except ctx.errors.ConfigurationError:
+        ctx.env.revert()
+        del ctx.env.env
+        raise
 
     if ctx.is_opt():
         if ctx.is_windows(): pass
@@ -153,8 +161,16 @@ def find_cxx_compiler(ctx, **kwargs):
         pass
     kwargs['path_list']=path_list
     
-    ctx.load('c_config')
-    ctx.load('compiler_cxx')
+    try:
+        ctx.env.stash()
+        env = ctx._hwaf_get_runtime_env()
+        ctx.env.env = env
+        ctx.load('c_config')
+        ctx.load('compiler_cxx')
+    except ctx.errors.ConfigurationError:
+        ctx.env.revert()
+        del ctx.env.env
+        raise
     
     if ctx.is_opt():
         if ctx.is_windows(): pass
@@ -222,8 +238,16 @@ def find_fortran_compiler(ctx, **kwargs):
         pass
     kwargs['path_list']=path_list
     
-    ctx.load('c_config')
-    ctx.load('compiler_fc')
+    try:
+        ctx.env.stash()
+        env = ctx._hwaf_get_runtime_env()
+        ctx.env.env = env
+        ctx.load('c_config')
+        ctx.load('compiler_fc')
+    except ctx.errors.ConfigurationError:
+        ctx.env.revert()
+        del ctx.env.env
+        raise
 
     if ctx.is_32b():
         if ctx.is_windows(): pass

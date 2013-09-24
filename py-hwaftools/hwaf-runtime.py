@@ -160,6 +160,7 @@ class RunCmdContext(waflib.Build.BuildContext):
         return ret
     pass # RunCmdContext
 
+@conf
 def _hwaf_get_runtime_env(ctx):
     """return an environment suitably modified to run locally built programs
     """
