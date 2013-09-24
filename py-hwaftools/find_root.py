@@ -574,7 +574,7 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
         #'--gccxmlpath=',
         ]
     if 'clang' in o.env.CFG_COMPILER:
-        if ctx.is_darwin():
+        if self.is_darwin():
             # latest macosx XCode-5 needs to use llvm-gcc as a compiler b/c of
             # system headers gcc can't grok
             o.env.append_unique('GCCXML_FLAGS', '--gccxmlopt=--gccxml-compiler llvm-gcc')
