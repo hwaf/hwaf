@@ -307,19 +307,19 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         if ctx.is_darwin():
             env.prepend_value('DYLD_LIBRARY_PATH', env['LIBPATH'])
         
-    if ctx.is_darwin():
+    if ctx.is_darwin() or ctx.is_linux():
         # special handling of ['bar', '-arch', 'foo', 'baz']
         #-> regroup as ['bar', ('-arch','foo'), 'baz'] so the ctx.append_unique
         # will work correctly
         def _regroup(lst):
-            if not '-arch' in lst:
+            if not '-arch' in lst and not '-include' in lst:
                 return lst
             v = []
             idx = 0
             while idx < len(lst):
                 o = lst[idx]
-                if o == '-arch':
-                    o = (lst[idx], lst[idx+1])
+                if o in ('-arch', '-include'):
+                    o = [lst[idx], lst[idx+1]]
                     idx += 1
                     pass
                 v.append(o)
