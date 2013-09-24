@@ -6,7 +6,7 @@ Package specific interpretation layered on deconf.
 import os
     
 from . import deconf
-from .util import check_output, CalledProcessError, update_if
+from .util import check_output, CalledProcessError, update_if, string2list
 from . import features as featmod
 
 def ups_flavor():
@@ -114,7 +114,7 @@ def fold_in_feature_requirements(suite, formatter = None, **kwds):
     for group in suite['groups']:
         new_packages = list()
         for package in group['packages']:
-            featlist = package.get('features').split()
+            featlist = string2list(package.get('features'))
             featcfg = featmod.feature_requirements(featlist)
             package = update_if(featcfg, None, **package)            
             new_packages.append(package)

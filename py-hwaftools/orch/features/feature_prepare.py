@@ -17,9 +17,9 @@ def generic(info):
         return exec_command(task, cmd)
         
     info.task('prepare',
-             rule = prepare_task,
-             source = info.unpacked_target,
-             target = info.prepare_target)
+              rule = prepare_task,
+              source = info.unpacked_target,
+              target = info.prepare_target)
 
 @feature('prepare', **requirements)
 def feature_prepare(info):

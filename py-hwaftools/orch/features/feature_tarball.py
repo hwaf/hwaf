@@ -51,7 +51,7 @@ def feature_tarball(info):
             import traceback
             traceback.print_exc()
             info.error("[{package}_download] problem downloading [{source_url}]")
-            return 1
+            raise
 
         checksum = info.source_archive_checksum
         if not checksum:

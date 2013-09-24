@@ -2,10 +2,17 @@
 '''
 Utility functions
 '''
+import re
+
 try:    from urllib import request
 except: from urllib import urlopen
 else:   urlopen = request.urlopen
 
+
+def string2list(string, delims=', '):
+    if not isinstance(string, type('')):
+        return string
+    return re.split('[%s]+'%delims, string)
 
 def update_if(d, p, **kwds):
     '''Return a copy of d updated with kwds.

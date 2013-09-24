@@ -13,6 +13,7 @@ from . import util
 
 ## waf imports
 import waflib.Logs as msg
+import waflib.Context as context
 
 # NOT from the waf book.  The waf book example for depends_on doesn't work
 from waflib import TaskGen
@@ -49,7 +50,7 @@ def configure(cfg):
     if not cfg.options.orch_config:
         raise RuntimeError('No Orchestration configuration file given (--orch-config)')
     orch_config = []
-    for lst in cfg.options.orch_config.split(','):
+    for lst in util.string2list(cfg.options.orch_config):
         lst = lst.strip()
         orch_config += glob(lst)
     okay = True
@@ -64,7 +65,8 @@ def configure(cfg):
     cfg.msg('Orch configuration files', '"%s"' % '", "'.join(orch_config))
 
     extra = dict(cfg.env)
-    extra['top'] = cfg.path.abspath()
+    extra['top'] = context.top_dir
+    extra['out'] = context.out_dir # usually {top}/tmp
     extra['DESTDIR'] = getattr(cfg.options, 'destdir', '')
     suite = pkgconf.load(orch_config, start = cfg.options.orch_start, **extra)
 
@@ -81,9 +83,9 @@ def build(bld):
 
     import orch.features
     feature_funcs, feature_configs = orch.features.load()
-    msg.info('Supported features: "%s"' % '", "'.join(feature_funcs.keys()))
+    msg.info('Supported features: "%s"' % '", "'.join(sorted(feature_funcs.keys())))
 
-    msg.debug('orch: Build envs: %s' % ', '.join(bld.all_envs.keys()))
+    msg.debug('orch: Build envs: %s' % ', '.join(sorted(bld.all_envs.keys())))
 
     pfi_list = list()
     to_recurse = []
@@ -103,7 +105,7 @@ def build(bld):
                 continue
 
             pkgcfg = bld.env.orch_package_dict[pkgname]
-            featlist = pkgcfg.get('features').split()
+            featlist = util.string2list(pkgcfg.get('features'))
             msg.debug('orch: features for %s: "%s"' % (pkgname, '", "'.join(featlist)))
             for feat in featlist:
                 try:

@@ -49,6 +49,7 @@ def exec_command(task, cmd, **kw):
             pass
         pass
     if ret != 0:
-        msg.error('orch: %s (%s)\n%s' % \
-                      (task.name, flog.name, ''.join(open(flog.name).readlines())))
+        msg.error('command failed, log in %s' % flog.name)
+        # msg.error('orch: %s (%s)\n%s' % \
+        #               (task.name, flog.name, ''.join(open(flog.name).readlines())))
     return ret
