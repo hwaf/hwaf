@@ -62,6 +62,8 @@ def find_c_compiler(ctx, **kwargs):
             break
         pass
 
+    runtime_env = ctx._hwaf_get_runtime_env()
+
     # find CC
     path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_hwaf_toolchain', None):
@@ -78,7 +80,7 @@ def find_c_compiler(ctx, **kwargs):
         pass
     else:
         comp = os.environ.get('CC', comp)
-        try:              comp = ctx.cmd_and_log(["which", comp]).strip()
+        try:              comp = ctx.cmd_and_log(["which", comp], env=runtime_env).strip()
         except Exception: pass
         ctx.env['CC'] = comp
         pass
@@ -86,14 +88,15 @@ def find_c_compiler(ctx, **kwargs):
 
     try:
         ctx.env.stash()
-        env = ctx._hwaf_get_runtime_env()
-        ctx.env.env = env
+        ctx.env.env = runtime_env
         ctx.load('c_config')
         ctx.load('compiler_c')
+        ctx.env.detach()
     except ctx.errors.ConfigurationError:
         ctx.env.revert()
-        del ctx.env.env
         raise
+    finally:
+        del ctx.env['env']
 
     if ctx.is_opt():
         if ctx.is_windows(): pass
@@ -139,6 +142,8 @@ def find_cxx_compiler(ctx, **kwargs):
             break
         pass
 
+    runtime_env = ctx._hwaf_get_runtime_env()
+
     # find CXX
     path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_hwaf_toolchain', None):
@@ -155,7 +160,7 @@ def find_cxx_compiler(ctx, **kwargs):
         pass
     else:
         comp = os.environ.get('CXX', comp)
-        try:              comp = ctx.cmd_and_log(["which", comp]).strip()
+        try:              comp = ctx.cmd_and_log(["which", comp], env=runtime_env).strip()
         except Exception: pass
         ctx.env.CXX = comp
         pass
@@ -163,15 +168,16 @@ def find_cxx_compiler(ctx, **kwargs):
     
     try:
         ctx.env.stash()
-        env = ctx._hwaf_get_runtime_env()
-        ctx.env.env = env
+        ctx.env.env = runtime_env
         ctx.load('c_config')
         ctx.load('compiler_cxx')
+        ctx.env.detach()
     except ctx.errors.ConfigurationError:
         ctx.env.revert()
-        del ctx.env.env
         raise
-    
+    finally:
+        del ctx.env['env']
+        
     if ctx.is_opt():
         if ctx.is_windows(): pass
         else: ctx.env.append_unique('CXXFLAGS', '-O2')
@@ -216,6 +222,8 @@ def find_fortran_compiler(ctx, **kwargs):
             break
         pass
 
+    runtime_env = ctx._hwaf_get_runtime_env()
+    
     # find FC
     path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
     if getattr(ctx.options, 'with_hwaf_toolchain', None):
@@ -232,7 +240,7 @@ def find_fortran_compiler(ctx, **kwargs):
         pass
     else:
         comp = os.environ.get('FC', comp)
-        try:              comp = ctx.cmd_and_log(["which", comp]).strip()
+        try:              comp = ctx.cmd_and_log(["which", comp], env=runtime_env).strip()
         except Exception: pass
         ctx.env.FC = comp
         pass
@@ -240,15 +248,16 @@ def find_fortran_compiler(ctx, **kwargs):
     
     try:
         ctx.env.stash()
-        env = ctx._hwaf_get_runtime_env()
-        ctx.env.env = env
+        ctx.env.env = runtime_env
         ctx.load('c_config')
         ctx.load('compiler_fc')
+        ctx.env.detach()
     except ctx.errors.ConfigurationError:
         ctx.env.revert()
-        del ctx.env.env
         raise
-
+    finally:
+        del ctx.env['env']
+        
     if ctx.is_32b():
         if ctx.is_windows(): pass
         else: ctx.env.append_unique('FCFLAGS', '-m32')
