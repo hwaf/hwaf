@@ -42,7 +42,6 @@ download_dir = downloads
 source_dir = sources
 build_dir = builds/{package}-{version}-{tagsdashed}
 install_dir = {PREFIX}/{package}/{version}/{tagsdashed}
-source_unpacked = {package}-{version}.{vcs_flavor}
 unpacked_target = autogen.sh
 vcs_flavor = git
 
