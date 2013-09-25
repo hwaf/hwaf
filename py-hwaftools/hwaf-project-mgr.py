@@ -55,7 +55,8 @@ def _hwaf_configure_project(ctx):
         pass
         
     pkgdir = osp.abspath(ctx.env.PKGDIR)
-    install_area = ctx.env.INSTALL_AREA
+    install_area = osp.abspath(ctx.env.INSTALL_AREA)
+    ctx.env.INSTALL_AREA = install_area
     
     #ctx.msg("pkg dir", pkgdir)
     #ctx.msg("install-area", install_area)
