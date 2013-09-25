@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from .pfi import feature
-from orch.wafutil import exec_command
+from orch.wafutil import exec_command, msg
 
 requirements = {
     'source_dir': None,
@@ -23,10 +23,10 @@ def feature_pypackage(info):
     def prepare_task(task):
         cmd = 'cp -a %s/* %s/' % (info.source_unpacked.abspath(),
                                   info.build_dir.abspath())
-        print 'PYPACKAGE cmd:',cmd
+        #msg.debug('orch: PYPACKAGE cmd: %r' % (cmd,))
         return exec_command(task, cmd)
-    print('pypackage: unpacked_target=%s' % info.unpacked_target.abspath())
-    print('pypackage: prepare_target=%s' % info.prepare_target.abspath())
+    msg.debug('orch: pypackage: unpacked_target=%s' % info.unpacked_target.abspath())
+    msg.debug('orch: pypackage: prepare_target=%s' % info.prepare_target.abspath())
     info.task('prepare',
               rule = prepare_task,
               source = info.unpacked_target,

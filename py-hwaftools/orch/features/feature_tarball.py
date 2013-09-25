@@ -57,15 +57,17 @@ def feature_tarball(info):
         if not checksum:
             return
         hasher_name, ref = checksum.split(":")
-        import hashlib
+        import hashlib, os
         # FIXME: check the hasher method exists. check for typos.
         hasher = getattr(hashlib, hasher_name)()
         hasher.update(tgt.read('rb'))
         data= hasher.hexdigest()
         if data != ref:
             info.error("[{package}_download] invalid checksum:\nref: %s\nnew: %s" % (ref, data))
-            try:            os.remove(tgt.abspath())
-            except IOError: pass
+            try:
+                os.remove(tgt.abspath())
+            except IOError: 
+                pass
             return 1
         return
 

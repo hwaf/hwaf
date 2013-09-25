@@ -2,10 +2,14 @@
 '''
 The VCS feature downloads and unpacks a source archive stored in a
 version control system.  It is a drop-in replacement for the "tarball"
-feature but does not make use of any intermediate downloaded files.
-Its final step is "unpack".
+feature.  Its final step is "unpack".
+
+Some VCS flavors may place the cloned repository under download_dir
+followed by producing the unpacked source.  Others may directly
+checkout to the unpacked source directory.
 '''
 
+import os.path as osp
 from .pfi import feature
 from orch.wafutil import exec_command
 
@@ -23,48 +27,86 @@ requirements = {
     'vcs_module': None,
 }
 
-# all three flavors 
-def make_cloner(flavor):
-    def cloner(info):
-        flavor = info.vcs_flavor
+    # def checkout_task(task):
+    #     meth = eval('do_%s' % flavor)
+    #     cmd = meth(info)
+    #     return exec_command(task, cmd)
+    # info.task('unpack',
+    #           rule = checkout_task,
+    #           source = info.source_urlfile,
+    #           target = info.unpacked_target,
 
-        command = 'clone'
-        if flavor in ['svn']:
-            command = 'checkout'
-        
-        tag = info.vcs_tag
-        if tag:
-            if flavor in ['svn']:
-                info.warn('SVN has no concept of tags, ignoring tag: "{vcs_tag}"')
-                tag = ''
-            else:
-                tag = '-b ' + tag # both git and hg
+def single_cmd_rule(func):
+    def rule(info):
+        def task_func(task):
+            cmd = func(info)
+            return exec_command(task, cmd)
+        info.task('unpack',
+                  rule = task_func,
+                  source = info.source_urlfile,
+                  target = info.unpacked_target)
+    return rule
 
-        pat = "{vcs_flavor} {vcs_command} {vcs_tag_opt} {source_url} {source_unpacked}"
-        return info.format(pat, vcs_tag_opt=tag, vcs_command = command)
-    return cloner
-
-def cvser(info):
-    '''
-    Return a cvs checkout command
-    '''
-    tag = info.vcs_tag or ''
+@single_cmd_rule
+def do_cvs(info):
+    tag = getattr(info, 'vcs_tag', '')
     if tag:
         tag = '-r ' + tag
-    module = info.vcs_module or ''
+    module = getattr(info, 'vcs_module', '')
     if not module:
         module = info.package
-
-    pat = '{vcs_flavor} -d {source_url} checkout {vcs_tag_opt} -d {source_unpacked} {module}'
+    pat = 'cvs -d {source_url} checkout {vcs_tag_opt} -d {source_unpacked} {module}'
     return info.format(pat, vcs_tag_opt=tag, module=module)
 
-vcs_commands = dict(
-    cvs = cvser,
-    git = make_cloner('git'),
-    hg = make_cloner('hg'),
-    svn = make_cloner('svn'),
-    )
+@single_cmd_rule
+def do_svn(info):
+    if getattr(info, 'vcs_tag'):
+        err = info.format('SVN has no concept of tags, can not honor: "{vcs_tag}"')
+        info.error(err)
+        raise ValueError(err)
+    pat = "svn checkout {source_url} {source_unpacked}"
+    return info.format(pat)
 
+
+@single_cmd_rule
+def do_hg(info):
+    tag = getattr(info, 'vcs_tag', '')
+    if tag:
+        tag = '-b ' + tag
+    pat = "hg clone {vcs_tag_opt} {source_url} {source_unpacked}"
+    return info.format(pat, vcs_tag_opt=tag)
+
+
+def do_git(info):
+
+    # note: it's a slight cheat to not have this in a requirement but
+    # the other do_* functions do not make in intermediate repository
+    git_dir = info.node(info.format('{package}.git'), info.download_dir)
+
+    def clone_or_update(task):
+        if osp.exists(git_dir.abspath()):
+            cmd = 'git --git-dir={git_dir} fetch --all --tags'
+        else:
+            cmd = 'git clone --bare {source_url} {git_dir}'
+        cmd = info.format(cmd , git_dir=git_dir.abspath())
+        return exec_command(task, cmd)
+    info.task('download',
+              rule = clone_or_update,
+              source = info.source_urlfile,
+              target = git_dir)
+
+    def checkout(task):
+        pat = 'git --git-dir={git_dir} archive'
+        pat += ' --format=tar --prefix={package}-{version}/ '
+        pat += ' ' + getattr(info, 'vcs_tag', 'HEAD') # git tag, branch or hash
+        pat += ' | tar -xvf -'
+        cmd = info.format(pat, git_dir=git_dir.abspath())
+        return exec_command(task, cmd)
+    info.task('unpack',
+              rule = checkout,
+              source = git_dir,
+              target = info.unpacked_target)
+    
 
 @feature('vcs', **requirements)
 def feature_vcs(info):
@@ -94,14 +136,19 @@ def feature_vcs(info):
               target = info.source_urlfile,)
 
     # do checkout/clone into download area
-    def checkout_task(task):
-        cmd = vcs_commands[flavor](info)
-        return exec_command(task, cmd)
-    info.task('unpack',
-              rule = checkout_task,
-              source = info.source_urlfile,
-              target = info.unpacked_target,
-              )
+    # def checkout_task(task):
+    #     meth = eval('do_%s' % flavor)
+    #     cmd = meth(info)
+    #     return exec_command(task, cmd)
+    # rule = rule_maker(info)
+    # info.task('unpack',
+    #           rule = rule,
+    #           source = info.source_urlfile,
+    #           target = info.unpacked_target,
+    #           )
     
+
+    doer = eval('do_%s' % flavor)
+    doer(info)
     return
 

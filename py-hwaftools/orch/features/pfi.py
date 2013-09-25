@@ -13,7 +13,8 @@ class PackageFeatureInfo(object):
     Also sets the contexts group and env to the ones for the package.
     '''
 
-    step_cwd = dict(unpack = 'source_dir',
+    step_cwd = dict(download = 'download_dir',
+                    unpack = 'source_dir',
                     patch = 'source_dir',
                     prepare = 'build_dir',
                     build = 'build_dir',
