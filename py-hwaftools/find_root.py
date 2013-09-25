@@ -535,7 +535,10 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
             _get_deps(tgt)
     kw['includes'] = dep_inc_dirs + kw['includes']
 
-    kw['target'] =target = kw.get('target', name+'Dict')
+    target = kw.get('target', name)
+    if not target.endswith('Dict'):
+        target = target + 'Dict'
+    kw['target'] = target
     del kw['target']
 
     features = waflib.Utils.to_list(kw.get('features', [])) + [
