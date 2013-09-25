@@ -108,12 +108,16 @@ def find_root(ctx, **kwargs):
     ctx.env['LIB_PyROOT'] = ['PyROOT'] + ctx.env['LIB_python']
 
      # XMLIO...
-    ctx.copy_uselib_defs(dst='XMLIO', src='ROOT')
-    ctx.env['LIB_XMLIO'] = ['XMLIO']
+    ctx.copy_uselib_defs(dst='ROOT-XMLIO', src='ROOT')
+    ctx.env['LIB_ROOT-XMLIO'] = ['XMLIO']
 
     # XMLParser
-    ctx.copy_uselib_defs(dst='XMLParser', src='ROOT')
-    ctx.env['LIB_XMLParser'] = ['XMLParser']
+    ctx.copy_uselib_defs(dst='ROOT-XMLParser', src='ROOT')
+    ctx.env['LIB_ROOT-XMLParser'] = ['XMLParser']
+
+    # TreePlayer
+    ctx.copy_uselib_defs(dst='ROOT-TreePlayer', src='ROOT')
+    ctx.env['LIB_ROOT-TreePlayer'] = ['TreePlayer']
 
     # check for gccxml
     if not ctx.env.HWAF_FOUND_GCCXML:
