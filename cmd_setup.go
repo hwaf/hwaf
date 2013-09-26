@@ -27,6 +27,8 @@ ex:
  $ hwaf setup -p=/opt/sw/mana/mana-core/20121207 my-work-area
  $ hwaf setup -p=/path1:/path2 my-work-area
  $ hwaf setup -cfg=${HWAF_CFG}/usr.cfg my-work-area
+ $ hwaf setup -tags=ATLAS,NEED_PYCOOL my-work-area
+ $ hwaf setup -variant=x86_64-slc6-gcc47-opt my-work-area
 `,
 		Flag: *flag.NewFlagSet("hwaf-setup", flag.ExitOnError),
 	}
@@ -34,6 +36,7 @@ ex:
 	cmd.Flag.String("cfg", "", "Path to a configuration file")
 	cmd.Flag.String("pkgdir", "src", "Directory under which to checkout packages")
 	cmd.Flag.String("variant", "", "quadruplet (e.g. x86_64-slc6-gcc47-opt) identifying the target to build for")
+	cmd.Flag.String("tags", "", "comma-separated list of tags to enable for this build")
 	cmd.Flag.Bool("v", false, "enable verbose output")
 
 	return cmd
@@ -60,6 +63,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	cfg_fname := cmd.Flag.Lookup("cfg").Value.Get().(string)
 	pkgdir := cmd.Flag.Lookup("pkgdir").Value.Get().(string)
 	variant := cmd.Flag.Lookup("variant").Value.Get().(string)
+	tags := cmd.Flag.Lookup("tags").Value.Get().(string)
 
 	projdirs := []string{}
 	const pathsep = string(os.PathListSeparator)
@@ -145,10 +149,16 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 		cmtcfg = variant
 	}
 
+	if tags != "" {
+		tags_slice := strings.Split(tags, ",")
+		tags = strings.Join(tags_slice, " ")
+	}
+
 	for k, v := range map[string]string{
 		"projects": strings.Join(projdirs, pathsep),
 		"pkgdir":   pkgdir,
 		"cmtcfg":   cmtcfg,
+		"tags":     tags,
 	} {
 		if lcfg.HasOption(section, k) {
 			lcfg.RemoveOption(section, k)
