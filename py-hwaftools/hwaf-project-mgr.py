@@ -296,7 +296,9 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                                 "share", "hwaf")
         hwaf_mod_name = g_HWAF_MODULE_FMT % (ppname.replace("-","_"),)
         hwaf_fname = osp.join(hwaf_mod_dir, hwaf_mod_name+".py")
-        ctx._hwaf_load_project_hwaf_module(hwaf_fname, do_export=True)
+        mod = ctx._hwaf_load_project_hwaf_module(hwaf_fname, do_export=True)
+        if not mod:
+            all_good = False
         pass # loop over proj-paths
     
     if not all_good:
@@ -513,7 +515,7 @@ def _hwaf_get_project_hwaf_module(ctx, fname=None):
         if not hwaf: hwaf = ctx.path.find_node(fname)
         pass
     if not hwaf:
-        msg.info("hwaf: could not find hwaf-module [%s]" % (fname,))
+        msg.error("hwaf: could not find hwaf-module [%s]" % (fname,))
         return None
     return hwaf
 
