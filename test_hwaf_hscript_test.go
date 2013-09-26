@@ -115,7 +115,12 @@ def build(ctx):
 			hwaf.Display()
 			t.Fatalf("in test [%s] cmd %v failed: %v", t_name, cmd, err)
 		}
+		if err == nil && t_err != nil {
+			hwaf.Display()
+			t.Fatalf("in test [%s] cmd %v did NOT fail (but should have): %v", t_name, cmd, err)
+		}
 	}
+
 }
 
 func TestHwafHscriptSections(t *testing.T) {
@@ -259,6 +264,32 @@ configure: {
 `,
 			expected: w_error,
 		},
+		// 		{
+		// 			name: "duplicate keys",
+		// 			content: `
+		// # -*- yaml -*-
+		// package: {
+		//  name: "mypkg",
+		//  authors: ["me"],
+		//  deps: {
+		//  },
+		// }
+
+		// options: {}
+
+		// configure: {}
+
+		// build: {
+		//  key1: {
+
+		//  },
+		//  key2: {
+
+		//  },
+		// }
+		// `,
+		// 			expected: w_error,
+		// 		},
 		{
 			name: "valid hscript",
 			content: `
@@ -286,6 +317,10 @@ configure: {
   MYPATH: "/some/path",
   PREPENDPATH: "/mypath/python:${PREPENDPATH}",
   APPENDPATH:  "${APPENDPATH}:/mypath/python",
+ },
+ alias: {
+  ll: "ls -l",
+  athena: athena.py,
  },
  declare-tags: [
   {x86_64-slc5-gcc48-opt: [x86_64, linux, slc5, 64b, gcc48, gcc, opt]},
