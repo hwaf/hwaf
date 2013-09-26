@@ -3,6 +3,7 @@ package hlib
 import (
 	"fmt"
 	"io"
+	"os"
 	"reflect"
 	"sort"
 	"strconv"
@@ -386,6 +387,13 @@ func gen_wscript_stmts(stmt Stmt) string {
 	const indent = "    "
 	var str []string
 	switch x := stmt.(type) {
+	case *AliasStmt:
+		str = []string{fmt.Sprintf("## alias %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_declare_runtime_alias", x.Value)...,
+		)
+
 	case *MacroStmt:
 		str = []string{fmt.Sprintf("## macro %v", stmt)}
 		str = append(
@@ -493,8 +501,13 @@ func gen_wscript_targets(tgts Targets_t) string {
 	cnv_values := func(values []Value) []string {
 		out := make([]string, 0, len(values))
 		for _, v := range values {
-			// FIXME what about the non-default values ??
-			out = append(out, v.Set[0].Value...)
+			if len(v.Set) > 0 {
+				// FIXME what about the non-default values ??
+				out = append(out, v.Set[0].Value...)
+			} else {
+				fmt.Fprintf(os.Stderr, "**warn** in target: %v\n", tgts)
+				fmt.Fprintf(os.Stderr, "**warn** invalid value: %v\n", v)
+			}
 		}
 		return out
 	}

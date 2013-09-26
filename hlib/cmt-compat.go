@@ -114,6 +114,13 @@ type SetAppendStmt struct {
 func (stmt *SetAppendStmt) is_stmt() {
 }
 
+type SetRemoveStmt struct {
+	Value Value
+}
+
+func (stmt *SetRemoveStmt) is_stmt() {
+}
+
 type AliasStmt struct {
 	Value Value
 }
@@ -142,6 +149,14 @@ type ApplyPatternStmt struct {
 }
 
 func (stmt *ApplyPatternStmt) is_stmt() {
+}
+
+type DocumentStmt struct {
+	Name string
+	Args []string
+}
+
+func (stmt *DocumentStmt) is_stmt() {
 }
 
 type IgnorePatternStmt struct {
@@ -174,10 +189,12 @@ var _ Stmt = (*IncludeDirsStmt)(nil)
 var _ Stmt = (*IncludePathStmt)(nil)
 var _ Stmt = (*SetStmt)(nil)
 var _ Stmt = (*SetAppendStmt)(nil)
+var _ Stmt = (*SetRemoveStmt)(nil)
 var _ Stmt = (*AliasStmt)(nil)
 var _ Stmt = (*PatternStmt)(nil)
 var _ Stmt = (*ApplyPatternStmt)(nil)
 var _ Stmt = (*IgnorePatternStmt)(nil)
+var _ Stmt = (*DocumentStmt)(nil)
 var _ Stmt = (*ActionStmt)(nil)
 var _ Stmt = (*MakeFragmentStmt)(nil)
 
