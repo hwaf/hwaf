@@ -328,7 +328,7 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 
 		err = waf_validate_sections(
 			cfg,
-			"tools", "hwaf-call", "env",
+			"tools", "hwaf-call", "env", "alias",
 			"declare-tags",
 			"apply-tags",
 		)

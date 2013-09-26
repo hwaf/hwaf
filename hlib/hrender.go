@@ -60,7 +60,10 @@ configure: {
     tools: [{{range .Tools}}{{.}}{{end}}],
     env: {
 {{.Stmts | gen_hscript_env}}
-    }
+    },
+    alias: {
+{{.Stmts | gen_hscript_aliases}}
+    },
 }
 `,
 		wscript.Configure,
@@ -109,6 +112,7 @@ func h_tmpl(w io.Writer, text string, data interface{}) error {
 		},
 		"gen_hscript_pkg_deps": gen_hscript_pkg_deps,
 		"gen_hscript_env":      gen_hscript_env,
+		"gen_hscript_aliases":  gen_hscript_aliases,
 		"gen_hscript_targets":  gen_hscript_targets,
 	})
 	template.Must(t.Parse(text))
@@ -179,6 +183,26 @@ func gen_hscript_env(stmts []Stmt) string {
 	for _, stmt := range stmts {
 		switch stmt := stmt.(type) {
 		case *MacroStmt:
+			str = append(str,
+				h_py_hlib_value(indent, stmt.Value)...,
+			)
+		}
+	}
+	// reindent:
+	for i, s := range str {
+		str[i] = indent + indent + s
+	}
+
+	return strings.Join(str, "\n")
+}
+
+func gen_hscript_aliases(stmts []Stmt) string {
+	const indent = "    "
+	var str []string
+
+	for _, stmt := range stmts {
+		switch stmt := stmt.(type) {
+		case *AliasStmt:
 			str = append(str,
 				h_py_hlib_value(indent, stmt.Value)...,
 			)
