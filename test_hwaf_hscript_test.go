@@ -120,7 +120,6 @@ def build(ctx):
 			t.Fatalf("in test [%s] cmd %v did NOT fail (but should have): %v", t_name, cmd, err)
 		}
 	}
-
 }
 
 func TestHwafHscriptSections(t *testing.T) {
