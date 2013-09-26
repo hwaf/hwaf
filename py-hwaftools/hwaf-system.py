@@ -116,6 +116,7 @@ def configure(ctx):
         pass
 
     ctx.env.PREFIX = ctx.options.prefix or "/usr"
+    ctx.env.PREFIX = osp.abspath(ctx.env.get_flat('PREFIX'))
 
     relocate_from = ctx.options.relocate_from
     if not relocate_from:
