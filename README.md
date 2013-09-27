@@ -122,7 +122,6 @@ then, you just have to do:
 
 ```sh
 $ go get github.com/hwaf/hwaf
-$ hwaf self init
 ```
 
 to get the latest ``hwaf`` tool installed (under
