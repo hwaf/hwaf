@@ -185,6 +185,42 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	_, err = io.Copy(waf_dst, waf_src)
 	handle_err(err)
 
+	const bq = "`"
+	// add setup.sh
+	setup_fname, err := os.Create(filepath.Join(top, "setup-hwaf.sh"))
+	handle_err(err)
+	defer setup_fname.Close()
+	_, err = fmt.Fprintf(setup_fname, `#!/bin/sh 
+# Absolute path to this script
+SCRIPT=$(readlink -f "$0")
+# Absolute path this script is in
+SCRIPTPATH=$(dirname "$SCRIPT")
+echo ":: adding [$SCRIPTPATH/bin] to PATH"
+export PATH=$SCRIPTPATH/bin:$PATH
+
+## EOF
+`)
+	handle_err(err)
+
+	handle_err(setup_fname.Sync())
+
+	// add setup.csh
+	csetup_fname, err := os.Create(filepath.Join(top, "setup-hwaf.csh"))
+	handle_err(err)
+	defer csetup_fname.Close()
+	_, err = fmt.Fprintf(csetup_fname, `#!/bin/csh
+# Absolute path to this script
+set SCRIPT=%sreadlink -f "$0"%s
+# Absolute path this script is in
+set SCRIPTPATH=%sdirname "$SCRIPT"%s
+echo ":: adding [$SCRIPTPATH/bin] to PATH"
+setenv PATH $SCRIPTPATH/bin:$PATH
+
+## EOF
+`, bq, bq, bq, bq)
+	handle_err(err)
+	handle_err(csetup_fname.Sync())
+
 	pwd, err := os.Getwd()
 	handle_err(err)
 
