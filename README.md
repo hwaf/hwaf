@@ -138,8 +138,14 @@ Untar under some directory like so (for linux 64b):
 $ mkdir local
 $ cd local
 $ curl -L \
-  http://cern.ch/mana-fwk/downloads/tar/hwaf-20130731-linux-amd64.tar.gz \
+  http://cern.ch/mana-fwk/downloads/tar/hwaf-20130926-linux-amd64.tar.gz \
   | tar zxf -
 $ export HWAF_ROOT=`pwd`
 $ export PATH=$HWAF_ROOT/bin:$PATH
+```
+
+If you are at CERN, binaries are installed here:
+
+```sh
+$ . /afs/cern.ch/atlas/project/hwaf/sw/install/hwaf-20130926/linux-amd64/setup-hwaf.sh
 ```
