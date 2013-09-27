@@ -15,6 +15,7 @@ requirements = {
     'install_cmd_options': '',
     'install_target': None,
     'build_dir': None,
+    'install_dir': None,        # package config MUST set this to {python_install_dir}
 }
 
 @feature('pypackage', **requirements)
@@ -43,7 +44,7 @@ def feature_pypackage(info):
     def install_task(task):
         cmd = "%s %s" % (info.install_cmd, info.install_cmd_options)
         return exec_command(task, cmd)
-    info.task('build',
+    info.task('install',
               source = info.build_target,
               target = info.install_target,
               rule = install_task)

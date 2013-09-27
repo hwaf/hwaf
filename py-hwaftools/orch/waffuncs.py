@@ -65,9 +65,12 @@ def configure(cfg):
     cfg.msg('Orch configuration files', '"%s"' % '", "'.join(orch_config))
 
     extra = dict(cfg.env)
-    extra['top'] = context.top_dir
-    extra['out'] = context.out_dir # usually {top}/tmp
+    extra['top'] = cfg.path.abspath()
+    out = cfg.bldnode.abspath() # usually {top}/tmp
+    assert out, 'No out dir defined'
+    extra['out'] = out
     extra['DESTDIR'] = getattr(cfg.options, 'destdir', '')
+    msg.debug('top="{top}" out="{out}" DESTDIR="{DESTDIR}"'.format(**extra))
     suite = pkgconf.load(orch_config, start = cfg.options.orch_start, **extra)
 
     envmunge.decompose(cfg, suite)
