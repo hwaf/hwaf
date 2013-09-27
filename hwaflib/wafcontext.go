@@ -342,7 +342,7 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 				wcfg.Tools = append(wcfg.Tools, itool.(string))
 			}
 		}
-		// FIXME:
+
 		//  handle 'env' section
 		if _, ok := cfg["env"]; ok {
 			env := waf_get_yaml_map(cfg["env"])
@@ -408,7 +408,6 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 			}
 		}
 
-		// FIXME:
 		//  handle 'declare-tags' section
 		if _, ok := cfg["declare-tags"]; ok {
 			add_tag := func(name string, data ...string) {
