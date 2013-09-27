@@ -1,9 +1,13 @@
-.PHONY: release dist gen-version clean
+.PHONY: release dist gen-version clean install
 
 export HWAF_VERSION=`date +%Y%m%d`
 export HWAF_REVISION=`git rev-parse --short HEAD`
 
 MANIFEST=/afs/cern.ch/atlas/project/hwaf/www/hwaf-latest/MANIFEST
+INSTALL=/afs/cern.ch/atlas/project/hwaf/sw/install
+VAULT=/afs/cern.ch/atlas/project/hwaf/www/downloads/tar
+
+OUT=$(INSTALL)/hwaf-${HWAF_VERSION}
 
 gen-version:
 	echo "HWAF_VERSION=${HWAF_VERSION}"
@@ -31,3 +35,14 @@ dist:
 
 release: dist
 	echo "hwaf ${HWAF_VERSION}" >> $(MANIFEST)
+
+install:
+	@echo ":: install hwaf: [$(OUT)]"
+	mkdir -p $(OUT)/linux-amd64
+	mkdir -p $(OUT)/linux-386
+	mkdir -p $(OUT)/darwin-amd64
+
+	tar -C $(OUT)/linux-amd64  -zxf $(VAULT)/hwaf-${HWAF_VERSION}-linux-amd64.tar.gz
+	tar -C $(OUT)/linux-386    -zxf $(VAULT)/hwaf-${HWAF_VERSION}-linux-386.tar.gz
+	tar -C $(OUT)/darwin-amd64 -zxf $(VAULT)/hwaf-${HWAF_VERSION}-darwin-amd64.tar.gz
+	@echo ":: bye."
