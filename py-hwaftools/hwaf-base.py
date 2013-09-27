@@ -636,7 +636,7 @@ def hwaf_declare_macro(self, name, value, override=False):
         if old_value != new_value and not override:
             raise waflib.Errors.WafError(
                 "package [%s] re-declares pre-existing macro [%s]\n old-value=%r\n new-value=%r"
-                % (self.path.name, name, old_value, new_value)
+                % (self.hwaf_pkg_name(), name, old_value, new_value)
                 )
     self.env[name] = value
     return
@@ -818,7 +818,7 @@ def hwaf_declare_path(self, name, value=None):
         if old_value != new_value:
             raise waflib.Errors.WafError(
                 "package [%s] re-declares pre-existing path [%s]\n old-value=%r\n new-value=%r"
-                % (self.path.name, name, old_value, new_value)
+                % (self.hwaf_pkg_name(), name, old_value, new_value)
                 )
     self.env[name] = value
     return
