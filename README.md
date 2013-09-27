@@ -25,7 +25,7 @@ cd work
 # setup hwaf to use a given project
 # the directory given to hwaf needs to hold a special
 # 'project.info' metadata file
-hwaf setup -p /opt/sw/mana/mana-core/<vers>/<cmtcfg>
+hwaf setup -p /opt/sw/mana/mana-core/<vers>/<variant>
 
 
 # checkout a few packages
