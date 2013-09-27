@@ -422,6 +422,30 @@ func gen_wscript_stmts(stmt Stmt) string {
 			w_py_hlib_value(indent, "hwaf_macro_remove", x.Value)...,
 		)
 
+	case *SetStmt:
+		str = []string{fmt.Sprintf("## set %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_declare_macro", x.Value)...,
+		)
+		str = append(
+			str,
+			fmt.Sprintf("ctx.hwaf_declare_runtime_env(%q)", x.Value.Name),
+		)
+
+	case *SetPrependStmt:
+		str = []string{fmt.Sprintf("## set_prepend %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_macro_prepend", x.Value)...,
+		)
+
+	case *SetRemoveStmt:
+		str = []string{fmt.Sprintf("## set_remove %v", stmt)}
+		str = append(
+			str,
+			w_py_hlib_value(indent, "hwaf_macro_remove", x.Value)...,
+		)
 	case *TagStmt:
 		str = []string{fmt.Sprintf("## tag %v", stmt)}
 		values := w_py_strlist(x.Content)

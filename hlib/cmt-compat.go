@@ -114,6 +114,13 @@ type SetAppendStmt struct {
 func (stmt *SetAppendStmt) is_stmt() {
 }
 
+type SetPrependStmt struct {
+	Value Value
+}
+
+func (stmt *SetPrependStmt) is_stmt() {
+}
+
 type SetRemoveStmt struct {
 	Value Value
 }
@@ -189,6 +196,7 @@ var _ Stmt = (*IncludeDirsStmt)(nil)
 var _ Stmt = (*IncludePathStmt)(nil)
 var _ Stmt = (*SetStmt)(nil)
 var _ Stmt = (*SetAppendStmt)(nil)
+var _ Stmt = (*SetPrependStmt)(nil)
 var _ Stmt = (*SetRemoveStmt)(nil)
 var _ Stmt = (*AliasStmt)(nil)
 var _ Stmt = (*PatternStmt)(nil)
