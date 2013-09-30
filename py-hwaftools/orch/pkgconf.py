@@ -103,6 +103,7 @@ class PkgFormatter(object):
         if version:
             kwds.setdefault('version_2digit', '.'.join(version.split('.')[:2]))
             kwds.setdefault('version_underscore', version.replace('.','_'))
+            kwds.setdefault('version_dashed', version.replace('.','-'))
             kwds.setdefault('version_nodots', version.replace('.',''))
         vars = dict(self.vars)
         vars.update(kwds)
