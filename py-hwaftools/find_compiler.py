@@ -301,8 +301,8 @@ def find_toolchain(ctx, **kw):
             libdir = osp.join(topdir, 'lib64')
             pass
 
-        os.environ['PATH'] = os.pathsep.join([bindir] + os.environ['PATH'].split(os.pathsep))
-        os.environ['LD_LIBRARY_PATH'] = os.pathsep.join([libdir] + os.environ['LD_LIBRARY_PATH'].split(os.pathsep))
+        os.environ['PATH'] = os.pathsep.join([bindir] + os.getenv('PATH',"").split(os.pathsep))
+        os.environ['LD_LIBRARY_PATH'] = os.pathsep.join([libdir] + os.getenv('LD_LIBRARY_PATH',"").split(os.pathsep))
 
         ctx.env.prepend_value('PATH', [bindir])
         ctx.env.prepend_value('LD_LIBRARY_PATH', [libdir])
