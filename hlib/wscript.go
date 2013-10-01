@@ -94,6 +94,7 @@ type Target_t struct {
 	Includes       []Value
 	ExportIncludes []Value
 	InstallPath    []Value
+	Env            Env_t
 	KwArgs         map[string][]Value
 }
 

@@ -938,6 +938,21 @@ def hwaf_subst_vars(self, value, env=None):
 
 ### ------------------------------------------------------------------------
 @conf
+def _hwaf_subenv(self, env=None):
+    '''
+    _hwaf_subenv returns a detached environment for a sub-feature.
+    if ``env`` is a dict-like instance, it will be merged in.
+    '''
+    subenv = self.env.derive()
+    subenv.detach()
+    if env:
+        env = dict(env)
+        subenv.update(env)
+        pass
+    return subenv
+
+### ------------------------------------------------------------------------
+@conf
 def _get_env_for_subproc(self, os_env_keys=None):
     import os
     #env = dict(os.environ)
