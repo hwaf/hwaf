@@ -52,11 +52,13 @@ import waflib.Utils
 from waflib.TaskGen import feature, before_method, after_method
 @feature('hwaf_runtime_tsk', '*')
 @before_method('process_rule')
-def insert_project_level_bindir(self):
+def hwaf_runtime_hwaf_runtime_insert_project_level_bindir(self):
     '''
-    insert_project_level_bindir adds ${INSTALL_AREA}/bin into the
-    ${PATH} environment variable.
+    hwaf_runtime_insert_project_level_bindir adds ${INSTALL_AREA}/bin into
+    the ${PATH} environment variable.
     '''
+    if not self.env.HWAF_ENABLE_INSTALL_AREA:
+        return
     _get = getattr(self, 'hwaf_get_install_path', None)
     if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
     d = _get('${INSTALL_AREA}/bin')
@@ -69,11 +71,13 @@ import waflib.Utils
 from waflib.TaskGen import feature, before_method, after_method
 @feature('hwaf_runtime_tsk', '*')
 @before_method('process_rule')
-def insert_project_level_libdir(self):
+def hwaf_runtime_insert_project_level_libdir(self):
     '''
-    insert_project_level_bindir adds ${INSTALL_AREA}/lib into the
-    ${LD_LIBRARY_PATH} and ${DYLD_LIBRARY_PATH} environment variables.
+    hwaf_runtime_insert_project_level_bindir adds ${INSTALL_AREA}/lib into
+    the ${LD_LIBRARY_PATH} and ${DYLD_LIBRARY_PATH} environment variables.
     '''
+    if not self.env.HWAF_ENABLE_INSTALL_AREA:
+        return
     _get = getattr(self, 'hwaf_get_install_path', None)
     if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
     d = _get('${INSTALL_AREA}/lib')
@@ -88,11 +92,13 @@ import waflib.Utils
 from waflib.TaskGen import feature, before_method, after_method
 @feature('hwaf_runtime_tsk', '*')
 @before_method('process_rule')
-def insert_project_level_incdir(self):
+def hwaf_runtime_insert_project_level_incdir(self):
     '''
-    insert_project_level_incdir adds ${INSTALL_AREA}/include into the
-    ${INCLUDES} environment variable.
+    hwaf_runtime_insert_project_level_incdir adds ${INSTALL_AREA}/include into
+    the ${INCLUDES} environment variable.
     '''
+    if not self.env.HWAF_ENABLE_INSTALL_AREA:
+        return
     _get = getattr(self, 'hwaf_get_install_path', None)
     if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
     d = _get('${INSTALL_AREA}/include')
@@ -104,7 +110,9 @@ def insert_project_level_incdir(self):
 import waflib.Utils
 from waflib.TaskGen import feature, before_method, after_method
 @feature('*')
-@after_method('insert_project_level_bindir','insert_project_level_libdir')
+@after_method('hwaf_runtime_insert_project_level_bindir',
+              'hwaf_runtime_insert_project_level_libdir',
+              'hwaf_runtime_insert_project_level_incdir')
 def hwaf_setup_runtime_env(self):
     '''
     hwaf_setup_runtime_env crafts a correct os.environ from the ctx.env.
@@ -139,6 +147,7 @@ class RunCmdContext(waflib.Build.BuildContext):
             msg.log.setLevel(msg.logging.ERROR)
             pass
         try:
+            self.env.HWAF_ENABLE_INSTALL_AREA = '1'
             ret = super(RunCmdContext, self).execute_build()
         finally:
             msg.log.setLevel(lvl)
@@ -153,7 +162,7 @@ class RunCmdContext(waflib.Build.BuildContext):
             arg = waflib.Options.commands.pop(0)
             args.append(arg)
             pass
-        
+
         msg.debug("hwaf: run-cmd args: %s" % args)
         self.hwaf_setup_runtime()
         ret = hwaf_run_cmd_with_runtime_env(self, args)
@@ -332,6 +341,7 @@ class IShellContext(waflib.Build.BuildContext):
             msg.log.setLevel(msg.logging.ERROR)
             pass
         try:
+            self.env.HWAF_ENABLE_INSTALL_AREA = '1'
             ret = super(IShellContext, self).execute_build()
         finally:
             msg.log.setLevel(lvl)
