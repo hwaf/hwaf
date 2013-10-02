@@ -325,6 +325,7 @@ class merge_dsomap(waflib.Task.Task):
     
 ### ---------------------------------------------------------------------------
 waflib.Tools.ccroot.USELIB_VARS['gen_reflex'] = set(['GCCXML_FLAGS', 'DEFINES', 'INCLUDES', 'CPPFLAGS', 'LIB'])
+from waflib.Tools import c_preproc
 
 @feature('gen_reflex')
 @after_method('apply_incpaths')
@@ -380,7 +381,10 @@ class gen_reflex(waflib.Task.Task):
     def scan(self):
         selfile = self.env['GENREFLEX_SELECTION']
         node = self.generator.bld.root.find_resource(selfile)
-        return ([node], waflib.Utils.h_file(node.abspath()))
+        c_nodes, c_names = c_preproc.scan(self)
+        c_nodes.append(node)
+        c_names.append(waflib.Utils.h_file(node.abspath()))
+        return (c_nodes, c_names)
 
     def exec_command(self, cmd, **kw):
         cwd_node = self.outputs[0].parent
@@ -639,12 +643,16 @@ class gen_rootcint(waflib.Task.Task):
     #after = ['apply_incpaths',]
     
     def scan_(self):
+        c_nodes, c_names = c_preproc.scan(self)
         linkdef = self.env['ROOTCINT_LINKDEF']
         linkdef_node = self.generator.bld.root.find_resource(linkdef)
+        c_nodes.append(linkdef_node)
+        c_names.append(waflib.Utils.h_file(linkdef_node.abspath()))
+
         src_node = self.inputs[0]
-        o=waflib.Utils.h_file(src_node.abspath())
-        return ([linkdef_node,src_node],
-                [waflib.Utils.h_file(linkdef_node.abspath()), o])
+        c_nodes.append(src_node)
+        c_names.append(waflib.Utils.h_file(src_node.abspath()))
+        return (c_nodes, c_names)
 
     def exec_command(self, cmd, **kw):
         cwd_node = self.outputs[0].parent
