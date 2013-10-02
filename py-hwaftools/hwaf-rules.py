@@ -143,6 +143,19 @@ def hwaf_export_lib(self):
     return
 
 ### -----------------------------------------------------------------------------
+import waflib.Task
+_hwaf_orig_task_str = waflib.Task.Task.__str__
+def _hwaf_task_str(self):
+    path = self.generator.path.abspath()
+    name = "???"
+    try:   name = self.generator.bld.hwaf_pkg_name(path)
+    except waflib.Errors.WafError: pass
+    
+    hdr = "[%s] " % name
+    return hdr + _hwaf_orig_task_str(self)
+waflib.Task.Task.__str__ = _hwaf_task_str
+
+### -----------------------------------------------------------------------------
 import waflib.Build
 class InstallContext(waflib.Build.InstallContext):
     '''
