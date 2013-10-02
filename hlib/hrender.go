@@ -272,6 +272,27 @@ func gen_hscript_targets(tgts Targets_t) string {
 				)
 			}
 		}
+
+		if len(tgt.Env) > 0 {
+			str = append(str,
+				fmt.Sprintf("%senv: {", indent),
+			)
+			for hdr, value := range tgt.Env {
+				vals := cnv_values([]Value{value})
+				str = append(str,
+					fmt.Sprintf(
+						"%s%s: [%s],",
+						indent+indent,
+						hdr,
+						w_py_strlist(vals),
+					),
+				)
+			}
+			str = append(str,
+				indent+"},",
+			)
+		}
+
 		for hdr, values := range tgt.KwArgs {
 			if len(values) > 0 {
 				vals := cnv_values(values)

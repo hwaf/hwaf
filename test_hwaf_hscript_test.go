@@ -347,6 +347,9 @@ build: {
    features: "cxx cxxshlib",
    source:   "src/mypkgtool.cxx",
    target:   "hello-world",
+   env: {
+     LD_LIBRARY_PATH: "/lib:${LD_LIBRARY_PATH}",
+   },
  },
 
  cxx-hello-app: {
