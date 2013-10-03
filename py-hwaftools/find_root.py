@@ -435,7 +435,8 @@ def gen_map_hook(self, node):
     out_node = bld_node.make_node(dso.replace(dso_ext,".dsomap"))
     tsk = self.create_task('gen_map', node, out_node)
     self.source += tsk.outputs
-    merge_dsomap_hook(self, out_node).set_run_after(tsk)
+    if getattr(self, 'do_merge_rootmap', True):
+        merge_dsomap_hook(self, out_node).set_run_after(tsk)
 
 class gen_map(waflib.Task.Task):
     vars = ['GENMAP', 'DEFINES', 'CPPFLAGS', 'INCLUDES']
