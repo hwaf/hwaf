@@ -12,9 +12,8 @@ func hwaf_make_cmd_waf_show() *commander.Commander {
 		Short: "show informations about packages and projects",
 		Commands: []*commander.Command{
 			hwaf_make_cmd_waf_show_active_tags(),
-			hwaf_make_cmd_waf_show_cmtcfg(),
 			hwaf_make_cmd_waf_show_constituents(),
-			hwaf_make_cmd_waf_show_default_cmtcfg(),
+			hwaf_make_cmd_waf_show_default_variant(),
 			hwaf_make_cmd_waf_show_flags(),
 			hwaf_make_cmd_waf_show_platform(),
 			hwaf_make_cmd_waf_show_projects(),
@@ -23,6 +22,7 @@ func hwaf_make_cmd_waf_show() *commander.Commander {
 			hwaf_make_cmd_waf_show_pkg_uses(),
 			hwaf_make_cmd_waf_show_pkg_tree(),
 			hwaf_make_cmd_waf_show_setup(),
+			hwaf_make_cmd_waf_show_variant(),
 		},
 		Flag: flag.NewFlagSet("hwaf-show", flag.ExitOnError),
 	}

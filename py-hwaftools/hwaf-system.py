@@ -18,7 +18,7 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 ### ---------------------------------------------------------------------------
 def options(ctx):
     ctx.add_option(
-        '--cmtcfg',
+        '--variant',
         default=None,
         help="The build type. ex: x86_64-linux-gcc-opt")
     ctx.add_option(
@@ -37,9 +37,9 @@ def configure(ctx):
     #ctx.load('compiler_cc')
     #ctx.load('compiler_cxx')
 
-    cmtcfg = os.environ.get('CMTCFG', None)
-    if not cmtcfg and ctx.options.cmtcfg:
-        cmtcfg = ctx.options.cmtcfg
+    variant = os.environ.get('HWAF_VARIANT', os.environ.get('CMTCFG', None))
+    if not variant and ctx.options.variant:
+        variant = ctx.options.variant
         pass
 
     cfg_arch = None
@@ -47,8 +47,8 @@ def configure(ctx):
     cfg_comp = 'gcc'
     cfg_type = None
     
-    if not cmtcfg or cmtcfg == 'default':
-        msg.debug('hwaf: detecting default CMTCFG...')
+    if not variant or variant == 'default':
+        msg.debug('hwaf: detecting default HWAF_VARIANT...')
         cfg_type = 'opt'
         if ctx.is_darwin():    cfg_os = 'darwin'
         elif ctx.is_linux():   cfg_os = 'linux'
@@ -60,16 +60,16 @@ def configure(ctx):
         elif ctx.is_host_64b(): cfg_arch = 'x86_64'
         else:                   cfg_arch = 'x86_64'
 
-        cmtcfg = '-'.join([cfg_arch, cfg_os,
-                           cfg_comp, cfg_type])
+        variant = '-'.join([cfg_arch, cfg_os,
+                            cfg_comp, cfg_type])
         pass
     
-    o = cmtcfg.split('-')
+    o = variant.split('-')
     if len(o) != 4:
         ctx.fatal(
-            ("Invalid CMTCFG (%s). Expected ARCH-OS-COMP-OPT. " +
+            ("Invalid HWAF_VARIANT (%s). Expected ARCH-OS-COMP-OPT. " +
             "ex: x86_64-linux-gcc-opt") %
-            cmtcfg)
+            variant)
     
     if o[1].startswith('mac'): o[1] = 'darwin'
     if o[1].startswith('slc'): o[1] = 'linux'
@@ -77,7 +77,7 @@ def configure(ctx):
     #if o[2].startswith('gcc'):
     #    o[2] = 'gcc'
 
-    ctx.env.CMTCFG = cmtcfg
+    ctx.env.HWAF_VARIANT = variant
     ctx.env.CFG_QUADRUPLET = o
     
     ctx.env.CFG_ARCH, \
@@ -129,25 +129,27 @@ def configure(ctx):
     if ctx.env.DESTDIR:
         pass
 
-    # percolate CMTCFG
-    ctx.hwaf_declare_tag(ctx.env.CMTCFG, content=ctx.env.CMTCFG.split("-"))
-    ctx.hwaf_apply_tag(ctx.env.CMTCFG)
+    # percolate HWAF_VARIANT
+    ctx.hwaf_declare_tag(ctx.env.HWAF_VARIANT, content=ctx.env.HWAF_VARIANT.split("-"))
+    ctx.hwaf_apply_tag(ctx.env.HWAF_VARIANT)
 
+    # backward compat
+    ctx.env.CMTCFG = ctx.env.HWAF_VARIANT
     return
 
 ### ---------------------------------------------------------------------------
 @conf
 def is_dbg(ctx):
-    return '-dbg' in ctx.env.CMTCFG
+    return '-dbg' in ctx.env.HWAF_VARIANT
 @conf
 def is_opt(ctx):
-    return '-opt' in ctx.env.CMTCFG
+    return '-opt' in ctx.env.HWAF_VARIANT
 @conf
 def is_64b(ctx):
-    return 'x86_64' in ctx.env.CMTCFG
+    return 'x86_64' in ctx.env.HWAF_VARIANT
 @conf
 def is_32b(ctx):
-    return not ctx.is_64b()#'i686' in ctx.env.CMTCFG
+    return not ctx.is_64b()#'i686' in ctx.env.HWAF_VARIANT
 
 @conf
 def is_host_64b(ctx):

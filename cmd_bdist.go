@@ -24,7 +24,7 @@ ex:
  $ hwaf bdist
  $ hwaf bdist -name=mana
  $ hwaf bdist -name=mana -version=20121218
- $ hwaf bdist -name=mana -version -cmtcfg=x86_64-linux-gcc-opt
+ $ hwaf bdist -name=mana -version -variant=x86_64-linux-gcc-opt
 `,
 		Flag: *flag.NewFlagSet("hwaf-bdist", flag.ExitOnError),
 		//CustomFlags: true,
@@ -32,7 +32,7 @@ ex:
 	cmd.Flag.Bool("v", false, "enable verbose output")
 	cmd.Flag.String("name", "", "name of the binary distribution (default: project name)")
 	cmd.Flag.String("version", "", "version of the binary distribution (default: project version)")
-	cmd.Flag.String("cmtcfg", "", "CMTCFG quadruplet for the binary distribution (default: project CMTCFG)")
+	cmd.Flag.String("variant", "", "HWAF_VARIANT quadruplet for the binary distribution (default: project VARIANT)")
 	return cmd
 }
 
@@ -49,7 +49,7 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 
 	bdist_name := cmd.Flag.Lookup("name").Value.Get().(string)
 	bdist_vers := cmd.Flag.Lookup("version").Value.Get().(string)
-	bdist_cmtcfg := cmd.Flag.Lookup("cmtcfg").Value.Get().(string)
+	bdist_variant := cmd.Flag.Lookup("variant").Value.Get().(string)
 
 	workdir, err := g_ctx.Workarea()
 	if err != nil {
@@ -65,7 +65,7 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	if bdist_vers == "" {
 		bdist_vers = time.Now().Format("20060102")
 	}
-	if bdist_cmtcfg == "" {
+	if bdist_variant == "" {
 		// FIXME: get actual value from waf, somehow
 		pinfo_name := filepath.Join(workdir, "__build__", "c4che", "_cache.py")
 		if !path_exists(pinfo_name) {
@@ -77,10 +77,10 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 		}
 		pinfo, err := hwaflib.NewProjectInfo(pinfo_name)
 		handle_err(err)
-		bdist_cmtcfg, err = pinfo.Get("CMTCFG")
+		bdist_variant, err = pinfo.Get("HWAF_VARIANT")
 		handle_err(err)
 	}
-	fname := bdist_name + "-" + bdist_vers + "-" + bdist_cmtcfg + ".tar.gz"
+	fname := bdist_name + "-" + bdist_vers + "-" + bdist_variant + ".tar.gz"
 
 	//fmt.Printf(">> fname=[%s]\n", fname)
 	fname = filepath.Join(workdir, fname)
@@ -95,10 +95,10 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 	// the prefix to prepend inside the tar-ball
-	prefix := bdist_name + "-" + bdist_vers //+ "-" + bdist_cmtcfg
+	prefix := bdist_name + "-" + bdist_vers //+ "-" + bdist_variant
 	// create a temporary install-area with the correct structure:
 	//  install-area/<pkgname>-<pkgvers>/...
-	bdist_dir := filepath.Join(workdir, ".hwaf-bdist-install-area-"+bdist_cmtcfg)
+	bdist_dir := filepath.Join(workdir, ".hwaf-bdist-install-area-"+bdist_variant)
 	_ = os.RemoveAll(bdist_dir)
 	err = os.MkdirAll(bdist_dir, 0700)
 	handle_err(err)

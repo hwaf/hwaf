@@ -36,7 +36,7 @@ func path_exists(name string) bool {
 type Context struct {
 	Root     string        // top-level directory of the hwaf installation
 	sitedir  string        // top-level directory for s/w installation
-	cmtcfg   string        // current CmtCfg
+	variant  string        // current Variant
 	workarea *string       // work directory for a local checkout
 	gcfg     *gocfg.Config // the global configuration (user>global)
 	lcfg     *gocfg.Config // the local config of a local workarea
@@ -51,7 +51,7 @@ func NewContext() (*Context, error) {
 	ctx = &Context{
 		Root:     "",
 		sitedir:  "",
-		cmtcfg:   "",
+		variant:  "",
 		workarea: nil,
 		gcfg:     nil,
 		lcfg:     nil,
@@ -76,7 +76,7 @@ func NewContextFrom(workarea string) (*Context, error) {
 	ctx = &Context{
 		Root:     "",
 		sitedir:  "",
-		cmtcfg:   "",
+		variant:  "",
 		workarea: &wdir,
 		gcfg:     nil,
 		lcfg:     nil,
@@ -133,8 +133,8 @@ func (ctx *Context) Sitedir() string {
 	return ctx.sitedir
 }
 
-func (ctx *Context) Cmtcfg() string {
-	return ctx.cmtcfg
+func (ctx *Context) Variant() string {
+	return ctx.variant
 }
 
 func (ctx *Context) pkgdir() string {
@@ -169,7 +169,7 @@ func (ctx *Context) Workarea() (string, error) {
 	return *ctx.workarea, err
 }
 
-func (ctx *Context) DefaultCmtcfg() string {
+func (ctx *Context) DefaultVariant() string {
 	hwaf_os := runtime.GOOS
 	hwaf_arch := runtime.GOARCH
 	hwaf_comp := "gcc"
@@ -183,22 +183,22 @@ func (ctx *Context) DefaultCmtcfg() string {
 		panic(fmt.Sprintf("unknown architecture [%s]", hwaf_arch))
 	}
 	//FIXME: is 'gcc' a good enough default ?
-	cmtcfg := fmt.Sprintf("%s-%s-%s-opt", hwaf_arch, hwaf_os, hwaf_comp)
+	variant := fmt.Sprintf("%s-%s-%s-opt", hwaf_arch, hwaf_os, hwaf_comp)
 
 	pinfos, err := platform.Infos()
 	if err != nil {
 		//println("*** error:" + err.Error())
-		return cmtcfg
+		return variant
 	}
 
 	// try harder...
-	cmtcfg2, err := ctx.infer_cmtcfg(pinfos, hwaf_arch, hwaf_os, hwaf_comp)
+	variant2, err := ctx.infer_variant(pinfos, hwaf_arch, hwaf_os, hwaf_comp)
 	if err != nil {
 		//println("*** error:" + err.Error())
-		return cmtcfg
+		return variant
 	}
-	cmtcfg = cmtcfg2
-	return cmtcfg
+	variant = variant2
+	return variant
 }
 
 func infer_gcc_version() (string, error) {
@@ -224,10 +224,10 @@ func infer_gcc_version() (string, error) {
 	return vers, nil
 }
 
-func (ctx *Context) infer_cmtcfg(pinfos platform.Platform, hwaf_arch, hwaf_os, hwaf_comp string) (string, error) {
+func (ctx *Context) infer_variant(pinfos platform.Platform, hwaf_arch, hwaf_os, hwaf_comp string) (string, error) {
 
 	var err error
-	var cmtcfg string
+	var variant string
 
 	hwaf_os = pinfos.DistId()
 
@@ -279,8 +279,8 @@ func (ctx *Context) infer_cmtcfg(pinfos platform.Platform, hwaf_arch, hwaf_os, h
 		panic(fmt.Sprintf("hwaf: unknown platform [%s]", pinfos.System))
 	}
 
-	cmtcfg = fmt.Sprintf("%s-%s-%s-opt", hwaf_arch, hwaf_os, hwaf_comp)
-	return cmtcfg, err
+	variant = fmt.Sprintf("%s-%s-%s-opt", hwaf_arch, hwaf_os, hwaf_comp)
+	return variant, err
 }
 
 func hwaf_root() string {
@@ -436,13 +436,13 @@ func (ctx *Context) init() error {
 		ctx.sitedir = sitedir
 	}
 
-	// init cmtcfg
+	// init variant
 	// FIXME: also get it from globalcfg/localcfg
-	if ctx.cmtcfg == "" {
-		if cmtcfg := os.Getenv("CMTCFG"); cmtcfg != "" {
-			ctx.cmtcfg = cmtcfg
+	if ctx.variant == "" {
+		if variant := os.Getenv("HWAF_VARIANT"); variant != "" {
+			ctx.variant = variant
 		} else {
-			ctx.cmtcfg = ctx.DefaultCmtcfg()
+			ctx.variant = ctx.DefaultVariant()
 		}
 	}
 

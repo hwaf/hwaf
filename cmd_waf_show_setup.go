@@ -40,7 +40,7 @@ func hwaf_run_cmd_waf_show_setup(cmd *commander.Command, args []string) {
 	}
 
 	for _, k := range [][]string{
-		{"hwaf-cfg", "cmtcfg"},
+		{"hwaf-cfg", "variant"},
 		{"hwaf-cfg", "projects"},
 	} {
 		section := k[0]

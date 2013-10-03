@@ -102,7 +102,7 @@ def configure(ctx):
         ctx.hwaf_declare_runtime_env('DYLD_LIBRARY_PATH')
         pass
     ctx.hwaf_declare_runtime_env('PKG_CONFIG_PATH')
-    ctx.hwaf_declare_runtime_env('CMTCFG')
+    ctx.hwaf_declare_runtime_env('HWAF_VARIANT')
 
     # explicitly declare paths
     ctx.hwaf_declare_path('PATH')
@@ -177,7 +177,7 @@ def configure(ctx):
         ctx.msg('destdir',     ctx.env.DESTDIR)
         pass
     ctx.msg('pkg dir',    ctx.env.PKGDIR)
-    ctx.msg('variant',    ctx.env.CMTCFG)
+    ctx.msg('variant',    ctx.env.HWAF_VARIANT)
     ctx.msg('arch',       ctx.env.CFG_ARCH)
     ctx.msg('OS',         ctx.env.CFG_OS)
     ctx.msg('compiler',   ctx.env.CFG_COMPILER)
@@ -444,7 +444,7 @@ def read_cfg(ctx, fname):
     # top-level config
     if cfg.has_section('hwaf-cfg'):
         section = 'hwaf-cfg'
-        for k in ('cmtcfg', 'prefix', 'projects', 'pkgdir'):
+        for k in ('variant', 'prefix', 'projects', 'pkgdir'):
             if cfg.has_option(section, k):
                 #msg.info("....[%s]..." % k)
                 if not (None == getattr(ctx.options, k)):

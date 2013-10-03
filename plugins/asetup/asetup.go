@@ -36,7 +36,7 @@ type asetup_t struct {
 
 type options struct {
 	projdir   string
-	cmtcfg    string
+	variant   string
 	toolchain map[string]string // entries for the hwaf-toolchain section
 	env       map[string]string // entries for the hwaf-env section
 }
@@ -216,7 +216,7 @@ func (a *asetup_t) process(args []string) error {
 	}
 
 	//cfg_fname := a.cmd.Flag.Lookup("cfg").Value.Get().(string)
-	cli_cmtcfg := a.cmd.Flag.Lookup("cmtcfg").Value.Get().(string)
+	cli_variant := a.cmd.Flag.Lookup("variant").Value.Get().(string)
 	cli_arch := a.cmd.Flag.Lookup("arch").Value.Get().(string)
 	cli_comp := a.cmd.Flag.Lookup("comp").Value.Get().(string)
 	cli_os := a.cmd.Flag.Lookup("os").Value.Get().(string)
@@ -315,7 +315,7 @@ func (a *asetup_t) process(args []string) error {
 		return err
 	}
 
-	usr_cmtcfg := fmt.Sprintf("%s-%s-%s-%s", hwaf_arch, hwaf_os, hwaf_comp, hwaf_bld)
+	usr_variant := fmt.Sprintf("%s-%s-%s-%s", hwaf_arch, hwaf_os, hwaf_comp, hwaf_bld)
 	proj_root := filepath.Join(sitedir, projname)
 	if !path_exists(proj_root) {
 		err = fmt.Errorf("no such directory [%s]", proj_root)
@@ -348,27 +348,27 @@ func (a *asetup_t) process(args []string) error {
 		a.ctx.Info("using project dir [%s]\n", opts.projdir)
 	}
 
-	// dft_cmtcfg is a variation on DefaultCmtcfg.
-	dft_cmtcfg := fmt.Sprintf(
+	// dft_variant is a variation on DefaultVariant.
+	dft_variant := fmt.Sprintf(
 		"%s-%s-%s-%s",
 		hwaf_arch,
 		hwaf_os,
-		strings.Split(a.ctx.DefaultCmtcfg(), "-")[2], // compiler
+		strings.Split(a.ctx.DefaultVariant(), "-")[2], // compiler
 		hwaf_bld,
 	)
 
 	found := false
-	for ii, cmtcfg := range []string{
-		cli_cmtcfg,
-		usr_cmtcfg,
-		a.ctx.Cmtcfg(),
-		a.ctx.DefaultCmtcfg(),
-		dft_cmtcfg,
+	for ii, variant := range []string{
+		cli_variant,
+		usr_variant,
+		a.ctx.Variant(),
+		a.ctx.DefaultVariant(),
+		dft_variant,
 	} {
-		if cmtcfg == "" {
+		if variant == "" {
 			continue
 		}
-		dir := filepath.Join(opts.projdir, cmtcfg)
+		dir := filepath.Join(opts.projdir, variant)
 		if a.verbose {
 			fmt.Printf("---> (%03d) [%s]... ", ii, dir)
 		}
@@ -379,7 +379,7 @@ func (a *asetup_t) process(args []string) error {
 			continue
 		}
 		opts.projdir = dir
-		opts.cmtcfg = cmtcfg
+		opts.variant = variant
 		if a.verbose {
 			fmt.Printf("[ok]\n")
 		}

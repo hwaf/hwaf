@@ -267,7 +267,7 @@ class BDist(waflib.Build.InstallContext):
         from waflib import Scripting
         ctx = Scripting.Dist()
         project_name = self.env.HWAF_BDIST_APPNAME
-        variant = self.env.CMTCFG
+        variant = self.env.HWAF_VARIANT
         version = self.env.HWAF_BDIST_VERSION
         ctx.arch_name = '%s-%s-%s.tar.gz' % (project_name,
                                              variant,

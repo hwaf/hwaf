@@ -36,7 +36,7 @@ ex:
 	cmd.Flag.String("name", "", "name of the binary distribution (default: project name)")
 	cmd.Flag.String("version", "", "version of the binary distribution (default: project version)")
 	cmd.Flag.String("release", "1", "release version of the binary distribution (default: 1)")
-	cmd.Flag.String("cmtcfg", "", "CMTCFG quadruplet for the binary distribution (default: project CMTCFG)")
+	cmd.Flag.String("variant", "", "HWAF_VARIANT quadruplet for the binary distribution (default: project variant)")
 	cmd.Flag.String("spec", "", "DEB control file for the binary distribution")
 	cmd.Flag.String("url", "", "URL for the DEB binary distribution")
 	return cmd
@@ -58,7 +58,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 	bdist_name := cmd.Flag.Lookup("name").Value.Get().(string)
 	bdist_vers := cmd.Flag.Lookup("version").Value.Get().(string)
 	bdist_release := cmd.Flag.Lookup("release").Value.Get().(string)
-	bdist_cmtcfg := cmd.Flag.Lookup("cmtcfg").Value.Get().(string)
+	bdist_variant := cmd.Flag.Lookup("variant").Value.Get().(string)
 	bdist_spec := cmd.Flag.Lookup("spec").Value.Get().(string)
 
 	bdist_url := cmd.Flag.Lookup("url").Value.Get().(string)
@@ -70,7 +70,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 		Name      string // DEB package name
 		Vers      string // DEB package version
 		Release   string // DEB package release
-		CmtCfg    string // DEB CMTCFG quadruplet
+		Variant   string // DEB VARIANT quadruplet
 		BuildRoot string // DEB build directory
 		Url       string // URL home page
 		Arch      string // DEB architecture (32b/64b)
@@ -90,7 +90,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 	if bdist_vers == "" {
 		bdist_vers = time.Now().Format("20060102")
 	}
-	if bdist_cmtcfg == "" {
+	if bdist_variant == "" {
 		// FIXME: get actual value from waf, somehow
 		pinfo_name := filepath.Join(workdir, "__build__", "c4che", "_cache.py")
 		if !path_exists(pinfo_name) {
@@ -102,10 +102,10 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 		}
 		pinfo, err := hwaflib.NewProjectInfo(pinfo_name)
 		handle_err(err)
-		bdist_cmtcfg, err = pinfo.Get("CMTCFG")
+		bdist_variant, err = pinfo.Get("HWAF_VARIANT")
 		handle_err(err)
 	}
-	fname := bdist_name + "-" + bdist_vers + "-" + bdist_cmtcfg
+	fname := bdist_name + "-" + bdist_vers + "-" + bdist_variant
 	debtopdir, err := ioutil.TempDir("", "hwaf-deb-buildroot-")
 	handle_err(err)
 	defer os.RemoveAll(debtopdir)
@@ -139,7 +139,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 		Name:      bdist_name,
 		Vers:      bdist_vers,
 		Release:   bdist_release,
-		CmtCfg:    bdist_cmtcfg,
+		Variant:   bdist_variant,
 		BuildRoot: debbldroot,
 		Url:       bdist_url,
 		Arch:      debarch,

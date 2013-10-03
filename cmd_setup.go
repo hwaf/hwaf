@@ -136,17 +136,17 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	}
 
 	// fetch a few informations from the first project.info
-	cmtcfg := g_ctx.Cmtcfg()
+	proj_variant := g_ctx.Variant()
 	//projvers := time.Now().Format("20060102")
 	if len(projdirs) > 0 {
 		pinfo, err := hwaflib.NewProjectInfo(filepath.Join(projdirs[0], "project.info"))
 		handle_err(err)
-		cmtcfg, err = pinfo.Get("CMTCFG")
+		proj_variant, err = pinfo.Get("HWAF_VARIANT")
 		handle_err(err)
 	}
 
 	if variant != "" {
-		cmtcfg = variant
+		proj_variant = variant
 	}
 
 	if tags != "" {
@@ -157,7 +157,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	for k, v := range map[string]string{
 		"projects": strings.Join(projdirs, pathsep),
 		"pkgdir":   pkgdir,
-		"cmtcfg":   cmtcfg,
+		"variant":  proj_variant,
 		"tags":     tags,
 	} {
 		if lcfg.HasOption(section, k) {

@@ -279,7 +279,8 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             if k.startswith('HWAF_') and \
                    not k.startswith(('HWAF_FOUND_',
                                      'HWAF_TAGS',
-                                     'HWAF_ACTIVE_TAGS')):
+                                     'HWAF_ACTIVE_TAGS',
+                                     'HWAF_VARIANT')):
                 continue
             # print "-- import [%s] from [%s] %r" % (k, ppname, denv[k])
             v = _un_massage(k,denv[k])

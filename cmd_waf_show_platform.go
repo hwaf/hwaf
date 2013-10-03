@@ -32,7 +32,7 @@ func hwaf_run_cmd_waf_show_platform(cmd *commander.Command, args []string) {
 	pinfos, err := platform.Infos()
 	handle_err(err)
 
-	fmt.Printf("%s\ndefault cmtcfg: %s\n", pinfos, g_ctx.DefaultCmtcfg())
+	fmt.Printf("%s\ndefault variant: %s\n", pinfos, g_ctx.DefaultVariant())
 }
 
 // EOF

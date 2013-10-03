@@ -52,13 +52,13 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 
 	bdist_name := "hwaf"
 	bdist_vers := cmd.Flag.Lookup("version").Value.Get().(string)
-	bdist_cmtcfg := fmt.Sprintf("%s-%s", runtime.GOOS, runtime.GOARCH)
+	bdist_variant := fmt.Sprintf("%s-%s", runtime.GOOS, runtime.GOARCH)
 
 	if bdist_vers == "" {
 		bdist_vers = time.Now().Format("20060102")
 	}
 
-	dirname := fmt.Sprintf("%s-%s-%s", bdist_name, bdist_vers, bdist_cmtcfg)
+	dirname := fmt.Sprintf("%s-%s-%s", bdist_name, bdist_vers, bdist_variant)
 	fname := dirname + ".tar.gz"
 
 	if verbose {

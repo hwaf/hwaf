@@ -9,24 +9,24 @@ import (
 	"github.com/hwaf/hwaf/hwaflib"
 )
 
-func hwaf_make_cmd_waf_show_cmtcfg() *commander.Command {
+func hwaf_make_cmd_waf_show_variant() *commander.Command {
 	cmd := &commander.Command{
-		Run:       hwaf_run_cmd_waf_show_cmtcfg,
-		UsageLine: "cmtcfg",
-		Short:     "show local project's CMTCFG value",
+		Run:       hwaf_run_cmd_waf_show_variant,
+		UsageLine: "variant",
+		Short:     "show local project's HWAF_VARIANT value",
 		Long: `
-show cmtcfg displays the project's CMTCFG value.
+show variant displays the project's HWAF_VARIANT value.
 
 ex:
- $ hwaf show cmtcfg
+ $ hwaf show variant
  x86_64-linux-gcc-opt
 `,
-		Flag: *flag.NewFlagSet("hwaf-waf-show-cmtcfg", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-waf-show-variant", flag.ExitOnError),
 	}
 	return cmd
 }
 
-func hwaf_run_cmd_waf_show_cmtcfg(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_show_variant(cmd *commander.Command, args []string) {
 	var err error
 	//n := "hwaf-" + cmd.Name()
 
@@ -45,10 +45,10 @@ func hwaf_run_cmd_waf_show_cmtcfg(cmd *commander.Command, args []string) {
 
 	pinfo, err := hwaflib.NewProjectInfo(pinfo_name)
 	handle_err(err)
-	cmtcfg, err := pinfo.Get("CMTCFG")
+	variant, err := pinfo.Get("HWAF_VARIANT")
 	handle_err(err)
 
-	fmt.Printf("%s\n", cmtcfg)
+	fmt.Printf("%s\n", variant)
 }
 
 // EOF
