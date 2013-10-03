@@ -115,6 +115,9 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
     projdeps = []
     
     env = waflib.ConfigSet.ConfigSet()
+    env.HWAF_TAGS = {}
+    env.HWAF_ACTIVE_TAGS = []
+
     for projpath in projpaths:
         if not projpath:
             continue
@@ -282,6 +285,17 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                                      'HWAF_ACTIVE_TAGS',
                                      'HWAF_VARIANT')):
                 continue
+
+            # special treatment
+            if k == 'HWAF_TAGS':
+                env.HWAF_TAGS.update(denv[k])
+                continue
+            if k == 'HWAF_ACTIVE_TAGS':
+                env.HWAF_ACTIVE_TAGS.extend(denv[k])
+                continue
+
+            # end-special treatment
+            
             # print "-- import [%s] from [%s] %r" % (k, ppname, denv[k])
             v = _un_massage(k,denv[k])
             if isinstance(v, list):
@@ -340,6 +354,18 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         def _flatten(v): return v
         pass
 
+    # special treatment
+    for kk in ['HWAF_TAGS', 'HWAF_ACTIVE_TAGS']:
+        if kk in env.keys():
+            vv = env[kk]
+            del env[kk]
+            if isinstance(vv, list):
+                ctx.env.append_unique(kk, vv)
+            if isinstance(vv, dict):
+                ctx.env[kk].update(vv)
+            pass
+        pass
+    # end special treatment
     
     # merge all
     for k in env.keys():
