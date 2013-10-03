@@ -670,6 +670,12 @@ func waf_gen_hvalue_from(name string, data interface{}) hlib.Value {
 				panic(fmt.Errorf("unknown type (%T)", data))
 			}
 		}
+	case bool:
+		if data {
+			_add_value(&value, "1")
+		} else {
+			_add_value(&value, "")
+		}
 	default:
 		panic(fmt.Errorf("unknown type (%T)", data))
 	}
