@@ -62,7 +62,7 @@ def find_c_compiler(ctx, **kwargs):
             break
         pass
 
-    runtime_env = ctx._hwaf_get_runtime_env()
+    ctx.environ = runtime_env = ctx._hwaf_get_runtime_env()
 
     # find CC
     path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
@@ -142,7 +142,7 @@ def find_cxx_compiler(ctx, **kwargs):
             break
         pass
 
-    runtime_env = ctx._hwaf_get_runtime_env()
+    ctx.environ = runtime_env = ctx._hwaf_get_runtime_env()
 
     # find CXX
     path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
@@ -222,7 +222,7 @@ def find_fortran_compiler(ctx, **kwargs):
             break
         pass
 
-    runtime_env = ctx._hwaf_get_runtime_env()
+    ctx.environ = runtime_env = ctx._hwaf_get_runtime_env()
     
     # find FC
     path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
