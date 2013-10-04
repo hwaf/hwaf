@@ -293,7 +293,6 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             if k == 'HWAF_ACTIVE_TAGS':
                 env.HWAF_ACTIVE_TAGS.extend(denv[k])
                 continue
-
             # end-special treatment
             
             # print "-- import [%s] from [%s] %r" % (k, ppname, denv[k])
@@ -354,22 +353,16 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         def _flatten(v): return v
         pass
 
-    # special treatment
-    for kk in ['HWAF_TAGS', 'HWAF_ACTIVE_TAGS']:
-        if kk in env.keys():
-            vv = env[kk]
-            del env[kk]
-            if isinstance(vv, list):
-                ctx.env.append_unique(kk, vv)
-            if isinstance(vv, dict):
-                ctx.env[kk].update(vv)
-            pass
-        pass
-    # end special treatment
-    
     # merge all
     for k in env.keys():
         v = env[k]
+        # special treatment
+        if k in ('HWAF_TAGS',
+                 ):
+            ctx.env[k].update(v)
+            continue
+        # end special treatment
+
         if isinstance(v, list):
             ctx.env[k] = _regroup(ctx.env[k])
             for vv in _regroup(v):
