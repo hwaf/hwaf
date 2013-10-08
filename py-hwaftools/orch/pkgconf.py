@@ -8,22 +8,7 @@ import os
 from . import deconf
 from .util import check_output, CalledProcessError, update_if, string2list
 from . import features as featmod
-
-def ups_flavor():
-    '''
-    Ow, my balls.
-    '''
-    kern, host, rel, vend, mach = os.uname()
-    if mach in ['x86_64','sun','ppc64']:
-        mach = '64bit'
-    else:
-        mach = ''
-    rel = '.'.join(rel.split('.')[:2])
-    if 'darwin' in kern.lower():
-        libc = rel # FIXME: is there something better on mac ?
-    else:
-        libc = check_output(['ldd','--version']).split(b'\n')[0].split()[-1]
-    return '%s%s+%s-%s' % (kern, mach, rel, libc)
+from . import ups
 
 def ncpus():
     try:
@@ -54,11 +39,7 @@ def host_description():
         ret[k] = v
     platform = '{kernelname}-{machine}'.format(**ret)
     ret['platform'] = platform
-    try:
-        flavor = check_output(['ups','flavor'])
-    except OSError:
-        flavor = ups_flavor()
-    ret['ups_flavor'] = flavor
+    ret['ups_flavor'] = ups.flavor()
 
     bits = '32'
     libbits = 'lib'
@@ -82,32 +63,25 @@ def host_description():
     else:
         libc_version = check_output(['ldd','--version']).split(b'\n')[0].split()[-1]
     ret['libc_version'] = libc_version
-    ret['NCPUS'] = ncpus()
+    ret['NCPUS'] = str(ncpus())
         
     return ret
 
 
 class PkgFormatter(object):
     def __init__(self, **kwds):
-        self.vars = host_description()
+        self.vars = dict()
         self.vars.update(kwds)
 
     def __call__(self, string, **kwds):
         if not string: return string
-        tags = kwds.get('tags') or ''
-        tags = [x.strip() for x in tags.split(',')]
-        kwds.setdefault('tagsdashed',  '-'.join(tags))
-        kwds.setdefault('tagsunderscore', '_'.join(tags))
-
-        version = kwds.get('version')
-        if version:
-            kwds.setdefault('version_2digit', '.'.join(version.split('.')[:2]))
-            kwds.setdefault('version_underscore', version.replace('.','_'))
-            kwds.setdefault('version_dashed', version.replace('.','-'))
-            kwds.setdefault('version_nodots', version.replace('.',''))
         vars = dict(self.vars)
         vars.update(kwds)
-        ret = string.format(**vars)
+        try:
+            ret = string.format(**vars)
+        except ValueError:
+            print ("%s" % string)
+            raise
         return ret
 
 def fold_in_feature_requirements(suite, formatter = None, **kwds):
@@ -126,16 +100,51 @@ def fold_in_feature_requirements(suite, formatter = None, **kwds):
     suite = deconf.format_any(suite, formatter=formatter, **kwds)
     return suite
 
-def fold_in_package_vars(suite, formatter, **kwds):
-    package_vars = dict()
+def munge_package(package):
+    '''
+    Put some computed values into the package's dict
+    '''
+    hd = host_description()
+    for k,v in hd.items():
+        package.setdefault(k,v)
+
+    tags = package.get('tags') or ''
+    tags = [x.strip() for x in tags.split(',')]
+    package.setdefault('tagsdashed',  '-'.join(tags))
+    package.setdefault('tagsunderscore', '_'.join(tags))
+
+    version = package.get('version')
+    if version:
+        package.setdefault('version_2digit', '.'.join(version.split('.')[:2]))
+        package.setdefault('version_underscore', version.replace('.','_'))
+        package.setdefault('version_dashed', version.replace('.','-'))
+        package.setdefault('version_nodots', version.replace('.',''))
+
+    dest_install_dir = package.get('dest_install_dir') or package.get('install_dir')
+    package['dest_install_dir'] = dest_install_dir
+
+def fold_in_worch_values(suite, formatter, **kwds):
     for group in suite['groups']:
         for package in group['packages']:
+            munge_package(package)
+    if not formatter:
+        formatter = PkgFormatter()
+    suite = deconf.format_any(suite, formatter=formatter, **kwds)
+    return suite
+
+def fold_in_package_vars(suite, formatter, **kwds):
+    package_vars = dict()
+
+    for group in suite['groups']:
+        for package in group['packages']:
+#            munge_package(package)
             pkgname = package['package']
+
+            # make uber dictionary with every package's variables
+            # prefixed by the package name
             for k,v in package.items():
-                package_vars['%s_%s'%(pkgname,k)] = v
-            dest_install_dir = package.get('dest_install_dir') or package.get('install_dir')
-            package['dest_install_dir'] = dest_install_dir
-            package_vars['%s_dest_install_dir'%pkgname] = dest_install_dir
+                p_name = '%s_%s'%(pkgname,k)
+                package_vars[p_name] = v
 
     for group in suite['groups']:
         new_packages = list()
@@ -153,13 +162,17 @@ def load(filename, start='start', formatter = None, **kwds):
 
     # load in initial configuration but delay formatting
     suite = deconf.load(filename, start=start, formatter=formatter, **kwds)
+    suite = fold_in_worch_values(suite, formatter, **kwds)
     suite = fold_in_feature_requirements(suite, formatter, **kwds)
     suite = fold_in_package_vars(suite, formatter, **kwds)
     
-    # from pprint import PrettyPrinter
-    # pp = PrettyPrinter(indent=2)
-    # pp.pprint(suite)
     return suite
+
+def dump_suite(suite):
+    from pprint import PrettyPrinter
+    pp = PrettyPrinter(indent=2)
+    pp.pprint(suite)
+
 
 
 # testing

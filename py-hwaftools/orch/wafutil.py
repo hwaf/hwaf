@@ -48,8 +48,18 @@ def exec_command(task, cmd, **kw):
                            (task.name, flog.name, ''.join(f.readlines())))
             pass
         pass
-    if ret != 0:
-        msg.error('command failed, log in %s' % flog.name)
-        # msg.error('orch: %s (%s)\n%s' % \
-        #               (task.name, flog.name, ''.join(open(flog.name).readlines())))
+    if ret == 0:
+        return 0
+    msg.error('command failed with code %d, log in %s' % (ret, flog.name))
+    repo = osp.join(cwd, "worch_%s.repo.sh" % task.name)
+    with open(repo, 'w') as fp:
+        fp.write('#!/bin/bash\n')
+        fp.write('cd %s\n' % cwd)
+        for var, val in sorted(env.items()):
+            if val.startswith('()'):
+                fp.write('%s %s\n' % (var, val))
+            else:
+                fp.write('export %s="%s"\n' % (var,val))
+        fp.write('\n\n%s\n' % cmd)
+    msg.error('reproduce with: %s' % repo)
     return ret

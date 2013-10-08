@@ -217,6 +217,8 @@ def format_flat_dict(dat, formatter = str.format, **kwds):
 def format_any(dat, formatter = str.format, **kwds):
     if dat is None:
         return dat
+    if isinstance(dat, type(b"")):
+        dat = "%s" % dat  # py3: bytes -> string
     if isinstance(dat, type("")):
         try:
             return formatter(dat, **kwds)

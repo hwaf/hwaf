@@ -62,6 +62,13 @@ class PackageFeatureInfo(object):
             dir = self.node(dir)
         return self.node(name, dir)
 
+    def items(self):
+        for k,v in self._data.items():
+            if v is None:
+                continue
+            yield (k, self.__getattr__(k))
+        
+
     def __getattr__(self, name):
         val = self._data[name]
         if val is None:
