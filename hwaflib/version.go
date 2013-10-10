@@ -1,12 +1,12 @@
 package hwaflib
 
 func (ctx *Context) Version() string {
-	version := "20131010"
+	version := "20131011"
 	return version
 }
 
 func (ctx *Context) Revision() string {
-	revision := "2cc09f3"
+	revision := "f42a362"
 	return revision
 }
 
