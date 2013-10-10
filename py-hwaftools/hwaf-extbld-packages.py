@@ -209,7 +209,7 @@ def declare_build_external(
                   'CC',
                   'CXX',
                   ):
-            env[k] = senv[k]
+            env[k] = senv.get(k, '')
             pass
         pass
     for k in list(env.keys()):
