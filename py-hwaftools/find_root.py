@@ -540,9 +540,12 @@ def build_reflex_dict(self, name, source, selection_file, **kw):
             _get_deps(tgt)
     kw['includes'] = dep_inc_dirs + kw['includes']
 
-    target = kw.get('target', name)
-    if not target.endswith('Dict'):
-        target = target + 'Dict'
+    target = kw.get('target', None)
+    if not target:
+        if not name.endswith('Dict'):
+            target = name + 'Dict'
+        else:
+            target = name
     kw['target'] = target
     del kw['target']
 
