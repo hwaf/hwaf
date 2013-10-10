@@ -137,7 +137,7 @@ Untar under some directory like so (for linux 64b):
 $ mkdir local
 $ cd local
 $ curl -L \
-  http://cern.ch/mana-fwk/downloads/tar/hwaf-20130926-linux-amd64.tar.gz \
+  http://cern.ch/hwaf/downloads/tar/hwaf-20130926-linux-amd64.tar.gz \
   | tar zxf -
 $ export HWAF_ROOT=`pwd`
 $ export PATH=$HWAF_ROOT/bin:$PATH
