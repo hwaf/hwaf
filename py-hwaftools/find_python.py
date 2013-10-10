@@ -90,11 +90,9 @@ def find_python(ctx, **kwargs):
         path_list.append(osp.join(topdir, "bin"))
         pass
     kwargs['path_list']=path_list
-    
-    # FIXME: force python2. needed to be done *before* 'ctx.load(python)'
-    try:    ctx.find_program('python2', var='PYTHON', **kwargs)
-    except: ctx.find_program('python',  var='PYTHON', **kwargs)
 
+
+    ctx.find_program('python',  var='PYTHON', **kwargs)
     ctx.hwaf_declare_runtime_env('PYTHON')
     try:
         # temporary hack for clang and glibc-2.16
