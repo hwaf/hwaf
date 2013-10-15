@@ -89,19 +89,52 @@ def find_root(ctx, **kwargs):
         args='--libs --cflags --ldflags',
         **kwargs)
 
-    ctx.find_program('genmap',      var='GENMAP',     **kwargs)
+    # -- check everything is kosher...
+    version = ctx.check_cxx(
+        msg="Checking ROOT version",
+        okmsg="ok",
+        fragment='''\
+        #include "RVersion.h"
+        #include <iostream>
+
+        int main(int argc, char* argv[]) {
+          std::cout << ROOT_RELEASE;
+          return 0;
+        }
+        ''',
+        use="ROOT",
+        define_name = "HWAF_ROOT_VERSION",
+        define_ret = True,
+        execute  = True,
+        mandatory=True,
+        )
+    ctx.msg("ROOT version", version)
+
+    ## FIXME: this is "a bit" fugly...
+    use_root6 = version.startswith("6.")
+    use_root5 = not version.startswith("5.99") and not use_root6
+    
+    if use_root5:
+        ctx.find_program('genmap',      var='GENMAP',     **kwargs)
+
     ctx.find_program('genreflex',   var='GENREFLEX',  **kwargs)
     ctx.find_program('root',        var='ROOT-EXE',   **kwargs)
     ctx.find_program('rootcint',    var='ROOTCINT',   **kwargs)
     ctx.find_program('rlibmap',     var='RLIBMAP',     **kwargs)
 
-    # reflex...
-    ctx.copy_uselib_defs(dst='Reflex', src='ROOT')
-    ctx.env['LIB_Reflex'] = ['Reflex']
+    if use_root6:
+        ctx.find_program('rootcling',   var='ROOTCLING',   **kwargs)
+        pass
+
+    if use_root5:
+        # reflex...
+        ctx.copy_uselib_defs(dst='Reflex', src='ROOT')
+        ctx.env['LIB_Reflex'] = ['Reflex']
     
-    # cintex...
-    ctx.copy_uselib_defs(dst='Cintex', src='ROOT')
-    ctx.env['LIB_Cintex'] = ['Reflex', 'Cintex']
+        # cintex...
+        ctx.copy_uselib_defs(dst='Cintex', src='ROOT')
+        ctx.env['LIB_Cintex'] = ['Reflex', 'Cintex']
+        pass
     
     # pyroot...
     ctx.copy_uselib_defs(dst='PyROOT', src='ROOT')
@@ -123,28 +156,6 @@ def find_root(ctx, **kwargs):
     if not ctx.env.HWAF_FOUND_GCCXML:
         ctx.find_gccxml()
         pass
-
-    # -- check everything is kosher...
-    version = ctx.check_cxx(
-        msg="Checking ROOT version",
-        okmsg="ok",
-        fragment='''\
-        #include "RVersion.h"
-        #include <iostream>
-
-        int main(int argc, char* argv[]) {
-          std::cout << ROOT_RELEASE;
-          return 0;
-        }
-        ''',
-        use="ROOT",
-        define_name = "HWAF_ROOT_VERSION",
-        define_ret = True,
-        execute  = True,
-        mandatory=True,
-        )
-    ctx.start_msg("ROOT version")
-    ctx.end_msg(version)
 
     ctx.check_cxx(
         msg="Checking for ROOT::TH1",
@@ -193,39 +204,41 @@ def find_root(ctx, **kwargs):
         mandatory=True,
         )
 
-    ctx.check_cxx(
-        msg="Checking for reflex",
-        features='cxx cxxshlib',
-        fragment='''\
-        #include "Reflex/Type.h"
-        #include <iostream>
+    if use_root5:
+        ctx.check_cxx(
+            msg="Checking for reflex",
+            features='cxx cxxshlib',
+            fragment='''\
+            #include "Reflex/Type.h"
+            #include <iostream>
         
-        void check_reflex ()
-        {
-          std::cout << "typeof(int): ["
-                    << Reflex::Type::ByName("int").Name()
-                    << std::endl;
-        }
-        ''',
-        use="ROOT Reflex",
-        mandatory=True,
-        )
+            void check_reflex ()
+            {
+               std::cout << "typeof(int): ["
+                         << Reflex::Type::ByName("int").Name()
+                         << std::endl;
+            }
+            ''',
+            use="ROOT Reflex",
+            mandatory=True,
+            )
 
-    ctx.check_cxx(
-        msg="Checking for cintex",
-        fragment='''\
-        #include "Cintex/Cintex.h"
+        ctx.check_cxx(
+            msg="Checking for cintex",
+            fragment='''\
+            #include "Cintex/Cintex.h"
         
-        int main()
-        {
-          ROOT::Cintex::Cintex::Enable();
-          return 0;
-        }
-        ''',
-        use="ROOT Cintex",
-        execute   = True,
-        mandatory = True,
-        )
+            int main()
+            {
+              ROOT::Cintex::Cintex::Enable();
+              return 0;
+            }
+            ''',
+            use="ROOT Cintex",
+            execute   = True,
+            mandatory = True,
+            )
+        pass
 
     # check for ROOTSYS env. variable.
     ctx.start_msg('Checking for $ROOTSYS')
@@ -257,8 +270,10 @@ def find_root(ctx, **kwargs):
 
     # check also python environment
     ctx.find_python_module('ROOT')
-    ctx.find_python_module('PyCintex')
-
+    if use_root5:
+        ctx.find_python_module('PyCintex')
+        pass
+    
     ctx.env.ROOT_VERSION = version
 
     # register the find_root module
@@ -712,7 +727,6 @@ def gen_rootcint_map_hook(self, node):
 class gen_rootcint_map(waflib.Task.Task):
     vars = ['RLIBMAP', 'DEFINES', 'CPPFLAGS', 'INCLUDES', 'RLIBMAP_LINKDEF']
     color= 'BLUE'
-    #run_str = '${GENMAP} -input-library ${SRC[0].name} -o ${TGT[0].name}'
     run_str = '${RLIBMAP} -o ${TGT[0].name} -l ${SRC} -c ${RLIBMAP_LINKDEF}'
     ext_in  = ['.so', '.dylib', '.dll', '.bin']
     ext_out = ['.dsomap']
