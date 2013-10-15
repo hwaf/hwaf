@@ -775,16 +775,20 @@ def _hwaf_select_value(self, value):
         v = list((k,v) for k,v in d.items())[0]
         msg.debug('hwaf: list= %s' % (v,))
         if isinstance(v[1], type("")):
+            #msg.debug("hwaf: ==> v: %r\t tags=%r" %(v,tags))
             if _select_tags(v[0], tags):
                 return waflib.Utils.subst_vars(v[1], self.env)
             if v[0] == "default":
                 default = v[1]
                 pass
         else:
+            #msg.debug("hwaf: ++> v[1]: %r" %(v,))
             if _select_tags(v[0], tags):
                 out = []
                 for o in v[1]:
                     out.append(waflib.Utils.subst_vars(o, self.env))
+                    pass
+                #msg.debug("hwaf: selected= %s" % (out,))
                 return out
             if v[0] == "default":
                 default = v[1]
