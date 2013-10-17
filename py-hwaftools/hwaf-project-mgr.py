@@ -117,11 +117,16 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
     env = waflib.ConfigSet.ConfigSet()
     env.HWAF_TAGS = {}
     env.HWAF_ACTIVE_TAGS = []
-
-    for projpath in projpaths:
+    env.HWAF_PATH_VARS = []
+    
+    # reverse it so:
+    #     "/proj1:/proj2"
+    #  correctly translates into proj1 paths having precedence
+    rev_projpaths = reversed(projpaths)
+    for projpath in rev_projpaths:
         if not projpath:
             continue
-        #msg.info("hwaf: >>>>>>>>> %s" % projpath)
+        msg.debug("hwaf: importing project [%s]..." % projpath)
         projpath = osp.expanduser(osp.expandvars(projpath))
         projpath = osp.abspath(projpath)
         proj_dir = ctx.root.find_dir(projpath)
