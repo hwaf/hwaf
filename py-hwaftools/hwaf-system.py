@@ -101,6 +101,7 @@ def configure(ctx):
     
     if not ctx.env.HWAF_TAGS:        ctx.env['HWAF_TAGS'] = {}
     if not ctx.env.HWAF_ACTIVE_TAGS: ctx.env['HWAF_ACTIVE_TAGS'] = []
+    if not ctx.env.HWAF_PATH_VARS:   ctx.env['HWAF_PATH_VARS'] = []
 
     pkgdir = os.environ.get('PKGDIR', None)
     if not pkgdir and ctx.options.pkgdir:

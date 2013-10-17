@@ -435,7 +435,8 @@ def read_cfg(ctx, fname):
     # make sure we initialize some waf-envs
     if not ctx.env.HWAF_TAGS:        ctx.env['HWAF_TAGS'] = {}
     if not ctx.env.HWAF_ACTIVE_TAGS: ctx.env['HWAF_ACTIVE_TAGS'] = []
-            
+    if not ctx.env.HWAF_PATH_VARS:   ctx.env['HWAF_PATH_VARS'] = []
+    
     try: from ConfigParser import SafeConfigParser as CfgParser
     except ImportError: from configparser import ConfigParser as CfgParser
     cfg = CfgParser()
@@ -813,6 +814,7 @@ def hwaf_declare_path(self, name, value=None):
            hwaf-tag can be a simple string or a tuple of strings.
     '''
     self.hwaf_declare_runtime_env(name)
+    self.env.append_unique('HWAF_PATH_VARS', name)
     if value is None:
         return
     value = self._hwaf_select_value(value)
@@ -836,8 +838,10 @@ def hwaf_path_prepend(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
+    self.env.append_unique('HWAF_PATH_VARS', name)
     value = self._hwaf_select_value(value)
-    self.env.prepend_value(name, value)
+    if value:
+        self.env.prepend_value(name, value)
     return
 
 ### ------------------------------------------------------------------------
@@ -849,8 +853,10 @@ def hwaf_path_append(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
+    self.env.append_unique('HWAF_PATH_VARS', name)
     value = self._hwaf_select_value(value)
-    self.env.append_value(name, value)
+    if value:
+        self.env.append_value(name, value)
     return
 
 ### ------------------------------------------------------------------------
@@ -862,7 +868,10 @@ def hwaf_path_remove(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
+    self.env.append_unique('HWAF_PATH_VARS', name)
     remove = self._hwaf_select_value(value)
+    if not remove:
+        return
     cur_val = waflib.Utils.to_list(self.env[name])
     new_val = []
     for x in cur_val:
