@@ -381,6 +381,15 @@ func (ctx *Context) init() error {
 	}
 	err = nil
 
+	// load local config
+	if ctx.lcfg != nil {
+		ctx.variant, err = ctx.lcfg.String("hwaf-cfg", "variant")
+		if err != nil {
+			err = nil
+			ctx.variant = ""
+		}
+	}
+
 	setup_env := func(topdir string) error {
 		topdir = os.ExpandEnv(topdir)
 		if !path_exists(topdir) {
