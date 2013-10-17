@@ -283,6 +283,7 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
                    not k.startswith(('HWAF_FOUND_',
                                      'HWAF_TAGS',
                                      'HWAF_ACTIVE_TAGS',
+                                     'HWAF_PATH_VARS',
                                      'HWAF_VARIANT')):
                 continue
 
@@ -293,13 +294,19 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
             if k == 'HWAF_ACTIVE_TAGS':
                 env.HWAF_ACTIVE_TAGS.extend(denv[k])
                 continue
+            if k == 'HWAF_PATH_VARS':
+                env.append_unique('HWAF_PATH_VARS', denv[k])
+                continue
             # end-special treatment
             
             # print "-- import [%s] from [%s] %r" % (k, ppname, denv[k])
             v = _un_massage(k,denv[k])
             if isinstance(v, list):
-                #env.prepend_unique(k, v)
-                env.prepend_value(k, v)
+                if k in env.HWAF_PATH_VARS:
+                    # env.prepend_unique(k, v)
+                    env.prepend_value(k, v)
+                else:
+                    env[k] = v
             else:
                 #ctx.fatal('invalid type (%s) for [%s]' % (type(v),k))
                 env[k] = v
@@ -360,6 +367,10 @@ def _hwaf_configure_projects_tree(ctx, projname=None, projpath=None):
         if k in ('HWAF_TAGS',
                  ):
             ctx.env[k].update(v)
+            continue
+        if k in ('HWAF_PATH_VARS',
+                 ):
+            ctx.env.append_unique(k, v)
             continue
         # end special treatment
 
