@@ -543,6 +543,27 @@ func (ctx *Context) LocalCfg() (*gocfg.Config, error) {
 	return ctx.lcfg, err
 }
 
+// ProjectInfo returns the ProjectInfo for the current context.
+func (ctx *Context) ProjectInfo() (*ProjectInfo, error) {
+
+	workdir, err := ctx.Workarea()
+	if err != nil {
+		return nil, err
+	}
+
+	// FIXME: get actual value from waf, somehow
+	pinfo_name := filepath.Join(workdir, "__build__", "c4che", "_cache.py")
+	if !path_exists(pinfo_name) {
+		err = fmt.Errorf(
+			"no such file [%s]. did you run \"hwaf configure\" ?",
+			pinfo_name,
+		)
+		return nil, err
+	}
+
+	return NewProjectInfo(pinfo_name)
+}
+
 func (ctx *Context) Info(format string, args ...interface{}) (n int, err error) {
 	return fmt.Fprintf(os.Stdout, "hwaf: "+format, args...)
 }
