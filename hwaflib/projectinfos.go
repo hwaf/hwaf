@@ -8,15 +8,15 @@ import (
 	gocfg "github.com/gonuts/config"
 )
 
-type ProjectInfo struct {
+type ProjectInfos struct {
 	cfg *gocfg.Config
 }
 
-func NewProjectInfo(name string) (*ProjectInfo, error) {
+func NewProjectInfos(name string) (*ProjectInfos, error) {
 	var err error
 	fname := filepath.Clean(name)
 	if !path_exists(fname) {
-		err = fmt.Errorf("could not find project info [%s]", fname)
+		err = fmt.Errorf("could not find project infos [%s]", fname)
 		return nil, err
 	}
 	cfg, err := gocfg.ReadDefault(fname)
@@ -24,10 +24,10 @@ func NewProjectInfo(name string) (*ProjectInfo, error) {
 		return nil, err
 	}
 	//fmt.Printf("cfg [%s]\nsections: %s\n", fname, cfg.Sections())
-	return &ProjectInfo{cfg}, nil
+	return &ProjectInfos{cfg}, nil
 }
 
-func (pi *ProjectInfo) Get(key string) (string, error) {
+func (pi *ProjectInfos) Get(key string) (string, error) {
 	s, err := pi.cfg.String("DEFAULT", key)
 
 	// we can't use strconv.Unquote as these are python strings...
@@ -42,7 +42,7 @@ func (pi *ProjectInfo) Get(key string) (string, error) {
 	return s, err
 }
 
-func (pi *ProjectInfo) Keys() []string {
+func (pi *ProjectInfos) Keys() []string {
 
 	opts, err := pi.cfg.Options("DEFAULT")
 	if err != nil {

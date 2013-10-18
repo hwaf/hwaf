@@ -29,17 +29,17 @@ ex:
 func hwaf_run_cmd_waf_show_flags(cmd *commander.Command, args []string) {
 	var err error
 
-	pinfo, err := g_ctx.ProjectInfo()
+	pinfos, err := g_ctx.ProjectInfos()
 	handle_err(err)
 
 	switch len(args) {
 	case 0:
-		args = pinfo.Keys()
+		args = pinfos.Keys()
 	}
 
 	err_stack := []error{}
 	for _, k := range args {
-		val, err2 := pinfo.Get(k)
+		val, err2 := pinfos.Get(k)
 		if err2 != nil {
 			err_stack = append(err_stack, err2)
 			err = err2

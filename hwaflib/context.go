@@ -543,8 +543,8 @@ func (ctx *Context) LocalCfg() (*gocfg.Config, error) {
 	return ctx.lcfg, err
 }
 
-// ProjectInfo returns the ProjectInfo for the current context.
-func (ctx *Context) ProjectInfo() (*ProjectInfo, error) {
+// ProjectInfos returns the ProjectInfos for the current context.
+func (ctx *Context) ProjectInfos() (*ProjectInfos, error) {
 
 	workdir, err := ctx.Workarea()
 	if err != nil {
@@ -561,7 +561,7 @@ func (ctx *Context) ProjectInfo() (*ProjectInfo, error) {
 		return nil, err
 	}
 
-	return NewProjectInfo(pinfo_name)
+	return NewProjectInfos(pinfo_name)
 }
 
 func (ctx *Context) Info(format string, args ...interface{}) (n int, err error) {

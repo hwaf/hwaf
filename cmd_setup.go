@@ -139,7 +139,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	proj_variant := g_ctx.Variant()
 	//projvers := time.Now().Format("20060102")
 	if len(projdirs) > 0 {
-		pinfo, err := hwaflib.NewProjectInfo(filepath.Join(projdirs[0], "project.info"))
+		pinfo, err := hwaflib.NewProjectInfos(filepath.Join(projdirs[0], "project.info"))
 		handle_err(err)
 		proj_variant, err = pinfo.Get("HWAF_VARIANT")
 		handle_err(err)

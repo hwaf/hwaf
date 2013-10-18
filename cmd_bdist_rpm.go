@@ -14,7 +14,6 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
-	"github.com/hwaf/hwaf/hwaflib"
 )
 
 func hwaf_make_cmd_waf_bdist_rpm() *commander.Command {
@@ -90,16 +89,7 @@ func hwaf_run_cmd_waf_bdist_rpm(cmd *commander.Command, args []string) {
 		bdist_vers = time.Now().Format("20060102")
 	}
 	if bdist_variant == "" {
-		// FIXME: get actual value from waf, somehow
-		pinfo_name := filepath.Join(workdir, "__build__", "c4che", "_cache.py")
-		if !path_exists(pinfo_name) {
-			err = fmt.Errorf(
-				"no such file [%s]. did you run \"hwaf configure\" ?",
-				pinfo_name,
-			)
-			handle_err(err)
-		}
-		pinfo, err := hwaflib.NewProjectInfo(pinfo_name)
+		pinfo, err := g_ctx.ProjectInfos()
 		handle_err(err)
 		bdist_variant, err = pinfo.Get("HWAF_VARIANT")
 		handle_err(err)
