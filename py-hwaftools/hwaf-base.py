@@ -799,6 +799,11 @@ def _hwaf_select_value(self, value):
     #msg.debug('hwaf: select default value: %s' % (value,))
     if isinstance(default, type("")):
         return waflib.Utils.subst_vars(default, self.env)
+
+    # check whether something was selected
+    if default is None:
+        return None
+
     out = []
     for o in default:
         out.append(waflib.Utils.subst_vars(o, self.env))
