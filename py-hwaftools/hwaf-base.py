@@ -471,6 +471,11 @@ def read_cfg(ctx, fname):
             pass
         pass
 
+    # --- initial value for HWAF_VARIANT
+    if getattr(ctx.options, 'variant', None):
+        ctx.env.HWAF_VARIANT = ctx.options.variant
+        pass
+    
     # env-level config
     if cfg.has_section('hwaf-env'):
         for k in cfg.options('hwaf-env'):
