@@ -242,7 +242,7 @@ def find_root(ctx, **kwargs):
 
     # check for ROOTSYS env. variable.
     ctx.start_msg('Checking for $ROOTSYS')
-    rootsys = ctx.env.ROOTSYS
+    rootsys = ctx.hwaf_subst_vars("${ROOTSYS}")
     if not rootsys:
         rootsys = os.getenv('ROOTSYS', None)
         pass
