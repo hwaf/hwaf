@@ -83,7 +83,7 @@ def find_boost(ctx, **kwargs):
     # get include/lib-dir from command-line or from API
     kwargs['includes'] = getattr(ctx.options, 'with_boost_incdir', kwargs.get('includes', None))
     kwargs['libs'] = getattr(ctx.options, 'with_boost_libdir', kwargs.get('libs', None))
-
+    
     # rationalize types
     if kwargs['libs'] is None: kwargs['libs'] = []
     if kwargs['includes'] is None: kwargs['includes'] = []
@@ -103,9 +103,10 @@ def find_boost(ctx, **kwargs):
     libdirs = []
     for dirname in waflib.Utils.to_list(kwargs['libs']):
         dirname = ctx.hwaf_subst_vars(dirname)
+        if dirname.startswith('/'): dirname = dirname[1:]
         d = ctx.root.find_dir(dirname)
         if not d: continue
-        libdirs.append(dirname)
+        libdirs.append(d.abspath())
         pass
     kwargs['libs'] = libdirs[:]
         
@@ -140,7 +141,6 @@ def find_boost(ctx, **kwargs):
             return osp.dirname(libs[0])
         return None
     setattr(ctx.options, 'with_boost', _get_with_boost())
-
     ctx.check_with(
         ctx.check_boost,
         "boost",
