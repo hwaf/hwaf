@@ -194,16 +194,14 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 
 if [ "x${BASH_ARGV[0]}" = "x" ]; then
     ## assume zsh
-    SOURCE="$( cd -P "$( dirname "$0" )" && pwd )"
+    SOURCE="$0"
 else
-    SOURCE="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    SOURCE="${BASH_SOURCE[0]}"
 fi
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 echo ":: adding [$DIR/bin] to PATH"
 export PATH=$DIR/bin:$PATH
-
-## EOF
 ## EOF
 `)
 	handle_err(err)
