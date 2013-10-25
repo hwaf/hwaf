@@ -135,22 +135,19 @@ import waflib.Build
 import waflib.Scripting
 import waflib.Utils
 
-class RunCmdContext(waflib.Build.BuildContext):
+class RunCmdContext(waflib.Configure.ConfigurationContext):
     """run a command within the correct runtime environment"""
     cmd = 'run'
 
-    def execute_build(self):
-        self.logger = msg
+    def execute(self):
 
-        lvl = msg.log.level
-        if lvl < msg.logging.ERROR:
-            msg.log.setLevel(msg.logging.ERROR)
+        self.init_dirs()
+        self.cachedir = self.bldnode.find_node(waflib.Build.CACHE_DIR)
+        if not self.cachedir:
+            self.fatal(
+                "no CACHE_DIR (%s). run 'hwaf configure' first" %
+                osp.join(self.bldnode.abspath(), waflib.Build.CACHE_DIR))
             pass
-        try:
-            self.env.HWAF_ENABLE_INSTALL_AREA = '1'
-            ret = super(RunCmdContext, self).execute_build()
-        finally:
-            msg.log.setLevel(lvl)
 
         msg.debug("hwaf: run-cmd options: %s" % waflib.Options.commands)
         if not waflib.Options.commands:
@@ -164,9 +161,13 @@ class RunCmdContext(waflib.Build.BuildContext):
             pass
 
         msg.debug("hwaf: run-cmd args: %s" % args)
+
+        self.env.load(self.cachedir.find_node("_cache.py").abspath())
+        self.env.HWAF_ENABLE_INSTALL_AREA = '1'
         self.hwaf_setup_runtime()
         ret = hwaf_run_cmd_with_runtime_env(self, args)
         return ret
+
     pass # RunCmdContext
 
 @conf
@@ -268,7 +269,7 @@ def _hwaf_get_runtime_env(ctx):
         ):
         _clean_env_path(env, k)
         pass
-    
+
     return env
 
 def hwaf_run_cmd_with_runtime_env(ctx, cmds):
@@ -329,24 +330,25 @@ import waflib.Build
 import waflib.Scripting
 import waflib.Utils
 
-class IShellContext(waflib.Build.BuildContext):
+class IShellContext(waflib.Configure.ConfigurationContext):
     """run an interactive shell with an environment suitably modified to run locally built programs"""
     cmd = 'shell'
-    #fun = 'shell'
 
-    def execute_build(self):
-        self.logger = msg
-        lvl = msg.log.level
-        if lvl < msg.logging.ERROR:
-            msg.log.setLevel(msg.logging.ERROR)
+    def execute(self):
+
+        self.init_dirs()
+        self.cachedir = self.bldnode.find_node(waflib.Build.CACHE_DIR)
+        if not self.cachedir:
+            self.fatal(
+                "no CACHE_DIR (%s). run 'hwaf configure' first" %
+                osp.join(self.bldnode.abspath(), waflib.Build.CACHE_DIR))
             pass
-        try:
-            self.env.HWAF_ENABLE_INSTALL_AREA = '1'
-            ret = super(IShellContext, self).execute_build()
-        finally:
-            msg.log.setLevel(lvl)
+        
+        self.env.load(self.cachedir.find_node("_cache.py").abspath())
+        self.env.HWAF_ENABLE_INSTALL_AREA = '1'
+
         self.hwaf_setup_runtime()
-        ret = hwaf_ishell(self)
+        ret = self.hwaf_ishell()
         return ret
     
 def hwaf_ishell(ctx):
@@ -517,27 +519,28 @@ def hwaf_ishell(ctx):
             raise waflib.Errors.WafError(
                 "hwaf: Command %s exited with code %i" % (shell_cmd, retval))
     return retval
+waflib.Context.Context.hwaf_ishell = hwaf_ishell
 
 ### ---------------------------------------------------------------------------
 import waflib.Build
 import waflib.Scripting
 import waflib.Utils
 
-class DumpEnvCmdContext(waflib.Build.BuildContext):
+class DumpEnvCmdContext(waflib.Configure.ConfigurationContext):
     """print the runtime environment in a json format"""
     cmd = 'dump-env'
 
-    def execute_build(self):
-        self.logger = msg
-
-        lvl = msg.log.level
-        if lvl < msg.logging.ERROR:
-            msg.log.setLevel(msg.logging.ERROR)
+    def execute(self):
+        self.init_dirs()
+        self.cachedir = self.bldnode.find_node(waflib.Build.CACHE_DIR)
+        if not self.cachedir:
+            self.fatal(
+                "no CACHE_DIR (%s). run 'hwaf configure' first" %
+                osp.join(self.bldnode.abspath(), waflib.Build.CACHE_DIR))
             pass
-        try:
-            ret = super(DumpEnvCmdContext, self).execute_build()
-        finally:
-            msg.log.setLevel(lvl)
+        
+        self.env.load(self.cachedir.find_node("_cache.py").abspath())
+        self.env.HWAF_ENABLE_INSTALL_AREA = '1'
 
         py_exe = self.env.PYTHON
         if isinstance(py_exe, (list, tuple)):
@@ -555,6 +558,6 @@ class DumpEnvCmdContext(waflib.Build.BuildContext):
         sys.stdout.write("%s\n" % json.dumps(env))
         sys.stdout.flush()
         return 0
-    pass # RunCmdContext
+    pass # DumpEnvContext
 
 ## EOF ##

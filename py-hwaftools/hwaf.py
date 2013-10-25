@@ -26,6 +26,10 @@ def build(ctx):
     ctx.load('hwaf-base', tooldir=_heptooldir)
     return
 
+def shell(ctx):
+    ctx.load('hwaf-base', tooldir=_heptooldir)
+    return
+
 ### ---------------------------------------------------------------------------
 @waflib.Configure.conf
 def hwaf_configure(ctx):

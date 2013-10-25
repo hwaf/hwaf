@@ -60,7 +60,7 @@ def check(ctx):
 
 def shell(ctx):
     ctx.load('hwaf')
-    hwaf_ishell(ctx)
+    ctx.hwaf_ishell()
     return
 
 def run(ctx):
