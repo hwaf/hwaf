@@ -399,19 +399,21 @@ def _findbase_setup(ctx, kwargs):
                 #"/usr/local",
             ])
 
-    # FIXME: should use use_macports...
-    if ctx.is_darwin(): # and ctx.options.use_macports:
-        extra_paths.extend([
-                # macports
-                "/opt/local",
-            ])
-    # FIXME: should use with_fink
-    if ctx.is_darwin(): # and ctx.options.with_fink:
-        extra_paths.extend([
-                # fink
-                "/sw",
-            ])
-
+    if 0:
+        # FIXME: should use use_macports...
+        if ctx.is_darwin(): # and ctx.options.use_macports:
+            extra_paths.extend([
+                    # macports
+                    "/opt/local",
+                ])
+        # FIXME: should use with_fink
+        if ctx.is_darwin(): # and ctx.options.with_fink:
+            extra_paths.extend([
+                    # fink
+                    "/sw",
+                ])
+        pass
+    
     kwargs['extra_paths'] = waflib.Utils.to_list(
         kwargs.get('extra_paths', [])) + extra_paths
     kwargs['_check_mandatory'] = kwargs.get('mandatory', True)
