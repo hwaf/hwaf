@@ -2,6 +2,7 @@ package hwaflib
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -76,39 +77,14 @@ func waf_gen_wscript_from_py(fname string) error {
 		return err
 	}
 	defer wscript.Close()
-	_, err = wscript.WriteString(`## -*- python -*-
-## automatically generated from a hscript
-## do NOT edit.
 
-## stdlib import
-import os.path as osp
+	hscript, err := os.Open(filepath.Join(filepath.Dir(fname), "hscript.py"))
+	if err != nil {
+		return err
+	}
+	defer hscript.Close()
 
-## waf imports
-import waflib.Logs as msg
-
-_tooldir = "." #"" osp.dirname(osp.abspath(__file__))
-
-### ---------------------------------------------------------------------------
-def pkg_deps(ctx):
-    ctx.load("hscript", tooldir=ctx.path.abspath())
-
-### ---------------------------------------------------------------------------
-def options(ctx):
-    ctx.load("hscript", tooldir=ctx.path.abspath())
-    return # options
-
-### ---------------------------------------------------------------------------
-def configure(ctx):
-    ctx.load("hscript", tooldir=ctx.path.abspath())
-    return # configure
-
-### ---------------------------------------------------------------------------
-def build(ctx):
-    ctx.load("hscript", tooldir=ctx.path.abspath())
-    return # build
-
-## EOF ##
-`)
+	_, err = io.Copy(wscript, hscript)
 	if err != nil {
 		return err
 	}
