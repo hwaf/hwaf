@@ -11,15 +11,15 @@ import (
 	"text/template"
 )
 
-type WscriptEncoder struct {
+type HscriptPyEncoder struct {
 	w io.Writer
 }
 
-func NewWscriptEncoder(w io.Writer) *WscriptEncoder {
-	return &WscriptEncoder{w: w}
+func NewHscriptPyEncoder(w io.Writer) *HscriptPyEncoder {
+	return &HscriptPyEncoder{w: w}
 }
 
-func (enc *WscriptEncoder) Encode(wscript *Wscript_t) error {
+func (enc *HscriptPyEncoder) Encode(wscript *Wscript_t) error {
 	var err error
 
 	_, err = fmt.Fprintf(

@@ -151,9 +151,9 @@ func waf_gen_wscript_from_yml(fname string) error {
 		return fmt.Errorf("error parsing file [%s]:\n%v", hscript, err)
 	}
 
-	enc := hlib.NewWscriptEncoder(f)
+	enc := hlib.NewHscriptPyEncoder(f)
 	if enc == nil {
-		return fmt.Errorf("error creating WscriptEncoder for file [%s]", fname)
+		return fmt.Errorf("error creating HscriptPyEncoder for file [%s]", fname)
 	}
 
 	err = enc.Encode(wscript)

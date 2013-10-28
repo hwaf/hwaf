@@ -9,15 +9,15 @@ import (
 	"text/template"
 )
 
-type HscriptEncoder struct {
+type HscriptYmlEncoder struct {
 	w io.Writer
 }
 
-func NewHscriptEncoder(w io.Writer) *HscriptEncoder {
-	return &HscriptEncoder{w: w}
+func NewHscriptYmlEncoder(w io.Writer) *HscriptYmlEncoder {
+	return &HscriptYmlEncoder{w: w}
 }
 
-func (enc *HscriptEncoder) Encode(wscript *Wscript_t) error {
+func (enc *HscriptYmlEncoder) Encode(wscript *Wscript_t) error {
 	var err error
 
 	// generate package header ------------------------------------------------
