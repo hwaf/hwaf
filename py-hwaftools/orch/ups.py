@@ -4,6 +4,7 @@ A ten foot pole
 '''
 
 import os
+import time
 from .util import check_output, CalledProcessError
 
 def flavor():
@@ -13,7 +14,7 @@ def flavor():
     try:
         flav = check_output(['ups','flavor'])
         #print 'UPS FLAVOR from ups: "%s"' % flav
-        return flav
+        return flav.strip()
     except OSError:
         #print 'UPS failed to run, calculate flavor manually'
         pass
@@ -80,6 +81,54 @@ End:
 '''.format(commands = '    \n'.join(commands), **cfg)
     return stf
 
-    
+def simple_setup_version_file(**cfg):
+    '''
+    Return the contents of a UPS version file
 
-    
+    FIXME: it makes some assumptions as to UPS directory structure.
+    '''
+    content = '''\
+FILE = version
+PRODUCT = {package}
+VERSION = {ups_version_string}
+
+#*************************************************
+#
+FLAVOR = {ups_flavor}
+QUALIFIERS = "{ups_qualifiers}"
+  DECLARER = {user}
+  DECLARED = {date}
+  MODIFIER = {user}
+  MODIFIER = {date}
+  PROD_DIR = {ups_prod_subdir}
+  UPS_DIR = ups
+  TABLE_FILE = {package}.table
+'''.format(user = os.environ.get('USER','unknown'),
+           date = time.strftime('%Y-%m-%d %H.%M.%S GMT', time.gmtime(time.time())),
+           **cfg)
+    return content
+
+def simple_setup_chain_file(**cfg):
+    '''
+    Return the contents of a UPS chain file
+
+    FIXME: it only make "current chain".
+    '''
+    content = '''\
+FILE = chain
+PRODUCT = {package}
+CHAIN = current
+
+#*************************************************
+#
+FLAVOR = {ups_flavor}
+VERSION = {ups_version_string}
+QUALIFIERS = "{ups_qualifiers}"
+  DECLARER = {user}
+  DECLARED = {date}
+  MODIFIER = {user}
+  MODIFIER = {date}
+'''.format(user = os.environ.get('USER','unknown'),
+           date = time.strftime('%Y-%m-%d %H.%M.%S GMT', time.gmtime(time.time())),
+           **cfg)
+    return content

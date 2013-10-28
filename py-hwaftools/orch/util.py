@@ -84,3 +84,35 @@ except ImportError:
                 cmd = popenargs[0]
             raise CalledProcessError(retcode, cmd, output=output)
         return output
+
+
+def envvars(envtext):
+    '''
+    Parse envtext as lines of 'name=value' pairs, return result as a
+    dictionary.  Values beginning with '()' are allowed to span
+    multiple lines and expected to end with a closing brace.
+    '''
+    def lines(text):
+        for line in text.split('\n'):
+            line = line.strip()
+            if not line:
+                continue
+            yield line
+    lines = lines(envtext)      # this looses the first?
+
+    ret = dict()
+    for line in lines:
+        name, val = line.split('=',1)
+        if not val.startswith('()') or val.endswith('}'):
+            ret[name] = val
+            continue
+
+        # we have a multi-lined shell function, slurp until we get an ending '}'
+        val = [val]
+        for line in lines.next():
+            val.append(line)
+            if line.endswith('}'):
+                break
+            continue
+        ret[name] = '\n'.join(val)
+    return ret

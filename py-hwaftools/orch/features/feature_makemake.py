@@ -42,12 +42,12 @@ def install(info):
     info.task('install',
               rule = install_task,
               source = info.build_target,
-              target = info.install_target,
-              cwd = info.build_dir.abspath())
+              target = info.install_target)
+
     return
 
 @feature('makemake', **requirements)
-def feature_prepare(info):
+def feature_makemake(info):
     build(info)
     install(info)
     return

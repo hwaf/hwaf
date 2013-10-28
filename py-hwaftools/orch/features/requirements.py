@@ -51,6 +51,9 @@ reqdesc_list = [
     ReqDesc('tags','',
             doc='A list of asserted tags to drive features in optional manners'),
     
+    # debugging
+    ReqDesc('dumpenv_cmd', "env | sort",
+            doc="Shell command line to dump info about the environment"),
 
     # locations
     ReqDesc('urlfile_dir', 'urlfiles', typecode='d', 
@@ -134,31 +137,26 @@ reqdesc_list = [
     ReqDesc('install_target', None, typecode='f', relative='{dest_install_dir}',
             doc='File that is produced upon successful installation'),
 
-    # UPS specials (ups*).  In general these should be allowed to
-    # differ from native worch values except that the
-    # ups_product_install_dir.abspath() should probably match up with
-    # install_dir.abspath().  All things should be relative to ups_products.
-
+    # UPS special tasks (ups*) from the ups features.
     ReqDesc('ups_products', '{PREFIX}', typecode='d',
-            doc='Absolute path to UPS "PRODUCTS" directory, likely should be same as PREFIX'),
+            doc='Absolute path to UPS "PRODUCTS" directory'),
+    ReqDesc('ups_version_string', 'v{version_underscore}',
+            doc='The version string used to make UPS database files/directories'),
+    ReqDesc('ups_qualifiers', '',
+            doc='List of UPS qualifiers.'),
+    ReqDesc('ups_prod_subdir', '{package}/{ups_version_string}',
+            doc='Subdirectory under UPS products directory where ups/package.table file is.'),
 
-    ReqDesc('ups_product_install_dir', '{package}/{version}/{tagsdashed}', 
-            typecode = 'd', relative = '{ups_products}',
-            doc='Subdirectory path, likely should match where worch installs the package.'),
 
-    ReqDesc('ups_tablegen_target', '{package}/{version}/{tagsdashed}/ups/{package}.table', 
-            typecode='f', relative='{ups_products}',
-            doc='Generated table file'),
-
-    # ups, y u no make this pattern? /{ups_flavor}_{ups_qualifiers}
-    ReqDesc('ups_declare_target', '{package}/v{version_underscore}.version',
-            typecode='f', relative='{ups_products}',
-            doc='UPS version file resulting from a UPS declaration'),
-
-    ReqDesc('ups_qualifiers', '', 
-            doc='UPS qualifiers associated with the package installation'),
+    # modules.sf.net modulefile
+    ReqDesc('modules_dir','{PREFIX}/modules', typecode='d', 
+            doc='Top of directory tree holding modules'),
+    ReqDesc('modulefile_target', '{package}/{version}/modulefile', 
+            typecode='f', relative='{modules_dir}',
+            doc='The package modulefile'),
 
     ]
+
 
 
 def make_pool():
