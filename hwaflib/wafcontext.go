@@ -23,14 +23,17 @@ func (ctx *Context) init_waf_ctx() error {
 	// get pkgdir: we only need to look for 'hscript.yml' files under pkgdir.
 	root = filepath.Join(root, ctx.pkgdir())
 
-	fnames := make([]string, 0, 2)
+	type gen_script_fct_t func(fname string) error
+	dirs := make(map[string]gen_script_fct_t)
 	err = filepath.Walk(
 		root,
 		func(path string, info os.FileInfo, err error) error {
 			//fmt.Printf(">>> [%s]...\n", path)
 			fname := filepath.Base(path)
 			if fname == "hscript.yml" {
-				fnames = append(fnames, path)
+				dirs[filepath.Dir(path)] = waf_gen_wscript_from_yml
+			} else if fname == "hscript.py" {
+				dirs[filepath.Dir(path)] = waf_gen_wscript_from_py
 			}
 			return err
 		})
@@ -39,9 +42,8 @@ func (ctx *Context) init_waf_ctx() error {
 	}
 
 	//fmt.Printf("fnames: %v\n", fnames)
-	wscripts := make([]string, 0, len(fnames))
-	for _, fname := range fnames {
-		path := filepath.Dir(fname)
+	wscripts := make([]string, 0, len(dirs))
+	for path, gen_wscript := range dirs {
 		wscript := filepath.Join(path, "wscript")
 		if path_exists(wscript) {
 			err = os.Rename(wscript, wscript+".bak")
@@ -49,7 +51,7 @@ func (ctx *Context) init_waf_ctx() error {
 				return err
 			}
 		}
-		err = waf_gen_wscript(wscript)
+		err = gen_wscript(wscript)
 		wscripts = append(wscripts, wscript)
 		if err != nil {
 			break
@@ -68,7 +70,53 @@ func (ctx *Context) init_waf_ctx() error {
 	return err
 }
 
-func waf_gen_wscript(fname string) error {
+func waf_gen_wscript_from_py(fname string) error {
+	wscript, err := os.Create(fname)
+	if err != nil {
+		return err
+	}
+	defer wscript.Close()
+	_, err = wscript.WriteString(`## -*- python -*-
+## automatically generated from a hscript
+## do NOT edit.
+
+## stdlib import
+import os.path as osp
+
+## waf imports
+import waflib.Logs as msg
+
+_tooldir = "." #"" osp.dirname(osp.abspath(__file__))
+
+### ---------------------------------------------------------------------------
+def pkg_deps(ctx):
+    ctx.load("hscript", tooldir=ctx.path.abspath())
+
+### ---------------------------------------------------------------------------
+def options(ctx):
+    ctx.load("hscript", tooldir=ctx.path.abspath())
+    return # options
+
+### ---------------------------------------------------------------------------
+def configure(ctx):
+    ctx.load("hscript", tooldir=ctx.path.abspath())
+    return # configure
+
+### ---------------------------------------------------------------------------
+def build(ctx):
+    ctx.load("hscript", tooldir=ctx.path.abspath())
+    return # build
+
+## EOF ##
+`)
+	if err != nil {
+		return err
+	}
+
+	return wscript.Sync()
+}
+
+func waf_gen_wscript_from_yml(fname string) error {
 	var err error
 	hscript := filepath.Join(filepath.Dir(fname), "hscript.yml")
 	f, err := os.Open(hscript)

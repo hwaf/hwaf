@@ -35,7 +35,7 @@ func TestHwafTuto(t *testing.T) {
 	for _, cmd := range [][]string{
 		{"hwaf", "init", "-v=1", "."},
 		{"hwaf", "setup", "-v=1"},
-		{"hwaf", "pkg", "create", "-script=wscript", "-v=1", "mytools/mypkg"},
+		{"hwaf", "pkg", "create", "-script=py", "-v=1", "mytools/mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
@@ -47,15 +47,15 @@ func TestHwafTuto(t *testing.T) {
 
 	mypkgdir := filepath.Join("src", "mytools", "mypkg")
 
-	// create src/mytools/mypkg/wscript file
-	ff, err := os.Create(filepath.Join(mypkgdir, "wscript"))
+	// create src/mytools/mypkg/hscript.py file
+	ff, err := os.Create(filepath.Join(mypkgdir, "hscript.py"))
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 	_, err = ff.WriteString(
 		`
 # -*- python -*-
-# automatically generated wscript
+# automatically generated hscript
 
 import waflib.Logs as msg
 
@@ -216,7 +216,7 @@ func TestHwafTutoHscript(t *testing.T) {
 		{"hwaf", "init", "-v=1", "."},
 		{"hwaf", "setup", "-v=1"},
 		{"hwaf", "pkg", "create", "-v=1", "mytools/mypkg"},
-		{"/bin/rm", "-f", "src/mytools/mypkg/wscript"},
+		{"/bin/rm", "-f", "src/mytools/mypkg/hscript.py"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
@@ -228,7 +228,7 @@ func TestHwafTutoHscript(t *testing.T) {
 
 	mypkgdir := filepath.Join("src", "mytools", "mypkg")
 
-	// create src/mytools/mypkg/wscript file
+	// create src/mytools/mypkg/hscript file
 	ff, err := os.Create(filepath.Join(mypkgdir, "hscript.yml"))
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -404,7 +404,7 @@ func TestHwafHepTuto(t *testing.T) {
 		{"hwaf"},
 		{"hwaf", "run", "python", "-c", "import pkgaa"},
 		{"hwaf", "bdist"},
-		{"hwaf", "pkg", "create", "-script=wscript", "-v=1", "mytools/mypkg"},
+		{"hwaf", "pkg", "create", "-script=py", "-v=1", "mytools/mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
@@ -416,15 +416,15 @@ func TestHwafHepTuto(t *testing.T) {
 
 	mypkgdir := filepath.Join("src", "mytools", "mypkg")
 
-	// create src/mytools/mypkg/wscript file
-	ff, err := os.Create(filepath.Join(mypkgdir, "wscript"))
+	// create src/mytools/mypkg/hscript.py file
+	ff, err := os.Create(filepath.Join(mypkgdir, "hscript.py"))
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 	_, err = ff.WriteString(
 		`
 # -*- python -*-
-# automatically generated wscript
+# automatically generated hscript
 
 import waflib.Logs as msg
 
@@ -647,14 +647,14 @@ MyHlv::hlv()
 	ff.Sync()
 	ff.Close()
 
-	ff, err = os.Create(filepath.Join(mypkgdir, "wscript"))
+	ff, err = os.Create(filepath.Join(mypkgdir, "hscript.py"))
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 	_, err = ff.WriteString(
 		`
 # -*- python -*-
-# automatically generated wscript
+# automatically generated hscript
 
 import waflib.Logs as msg
 

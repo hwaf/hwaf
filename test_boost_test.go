@@ -29,7 +29,7 @@ func TestHwafBoost(t *testing.T) {
 	for _, cmd := range [][]string{
 		{"hwaf", "init", "-v=1", "."},
 		{"hwaf", "setup", "-v=1"},
-		{"hwaf", "pkg", "create", "-script=wscript", "-v=1", "mypkg"},
+		{"hwaf", "pkg", "create", "-script=py", "-v=1", "mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
@@ -41,15 +41,15 @@ func TestHwafBoost(t *testing.T) {
 
 	mypkgdir := filepath.Join("src", "mypkg")
 
-	// create src/mytools/mypkg/wscript file
-	ff, err := os.Create(filepath.Join(mypkgdir, "wscript"))
+	// create src/mytools/mypkg/hscript.py file
+	ff, err := os.Create(filepath.Join(mypkgdir, "hscript.py"))
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 	_, err = ff.WriteString(
 		`
 # -*- python -*-
-# automatically generated wscript
+# automatically generated hscript
 
 import waflib.Logs as msg
 
@@ -129,7 +129,7 @@ func TestHwafBoostBogusConfigureCmd(t *testing.T) {
 	for _, cmd := range [][]string{
 		{"hwaf", "init", "-v=1", "."},
 		{"hwaf", "setup", "-v=1"},
-		{"hwaf", "pkg", "create", "-script=wscript", "-v=1", "mypkg"},
+		{"hwaf", "pkg", "create", "-script=py", "-v=1", "mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
@@ -141,15 +141,15 @@ func TestHwafBoostBogusConfigureCmd(t *testing.T) {
 
 	mypkgdir := filepath.Join("src", "mypkg")
 
-	// create src/mytools/mypkg/wscript file
-	ff, err := os.Create(filepath.Join(mypkgdir, "wscript"))
+	// create src/mytools/mypkg/hscript.py file
+	ff, err := os.Create(filepath.Join(mypkgdir, "hscript.py"))
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 	_, err = ff.WriteString(
 		`
 # -*- python -*-
-# automatically generated wscript
+# automatically generated hscript
 
 import waflib.Logs as msg
 
@@ -229,7 +229,7 @@ func TestHwafBoostEmptyLib(t *testing.T) {
 	for _, cmd := range [][]string{
 		{"hwaf", "init", "-v=1", "."},
 		{"hwaf", "setup", "-v=1"},
-		{"hwaf", "pkg", "create", "-script=wscript", "-v=1", "mypkg"},
+		{"hwaf", "pkg", "create", "-script=py", "-v=1", "mypkg"},
 		{"hwaf", "pkg", "ls"},
 	} {
 		err := hwaf.Run(cmd[0], cmd[1:]...)
@@ -241,15 +241,15 @@ func TestHwafBoostEmptyLib(t *testing.T) {
 
 	mypkgdir := filepath.Join("src", "mypkg")
 
-	// create src/mytools/mypkg/wscript file
-	ff, err := os.Create(filepath.Join(mypkgdir, "wscript"))
+	// create src/mytools/mypkg/hscript.py file
+	ff, err := os.Create(filepath.Join(mypkgdir, "hscript.py"))
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 	_, err = ff.WriteString(
 		`
 # -*- python -*-
-# automatically generated wscript
+# automatically generated hscript
 
 import waflib.Logs as msg
 

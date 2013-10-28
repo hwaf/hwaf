@@ -726,7 +726,11 @@ def hwaf_pkg_infos(self, pkgdir=None):
     try:
         package = getattr(mod, 'PACKAGE')
     except AttributeError:
-        raise waflib.Errors.WafError('package [%s] has not "PACKAGE" attribute' % pkgdir)
+        mod = waflib.Context.load_module(osp.join(pkgdir, 'hscript.py'))
+        try:
+            package = getattr(mod, 'PACKAGE')
+        except AttributeError:
+            raise waflib.Errors.WafError('package [%s] has not "PACKAGE" attribute' % pkgdir)
     return package
 
 @waflib.Configure.conf

@@ -22,11 +22,13 @@ create creates a new package in the current workarea.
 
 ex:
  $ hwaf pkg create MyPath/MyPackage
+ $ hwaf pkg create -script=yml MyPath/MyPackage
+ $ hwaf pkg create -script=py  MyPath/MyPackage
 `,
 		Flag: *flag.NewFlagSet("hwaf-pkg-create", flag.ExitOnError),
 	}
 	cmd.Flag.Bool("v", false, "enable verbose output")
-	cmd.Flag.String("script", "hscript", "type of the hwaf script to use (hscript|wscript)")
+	cmd.Flag.String("script", "yml", "type of the hwaf script to use (yml|py)")
 	cmd.Flag.String("authors", "", "comma-separated list of authors for the new package")
 	return cmd
 }
@@ -45,10 +47,10 @@ func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
 
 	script := cmd.Flag.Lookup("script").Value.Get().(string)
 	switch script {
-	case "hscript", "wscript":
+	case "yml", "py":
 		// ok
 	default:
-		err = fmt.Errorf("%s: script type is either 'hscript' or 'wscript' (got: %q)", n, script)
+		err = fmt.Errorf("%s: script type is either 'yml' or 'py' (got: %q)", n, script)
 		handle_err(err)
 	}
 
@@ -181,12 +183,12 @@ build: {
 	fname := "hscript.yml"
 
 	switch script {
-	case "hscript":
+	case "yml":
 		txt = h_txt
 		fname = "hscript.yml"
-	case "wscript":
+	case "py":
 		txt = w_txt
-		fname = "wscript"
+		fname = "hscript.py"
 	}
 
 	// create generic structure...
