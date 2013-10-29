@@ -70,6 +70,7 @@ def find_c_compiler(ctx, **kwargs):
         topdir = ctx.options.with_hwaf_toolchain
         topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.join(topdir, "bin"))
+        ctx.env.CC = osp.join(topdir, "bin", comp)
         pass
     elif getattr(ctx.options, 'with_c_compiler', None):
         comp = ctx.options.with_c_compiler
@@ -150,6 +151,7 @@ def find_cxx_compiler(ctx, **kwargs):
         topdir = ctx.options.with_hwaf_toolchain
         topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.join(topdir, "bin"))
+        ctx.env.CXX = osp.join(topdir, "bin", comp)
         pass
     elif getattr(ctx.options, 'with_cxx_compiler', None):
         comp = ctx.options.with_cxx_compiler
@@ -230,6 +232,7 @@ def find_fortran_compiler(ctx, **kwargs):
         topdir = ctx.options.with_hwaf_toolchain
         topdir = ctx.hwaf_subst_vars(topdir)
         path_list.append(osp.join(topdir, "bin"))
+        ctx.env.FC = osp.join(topdir, "bin", comp)
         pass
     elif getattr(ctx.options, 'with_fc_compiler', None):
         comp = ctx.options.with_fc_compiler
@@ -308,7 +311,7 @@ def find_toolchain(ctx, **kw):
         ctx.env.prepend_value('LD_LIBRARY_PATH', [libdir])
 
         pass
-    
+
     # C compiler
     c_kw = dict(kw)
     ctx.find_c_compiler(**c_kw)
