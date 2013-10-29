@@ -271,6 +271,8 @@ func (ctx *Context) infer_variant(pinfos platform.Platform, hwaf_arch, hwaf_os, 
 			hwaf_comp = "clang41"
 		} else if strings.HasPrefix(pinfos.DistVers, "10.8") {
 			hwaf_comp = "clang41"
+		} else if strings.HasPrefix(pinfos.DistVers, "10.9") {
+			hwaf_comp = "clang50"
 		} else {
 			panic(fmt.Sprintf("hwaf: unhandled distribution [%s]", pinfos.DistId()))
 		}
