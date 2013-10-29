@@ -542,6 +542,24 @@ def read_cfg(ctx, fname):
 
 ### ---------------------------------------------------------------------------
 @conf
+def hwaf_propagate_uselib(ctx, tgt, uses):
+    if not uses:
+        return
+    for use in uses:
+        for kk in ('INCLUDES',
+                   'LIBPATH',   'LIB',
+                   'STLIBPATH', 'STLIB'):
+            vv = ctx.env['%s_%s' % (kk,use)]
+            if vv:
+                msg.debug('hwaf: propagate_uselib(%s_%s <<< %s)'% (kk,tgt, vv))
+                ctx.env.append_unique('%s_%s' % (kk,tgt), vv)
+                pass
+            pass
+        pass
+    return
+
+### ---------------------------------------------------------------------------
+@conf
 def hwaf_copy_uselib_defs(ctx, dst, src):
     for n in ('LIB', 'LIBPATH',
               'STLIB', 'STLIBPATH',
