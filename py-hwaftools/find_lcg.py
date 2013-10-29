@@ -42,17 +42,15 @@ def find_lcg(ctx, **kwargs):
         ctx.fatal('load a C++ compiler first')
         pass
 
-    lcg_root = ctx.options.with_lcg
+    lcg_root = ctx.hwaf_subst_vars(ctx.options.with_lcg)
     if not osp.exists(lcg_root):
-        msg.fatal("LCG: no such path [%s]" % lcg_root)
+        ctx.fatal("LCG: no such path [%s]" % lcg_root)
         return
 
-    ctx.start_msg("LCG-hep-tools")
-    ctx.end_msg(lcg_root)
+    ctx.msg("LCG-hep-tools", lcg_root)
 
     lcg_ext_root = ctx.options.with_lcg_ext_root
-    ctx.start_msg("LCG-hep-tools externals")
-    ctx.end_msg(lcg_ext_root)
+    ctx.msg("LCG-hep-tools externals", lcg_ext_root)
 
     
     ctx.env.HWAF_FOUND_LCG = 1
