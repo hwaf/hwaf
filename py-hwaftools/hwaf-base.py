@@ -362,14 +362,12 @@ def check_with(ctx, check, what, *args, **kwargs):
     with_dir = getattr(ctx.options, "with_" + what, None)    
     env_dir = os.environ.get(what.upper() + "_HOME", None)
     paths = [with_dir, env_dir] + kwargs.pop("extra_paths", [])
-    
     WHAT = what.upper()
     kwargs["uselib_store"] = kwargs.get("uselib_store", WHAT)
     kwargs["use"] = waflib.Utils.to_list(kwargs.get("use", [])) + \
         waflib.Utils.to_list(kwargs["uselib_store"])
 
-    for path in [abspath(p) for p in paths if p]:
-        path = waflib.Utils.subst_vars(path, ctx.env)
+    for path in [abspath(ctx.hwaf_subst_vars(p)) for p in paths if p]:
         ctx.in_msg = 0
         ctx.to_log("Checking for %s in %s" % (what, path))
         if ctx.find_at(check, what, path, **kwargs):
