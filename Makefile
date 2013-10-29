@@ -45,4 +45,8 @@ install:
 	tar -C $(OUT)/linux-amd64  -zxf $(VAULT)/hwaf-${HWAF_VERSION}-linux-amd64.tar.gz
 	tar -C $(OUT)/linux-386    -zxf $(VAULT)/hwaf-${HWAF_VERSION}-linux-386.tar.gz
 	tar -C $(OUT)/darwin-amd64 -zxf $(VAULT)/hwaf-${HWAF_VERSION}-darwin-amd64.tar.gz
+
+	# create 'latest' symlink...
+	(cd $(INSTALL) && ln -sf hwaf-${HWAF_VERSION} latest)
+
 	@echo ":: bye."
