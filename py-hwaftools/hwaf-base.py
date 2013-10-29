@@ -544,7 +544,7 @@ def read_cfg(ctx, fname):
 
 ### ---------------------------------------------------------------------------
 @conf
-def copy_uselib_defs(ctx, dst, src):
+def hwaf_copy_uselib_defs(ctx, dst, src):
     for n in ('LIB', 'LIBPATH',
               'STLIB', 'STLIBPATH',
               'LINKFLAGS', 'RPATH',
@@ -558,6 +558,11 @@ def copy_uselib_defs(ctx, dst, src):
         ctx.env['%s_%s' % (n,dst)] = ctx.env['%s_%s' % (n,src)]
     ctx.env.append_unique('DEFINES', 'HAVE_%s=1' % dst.upper().replace('-','_'))
     return
+
+### ---------------------------------------------------------------------------
+@conf
+def copy_uselib_defs(ctx, dst, src):
+    return ctx.hwaf_copy_uselib_defs(dst, src)
 
 ### ---------------------------------------------------------------------------
 @conf
