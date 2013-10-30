@@ -34,8 +34,14 @@ def shell(ctx):
 @waflib.Configure.conf
 def hwaf_configure(ctx):
     dirs = ctx.hwaf_pkg_dirs()
-    for d in dirs:
-        ctx.msg("configuring", d)
+    npkgs = len(dirs)
+    fmt = "%%0%dd" % (len("%s" % npkgs),)
+    hdr = "[%s/%s]" % (fmt,fmt)
+    for i,d in enumerate(dirs):
+        #ctx.msg("configuring", d)
+        pkg = "[%s]:" % ctx.hwaf_pkg_name(d)
+        msg.pprint('NORMAL', hdr % (i+1, npkgs), sep='')
+        msg.pprint('GREEN', "%s configure package" % pkg.ljust(60))
         ctx.recurse(d)
     return
 
