@@ -41,7 +41,7 @@ def hwaf_configure(ctx):
         #ctx.msg("configuring", d)
         pkg = "[%s]:" % ctx.hwaf_pkg_name(d)
         msg.pprint('NORMAL', hdr % (i+1, npkgs), sep='')
-        msg.pprint('GREEN', "%s configure package" % pkg.ljust(60))
+        msg.pprint('GREEN', "%s configuring..." % pkg.ljust(60))
         ctx.recurse(d)
     return
 
