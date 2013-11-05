@@ -17,11 +17,18 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 ### ---------------------------------------------------------------------------
 def options(ctx):
-    ctx.add_option(
+    gr = ctx.get_option_group("configure options")
+    default_prefix = "install-area"
+    gr.add_option(
+        '--prefix',
+        default='install-area',
+        help='installation prefix [default: %r]' % default_prefix)
+
+    gr.add_option(
         '--variant',
         default=None,
         help="The build type. ex: x86_64-linux-gcc-opt")
-    ctx.add_option(
+    gr.add_option(
         '--pkgdir',
         default=None,
         help="The directory where pkgs are located")

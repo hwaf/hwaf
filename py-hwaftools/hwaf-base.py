@@ -19,30 +19,31 @@ WSCRIPT_FILE = 'wscript'
 
 ### ---------------------------------------------------------------------------
 def options(ctx):
+    gr = ctx.get_option_group("configure options")
     if 'darwin' in sys.platform:
-        ctx.add_option(
+        gr.add_option(
             '--use-macports',
             default=None,
             action='store_true',
             help="Enable MacPorts")
         
-        ctx.add_option(
+        gr.add_option(
             '--use-fink',
             default=None,
             action='store_true',
             help="Enable Fink")
         pass
-    ctx.add_option(
+    gr.add_option(
         '--relocate-from',
         default=None,
         help='top-level path to relocate against (default=${PREFIX})',
         )
-    ctx.add_option(
+    gr.add_option(
         '--project-version',
         default=None,
         help='modify the project version used during build',
         )
-    ctx.add_option(
+    gr.add_option(
         '--local-cfg',
         default="local.conf",
         help="Path to the local config file listing all type of configuration infos")
@@ -66,7 +67,7 @@ def options(ctx):
 def configure(ctx):
     ctx.msg("hwaf version", os.environ.get("HWAF_VERSION", "N/A"))
     ctx.msg("hwaf revision", os.environ.get("HWAF_REVISION", "N/A"))
-    
+
     # transfer all env.vars from OS to hwaf.ctx.env
     for k in os.environ:
         ctx.env[k] = os.environ[k]

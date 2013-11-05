@@ -18,22 +18,23 @@ def options(ctx):
     ctx.load('compiler_cxx')
     ctx.load('compiler_fc')
 
-    ctx.add_option(
+    gr = ctx.get_option_group("configure options")
+    gr.add_option(
         '--with-hwaf-toolchain',
         default=None,
         help="path to a complete C/C++/Fortran toolchain")
 
-    ctx.add_option(
+    gr.add_option(
         '--with-c-compiler',
         default=None,
         help="path to a C compiler executable")
 
-    ctx.add_option(
+    gr.add_option(
         '--with-cxx-compiler',
         default=None,
         help="path to a C++ compiler executable")
 
-    ctx.add_option(
+    gr.add_option(
         '--with-fortran-compiler',
         default=None,
         help="path to a FORTRAN compiler executable")

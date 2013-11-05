@@ -12,12 +12,13 @@ import os.path as osp
 from waflib.Configure import conf
 
 def options(ctx):
-    ctx.add_option(
+    gr = ctx.get_option_group("configure options")
+    gr.add_option(
         '--hwaf-worch-config',
         default='worch.cfg',
         help='Give an orchestration configuration file.',
         )
-    ctx.add_option(
+    gr.add_option(
         '--hwaf-worch-start',
         action = 'store',
         default = 'start',
