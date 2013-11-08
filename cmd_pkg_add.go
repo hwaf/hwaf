@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
@@ -44,85 +44,100 @@ ex:
 func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	var err error
 	n := "hwaf-pkg-" + cmd.Name()
-	pkguri := ""
-	pkgname := ""
+
+	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
+	bname := cmd.Flag.Lookup("b").Value.Get().(string)
+
+	type Request struct {
+		pkguri  string
+		pkgname string
+		pkgtag  string
+	}
+
+	reqs := make([]Request, 0, 2)
 
 	switch len(args) {
 	default:
 		err = fmt.Errorf("%s: expects 0, 1 or 2 arguments (got %d: %v)", n, len(args), args)
 		handle_err(err)
 	case 2:
-		pkguri = args[0]
-		pkgname = args[1]
+		pkguri := args[0]
+		pkgname := args[1]
+		reqs = append(reqs,
+			Request{
+				pkguri:  pkguri,
+				pkgname: pkgname,
+				pkgtag:  bname,
+			},
+		)
 	case 1:
-		pkguri = args[0]
-		pkgname = ""
+		pkguri := args[0]
+		pkgname := ""
+		reqs = append(reqs,
+			Request{
+				pkguri:  pkguri,
+				pkgname: pkgname,
+				pkgtag:  bname,
+			},
+		)
 	case 0:
 		fname := cmd.Flag.Lookup("f").Value.Get().(string)
-		if fname != "" {
-			f, err := os.Open(fname)
-			if err != nil {
-				handle_err(err)
-			}
-			pkgs := [][]string{}
-			scnr := bufio.NewScanner(f)
-			for scnr.Scan() {
-				line := strings.Trim(scnr.Text(), " \n")
-				if strings.HasPrefix(line, "#") {
-					continue
-				}
-				tokens := strings.Split(line, " ")
-				pkg := []string{}
-				for _, tok := range tokens {
-					tok = strings.Trim(tok, " \t")
-					if tok != "" {
-						pkg = append(pkg, tok)
-					}
-				}
-				if len(pkg) > 0 {
-					pkgs = append(pkgs, pkg)
-				}
-			}
-			err = scnr.Err()
-			if err != nil && err != io.EOF {
-				handle_err(err)
-			}
-			verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
-			for _, pkg := range pkgs {
-				args := []string{"pkg", "co"}
-				if verbose {
-					args = append(args, "-v=1")
-				}
-				switch len(pkg) {
-				case 1:
-					args = append(args, pkg[0])
-				case 2:
-					args = append(args, "-b="+pkg[1], pkg[0])
-				case 3:
-					args = append(args, "-b="+pkg[1], pkg[0], pkg[2])
-				default:
-					err = fmt.Errorf("%s: invalid number of pkg-co arguments (expected [1-3], got=%d) args=%v", n, len(pkg), pkg)
-					handle_err(err)
-				}
-				cmd := exec.Command("hwaf", args...)
-				cmd.Stdout = os.Stdout
-				cmd.Stderr = os.Stderr
-				cmd.Stdin = os.Stdin
-				err = cmd.Run()
-				handle_err(err)
-			}
-			return
+		if fname == "" {
+			err = fmt.Errorf("%s: you need to give a package URL", n)
+			handle_err(err)
 		}
-
-		err = fmt.Errorf("%s: you need to give a package URL", n)
-		handle_err(err)
-	}
-
-	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
-	bname := cmd.Flag.Lookup("b").Value.Get().(string)
-
-	if verbose {
-		fmt.Printf("%s: checkout package [%s]...\n", n, pkguri)
+		f, err := os.Open(fname)
+		if err != nil {
+			handle_err(err)
+		}
+		pkgs := [][]string{}
+		scnr := bufio.NewScanner(f)
+		for scnr.Scan() {
+			line := strings.Trim(scnr.Text(), " \n")
+			if strings.HasPrefix(line, "#") {
+				continue
+			}
+			tokens := strings.Split(line, " ")
+			pkg := []string{}
+			for _, tok := range tokens {
+				tok = strings.Trim(tok, " \t")
+				if tok != "" {
+					pkg = append(pkg, tok)
+				}
+			}
+			if len(pkg) > 0 {
+				pkgs = append(pkgs, pkg)
+			}
+		}
+		err = scnr.Err()
+		if err != nil && err != io.EOF {
+			handle_err(err)
+		}
+		for _, pkg := range pkgs {
+			switch len(pkg) {
+			case 1:
+				reqs = append(reqs, Request{
+					pkguri:  pkg[0],
+					pkgname: "",
+					pkgtag:  "",
+				})
+			case 2:
+				reqs = append(reqs, Request{
+					pkguri:  pkg[0],
+					pkgname: "",
+					pkgtag:  pkg[1],
+				})
+			case 3:
+				reqs = append(reqs, Request{
+					pkguri:  pkg[0],
+					pkgname: pkg[2],
+					pkgtag:  pkg[1],
+				})
+			default:
+				err := fmt.Errorf("%s: invalid number of pkg-co arguments (expected [1-3], got=%d) args=%v", n, len(pkg), pkg)
+				handle_err(err)
+			}
+		}
 	}
 
 	cfg, err := g_ctx.LocalCfg()
@@ -134,31 +149,84 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	//fmt.Printf(">>> helper(pkguri=%q, pkgname=%q, pkgid=%q)...\n", pkguri, pkgname, bname)
-	helper, err := vcs.NewHelper(pkguri, pkgname, bname, pkgdir)
-	handle_err(err)
-	defer helper.Delete()
+	throttle := make(chan struct{}, 4)
+	errch := make(chan error)
 
-	dir := filepath.Join(pkgdir, helper.PkgName)
-	//fmt.Printf(">>> dir=%q\n", dir)
+	var dblock sync.RWMutex
 
-	if g_ctx.PkgDb.HasPkg(dir) {
-		err = fmt.Errorf("%s: package [%s] already in db.\ndid you forget to run 'hwaf pkg rm %s' ?", n, dir, dir)
-		handle_err(err)
+	do_checkout := func(req Request) {
+		pkguri := req.pkguri
+		pkgname := req.pkgname
+		bname := req.pkgtag
+
+		throttle <- struct{}{}
+		defer func() { <-throttle }()
+
+		if verbose {
+			fmt.Printf("%s: checkout package [%s]...\n", n, pkguri)
+		}
+
+		//fmt.Printf(">>> helper(pkguri=%q, pkgname=%q, pkgid=%q)...\n", pkguri, pkgname, bname)
+		helper, err := vcs.NewHelper(pkguri, pkgname, bname, pkgdir)
+		if err != nil {
+			errch <- err
+			return
+		}
+		defer helper.Delete()
+
+		dir := filepath.Join(pkgdir, helper.PkgName)
+		//fmt.Printf(">>> dir=%q\n", dir)
+
+		dblock.RLock()
+		if g_ctx.PkgDb.HasPkg(dir) {
+			err = fmt.Errorf("%s: package [%s] already in db.\ndid you forget to run 'hwaf pkg rm %s' ?", n, dir, dir)
+			errch <- err
+			dblock.RUnlock()
+			return
+		}
+		dblock.RUnlock()
+
+		//fmt.Printf(">>> pkgname=%q\n", helper.PkgName)
+		err = helper.Checkout()
+		if err != nil {
+			errch <- err
+			return
+		}
+
+		dblock.Lock()
+		defer dblock.Unlock()
+		err = g_ctx.PkgDb.Add(helper.Type, helper.Repo, dir)
+		if err != nil {
+			errch <- err
+			return
+		}
+
+		err = helper.Delete()
+		if err != nil {
+			errch <- err
+			return
+		}
+
+		if verbose {
+			fmt.Printf("%s: checkout package [%s]... [ok]\n", n, pkguri)
+		}
+		errch <- nil
 	}
 
-	//fmt.Printf(">>> pkgname=%q\n", helper.PkgName)
-	err = helper.Checkout()
-	handle_err(err)
+	for _, req := range reqs {
+		go do_checkout(req)
+	}
 
-	err = g_ctx.PkgDb.Add(helper.Type, helper.Repo, dir)
-	handle_err(err)
+	allgood := true
+	for _ = range reqs {
+		err := <-errch
+		if err != nil {
+			allgood = false
+		}
+	}
 
-	err = helper.Delete()
-	handle_err(err)
-
-	if verbose {
-		fmt.Printf("%s: checkout package [%s]... [ok]\n", n, pkguri)
+	if !allgood {
+		os.Exit(1)
 	}
 }
 
