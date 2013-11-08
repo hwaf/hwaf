@@ -794,7 +794,7 @@ def hwaf_find_pkg(self, pkgname, projname=None):
             pass
     from pprint import pformat
     errmsg = "hwaf: no such package [%s] in any of the projects\n%s" % \
-             (pkgname, pformat(self.hwaf_projects()))
+             (pkgname, pformat(self.hwaf_projects().keys()))
     msg.error(errmsg)
     raise KeyError("hwaf: no such package [%s]" % pkgname)
 
@@ -842,14 +842,17 @@ def _hwaf_build_pkg_deps(ctx, pkgdir=None):
             try:
                 process_pkg(ppkg, pkg)
             except KeyError:
-                ctx.fatal('package [%s] depends on *UNKNOWN* package [%s]' %
-                          (pkg, ppkg,))
+                msg.warn('package [%s] depends on *UNKNOWN* package [%s]' %
+                         (pkg, ppkg,))
+                continue
         if not (pkg in pkglist):
             if not ctx.hwaf_has_pkg(pkg):
-                ctx.fatal('package [%s] depends on *UNKNOWN* package [%s]' %
+                msg.warn('package [%s] depends on *UNKNOWN* package [%s]' %
                           (parent, pkg,))
-            pkglist.append(pkg)
-
+            else:
+                pkglist.append(pkg)
+                pass
+            pass
     for pkg in ctx.hwaf_pkgs():
         #msg.info("--> %s" % pkg)
         process_pkg(pkg)
