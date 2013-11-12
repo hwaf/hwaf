@@ -250,19 +250,19 @@ func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
 
 func (h *Helper) Checkout() error {
 	var err error
-	top := h.PkgDir
-	pkgdir := filepath.Join(top, h.PkgName)
-	if filepath.IsAbs(h.PkgName) {
-		pkgdir = h.PkgName
-	}
-	if !path_exists(pkgdir) {
-		err = os.MkdirAll(pkgdir, 0755)
-		if err != nil {
-			return err
-		}
-	}
 	switch h.Type {
 	default:
+		top := h.PkgDir
+		pkgdir := filepath.Join(top, h.PkgName)
+		if filepath.IsAbs(h.PkgName) {
+			pkgdir = h.PkgName
+		}
+		if !path_exists(pkgdir) {
+			err = os.MkdirAll(pkgdir, 0755)
+			if err != nil {
+				return err
+			}
+		}
 		err = copytree(pkgdir, h.TmpDir)
 	case "git":
 		err = h.git_checkout()
