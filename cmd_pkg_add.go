@@ -149,10 +149,11 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		handle_err(err)
 	}
 
-	throttle := make(chan struct{}, 4)
+	throttle := make(chan struct{}, 1)
 	errch := make(chan error)
 
 	var dblock sync.RWMutex
+	var colock sync.RWMutex
 
 	do_checkout := func(req Request) {
 		pkguri := req.pkguri
@@ -166,7 +167,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 			fmt.Printf("%s: checkout package [%s]...\n", n, pkguri)
 		}
 
-		//fmt.Printf(">>> helper(pkguri=%q, pkgname=%q, pkgid=%q)...\n", pkguri, pkgname, bname)
+		// fmt.Printf(">>> helper(pkguri=%q, pkgname=%q, pkgid=%q, pkgdir=%q)...\n", pkguri, pkgname, bname, pkgdir)
 		helper, err := vcs.NewHelper(pkguri, pkgname, bname, pkgdir)
 		if err != nil {
 			errch <- err
@@ -174,36 +175,45 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		}
 		defer helper.Delete()
 
-		dir := filepath.Join(pkgdir, helper.PkgName)
-		//fmt.Printf(">>> dir=%q\n", dir)
+		dir := filepath.Join(helper.RepoDir, helper.PkgName)
+		// fmt.Printf(">>> dir=%q\n", dir)
+		// fmt.Printf(">>> helper=%#v\n", helper)
 
 		dblock.RLock()
 		if g_ctx.PkgDb.HasPkg(dir) {
 			err = fmt.Errorf("%s: package [%s] already in db.\ndid you forget to run 'hwaf pkg rm %s' ?", n, dir, dir)
 			errch <- err
 			dblock.RUnlock()
+			fmt.Printf("%s: checkout package [%s]... [err]\n", n, pkguri)
 			return
 		}
 		dblock.RUnlock()
 
 		//fmt.Printf(">>> pkgname=%q\n", helper.PkgName)
+		colock.Lock()
 		err = helper.Checkout()
 		if err != nil {
 			errch <- err
+			colock.Unlock()
+			fmt.Printf("%s: checkout package [%s]... [err]\n", n, pkguri)
 			return
 		}
+		colock.Unlock()
 
 		dblock.Lock()
-		defer dblock.Unlock()
-		err = g_ctx.PkgDb.Add(helper.Type, helper.Repo, dir)
+		err = g_ctx.PkgDb.Add(helper.Type, helper.Repo, helper.RepoDir, dir)
 		if err != nil {
 			errch <- err
+			dblock.Unlock()
+			fmt.Printf("%s: checkout package [%s]... [err]\n", n, pkguri)
 			return
 		}
+		dblock.Unlock()
 
 		err = helper.Delete()
 		if err != nil {
 			errch <- err
+			fmt.Printf("%s: checkout package [%s]... [err]\n", n, pkguri)
 			return
 		}
 
@@ -217,15 +227,19 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		go do_checkout(req)
 	}
 
-	allgood := true
+	errs := make([]error, 0, len(reqs))
 	for _ = range reqs {
 		err := <-errch
 		if err != nil {
-			allgood = false
+			errs = append(errs, err)
 		}
 	}
 
-	if !allgood {
+	for _, err := range errs {
+		fmt.Fprintf(os.Stderr, "**error** %v\n", err)
+	}
+
+	if len(errs) != 0 {
 		os.Exit(1)
 	}
 }
