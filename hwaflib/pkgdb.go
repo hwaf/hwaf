@@ -9,9 +9,10 @@ import (
 )
 
 type VcsPackage struct {
-	Type string // type of remote VCS (svn, git, ...)
-	Repo string // remote repository URL
-	Path string // path under which the package is locally checked out
+	Type    string // type of remote VCS (svn, git, ...)
+	Repo    string // remote repository URL
+	RepoDir string // local repository directory
+	Path    string // path under which the package is locally checked out
 }
 
 type PackageDb struct {
@@ -36,12 +37,17 @@ func (db *PackageDb) Load(fname string) error {
 	return err
 }
 
-func (db *PackageDb) Add(vcs, pkguri, pkgname string) error {
+func (db *PackageDb) Add(vcs, pkguri, repodir, pkgname string) error {
 	_, has := db.db[pkgname]
 	if has {
 		return fmt.Errorf("hwaf.pkgdb: package [%s] already in db", pkgname)
 	}
-	db.db[pkgname] = VcsPackage{vcs, pkguri, pkgname}
+	db.db[pkgname] = VcsPackage{
+		Type:    vcs,
+		Repo:    pkguri,
+		RepoDir: repodir,
+		Path:    pkgname,
+	}
 
 	err := db.sync()
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -27,12 +28,13 @@ type Helper struct {
 	Uri     *url.URL
 	TmpDir  string
 	PkgUri  string
-	PkgName string
-	PkgId   string
+	PkgName string // full package name (relative to repo root)
+	PkgId   string // tag, branch or revision,... of package
 	PkgDir  string
 
-	Repo string
-	Type string
+	Type    string // type of repository
+	Repo    string // origin of repository
+	RepoDir string // local directory for the repository
 }
 
 func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
@@ -77,6 +79,11 @@ func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
 				uri.Scheme = "local"
 			}
 		}
+	}
+
+	// FIXME: hack. support for cern-git.
+	if uri.Host == "git.cern.ch" && uri.Scheme == "https" {
+		uri.Scheme = "git+kerberos"
 	}
 
 	tmpdir, err := ioutil.TempDir("", "hwaf-pkg-co-")
@@ -172,54 +179,44 @@ func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
 			return nil, err
 		}
 
-	case "git", "git+ssh":
-		err = Git.Create(tmpdir, pkguri)
-		if err != nil {
-			return nil, err
-		}
+	case "git", "git+ssh", "git+kerberos":
 
-		if pkgid != "" {
-			err = Git.run(tmpdir, "checkout {tag}", "tag", pkgid)
-			if err != nil {
-				return nil, err
+		h.PkgName = strings.Join(strings.Split(uri.Path, "/")[3:], "/")
+		repo := pkguri[:len(pkguri)-len(h.PkgName)]
+		if strings.HasSuffix(repo, "/") {
+			repo = repo[:len(repo)-1]
+		}
+		repo_name := func() string {
+			switch pkgname {
+			default:
+				return pkgname
+			case "":
+				tmp := strings.Split(repo, "/")
+				return tmp[len(tmp)-1]
 			}
+		}()
+		h.RepoDir = filepath.Join(h.PkgDir, repo_name)
+
+		if h.PkgId == "" {
+			h.PkgId = "master"
 		}
 
 		h.Type = "git"
-		h.Repo = pkguri
+		h.Repo = repo
 
-		bout, err := Git.runOutput(tmpdir, "config --get {url}", "url", "remote.origin.url")
-		if err != nil {
-			return nil, err
-		}
-		pkgurl := strings.Trim(string(bout), " \n")
-
-		//fmt.Printf("uri: %q\n", pkguri)
-		//fmt.Printf("url: %q\n", pkgurl)
-		n := strings.Replace(pkguri, pkgurl, "", -1)
-		//fmt.Printf("n:   %q\n", n)
-		if n == "" {
-			n = filepath.Base(uri.Path)
-		}
-		h.PkgName = n
-		//fmt.Printf("n:   %q\n", n)
-
-		// retrieve tag/version infos
-		bout, err = Git.runOutput(tmpdir, "rev-parse --short HEAD")
-		if err != nil {
-			return nil, err
-		}
-		rev := n + "-" + string(bout)
-		err = ioutil.WriteFile(filepath.Join(tmpdir, "version.hwaf"), []byte(rev), 0666)
-		if err != nil {
-			return nil, err
-		}
+		// bout, err := Git.runOutput(h.RepoDir, "config --get {url}", "url", "remote.origin.url")
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// pkgurl := strings.Trim(string(bout), " \n")
+		// fmt.Printf("uri: %q\n", pkguri)
+		// fmt.Printf("url: %q\n", pkgurl)
 
 	default:
 		return nil, fmt.Errorf("unknown URL scheme [%v]", uri.Scheme)
 	}
 
-	if pkgname != "" {
+	if pkgname != "" && h.Type != "git" {
 		if strings.HasPrefix(pkgname, "./") || strings.HasPrefix(pkgname, "/") {
 			abspath, err := filepath.Abs(pkgname)
 			if err == nil {
@@ -264,12 +261,151 @@ func (h *Helper) Checkout() error {
 			return err
 		}
 	}
-	err = copytree(pkgdir, h.TmpDir)
+	switch h.Type {
+	default:
+		err = copytree(pkgdir, h.TmpDir)
+	case "git":
+		err = h.git_checkout()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "**err-checkout** (%s): %v\n", h.PkgUri, err)
+		}
+	}
 	return err
 }
 
 func (h *Helper) Delete() error {
-	return os.RemoveAll(h.TmpDir)
+	switch h.TmpDir {
+	case "":
+		return nil
+	default:
+		return os.RemoveAll(h.TmpDir)
+	}
+}
+
+func (h *Helper) git_checkout() error {
+
+	var err error
+	repo_name := filepath.Base(h.RepoDir)
+
+	err = os.MkdirAll(h.PkgDir, 0755)
+	if err != nil {
+		return err
+	}
+
+	if !path_exists(h.RepoDir) {
+		err = Git.run(h.PkgDir, "init {repo}", "repo", repo_name)
+		if err != nil {
+			return err
+		}
+
+		err = Git.run(h.RepoDir, "remote add origin {origin}", "origin", h.Repo)
+		if err != nil {
+			return err
+		}
+
+	}
+
+	err = Git.run(h.RepoDir, "remote update origin")
+	if err != nil {
+		return err
+	}
+
+	err = Git.run(h.RepoDir, "config core.sparsecheckout true")
+	if err != nil {
+		return err
+	}
+
+	err = git_add_sparse_checkout(h)
+	if err != nil {
+		return err
+	}
+
+	err = Git.run(h.RepoDir, "checkout {tag}", "tag", h.PkgId)
+	if err != nil {
+		return err
+	}
+
+	err = Git.run(h.RepoDir, "read-tree -mu {tag}", "tag", h.PkgId)
+	if err != nil {
+		return err
+	}
+
+	// retrieve tag/version infos
+	bout, err := Git.runOutput(h.RepoDir, "rev-parse --short HEAD")
+	if err != nil {
+		return err
+	}
+	rev := h.PkgName + "-" + string(bout)
+	err = ioutil.WriteFile(filepath.Join(h.RepoDir, "version.hwaf"), []byte(rev), 0666)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func git_add_sparse_checkout(h *Helper) error {
+	var err error
+	sparse := filepath.Join(h.RepoDir, ".git", "info", "sparse-checkout")
+	if !path_exists(sparse) {
+		f, err := os.Create(sparse)
+		if err != nil {
+			return err
+		}
+		f.Close()
+	}
+
+	content, err := ioutil.ReadFile(sparse)
+	if err != nil {
+		return err
+	}
+
+	paths := make(map[string]struct{})
+	for _, line := range bytes.Split(content, []byte("\n")) {
+		text := strings.Trim(string(line), " \r\n\t")
+		if text == "" {
+			continue
+		}
+		paths[text] = struct{}{}
+	}
+
+	pkgname := h.PkgName + "/"
+	//fmt.Printf(">> adding [%s]...\n", pkgname)
+	if _, ok := paths[pkgname]; ok {
+		// already in sparse-checkout selection
+		return nil
+	}
+
+	paths[pkgname] = struct{}{}
+
+	pkgs := make([]string, 0, len(paths))
+	for pkg, _ := range paths {
+		pkgs = append(pkgs, pkg)
+	}
+	sort.Strings(pkgs)
+
+	err = os.Rename(sparse, sparse+"-old")
+	if err != nil {
+		return nil
+	}
+
+	f, err := os.Create(sparse + "-new")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	for _, pkg := range pkgs {
+		_, err = f.WriteString(pkg + "\n")
+		if err != nil {
+			return err
+		}
+	}
+	err = f.Close()
+	if err != nil {
+		return err
+	}
+	err = os.Rename(sparse+"-new", sparse)
+	return err
 }
 
 func copytree(dstdir, srcdir string) error {

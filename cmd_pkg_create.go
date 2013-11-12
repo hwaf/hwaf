@@ -242,7 +242,7 @@ build: {
 	err = tmpl.Execute(wscript, &pkg)
 	handle_err(err)
 
-	err = g_ctx.PkgDb.Add("local", "", dir)
+	err = g_ctx.PkgDb.Add("local", "", pkgdir, dir)
 	handle_err(err)
 
 	if verbose {
