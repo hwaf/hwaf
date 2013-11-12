@@ -292,6 +292,9 @@ func (h *Helper) git_checkout() error {
 		return err
 	}
 
+	do_sparse := h.PkgName != ""
+	sparse_fname := filepath.Join(h.RepoDir, ".git", "info", "sparse-checkout")
+
 	if !path_exists(h.RepoDir) {
 		err = Git.run(h.PkgDir, "init {repo}", "repo", repo_name)
 		if err != nil {
@@ -303,6 +306,33 @@ func (h *Helper) git_checkout() error {
 			return err
 		}
 
+		if do_sparse {
+			ff, err := os.Create(sparse_fname)
+			if err != nil {
+				return err
+			}
+			ff.Close()
+		}
+	}
+
+	// consistency check:
+	// make sure that no sparse-checkout file exists if we are configured to do no sparse-checkout
+	if do_sparse {
+		if !path_exists(sparse_fname) {
+			return fmt.Errorf(
+				"vcs.git: repository [%s] in inconsistent state. configured for sparse-checkout but [%s] file does NOT exist.",
+				h.RepoDir,
+				sparse_fname,
+			)
+		}
+	} else {
+		if path_exists(sparse_fname) {
+			return fmt.Errorf(
+				"vcs.git: repository [%s] in inconsistent state. not configured for sparse-checkout but [%s] file DOES exist.",
+				h.RepoDir,
+				sparse_fname,
+			)
+		}
 	}
 
 	err = Git.run(h.RepoDir, "remote update origin")
@@ -310,14 +340,18 @@ func (h *Helper) git_checkout() error {
 		return err
 	}
 
-	err = Git.run(h.RepoDir, "config core.sparsecheckout true")
-	if err != nil {
-		return err
+	if do_sparse {
+		err = Git.run(h.RepoDir, "config core.sparsecheckout true")
+		if err != nil {
+			return err
+		}
 	}
 
-	err = git_add_sparse_checkout(h)
-	if err != nil {
-		return err
+	if do_sparse {
+		err = git_add_sparse_checkout(h)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = Git.run(h.RepoDir, "checkout {tag}", "tag", h.PkgId)
@@ -348,11 +382,10 @@ func git_add_sparse_checkout(h *Helper) error {
 	var err error
 	sparse := filepath.Join(h.RepoDir, ".git", "info", "sparse-checkout")
 	if !path_exists(sparse) {
-		f, err := os.Create(sparse)
-		if err != nil {
-			return err
-		}
-		f.Close()
+		return fmt.Errorf(
+			"vcs.git: repository [%s] not configured to allow sparse-checkout",
+			h.RepoDir,
+		)
 	}
 
 	content, err := ioutil.ReadFile(sparse)
