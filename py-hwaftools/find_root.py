@@ -152,6 +152,10 @@ def find_root(ctx, **kwargs):
     ctx.copy_uselib_defs(dst='ROOT-TreePlayer', src='ROOT')
     ctx.env['LIB_ROOT-TreePlayer'] = ['TreePlayer']
 
+    # GenVector
+    ctx.copy_uselib_defs(dst='ROOT-GenVector', src='ROOT')
+    ctx.env['LIB_ROOT-GenVector'] = ['GenVector']
+
     # check for gccxml
     if not ctx.env.HWAF_FOUND_GCCXML:
         ctx.find_gccxml()
