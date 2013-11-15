@@ -8,8 +8,8 @@ import (
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
+	//"github.com/hwaf/hwaf/vcs"
 	//gocfg "github.com/gonuts/config"
-	_ "github.com/hwaf/git-tools/utils"
 )
 
 func hwaf_make_cmd_pkg_rm() *commander.Command {
@@ -90,7 +90,35 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 
 		switch vcspkg.Type {
 
-		case "svn", "git":
+		case "svn":
+			if path_exists(vcspkg.Path) {
+				err = os.RemoveAll(vcspkg.Path)
+				if err != nil {
+					return err
+				}
+				path := vcspkg.Path
+				// clean-up dir if empty...
+				for {
+					path = filepath.Dir(path)
+					if path == srcdir {
+						break
+					}
+					content, err := filepath.Glob(filepath.Join(path, "*"))
+					if err != nil {
+						return err
+					}
+					if len(content) > 0 {
+						break
+					}
+					err = os.RemoveAll(path)
+					if err != nil {
+						return err
+					}
+				}
+			}
+
+		case "git":
+			fmt.Fprintf(os.Stderr, ">>> %#v\n", vcspkg)
 			if path_exists(vcspkg.Path) {
 				err = os.RemoveAll(vcspkg.Path)
 				if err != nil {
