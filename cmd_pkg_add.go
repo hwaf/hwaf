@@ -190,15 +190,21 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		dblock.RUnlock()
 
 		//fmt.Printf(">>> pkgname=%q\n", helper.PkgName)
-		colock.Lock()
+		if helper.Type == "git" {
+			colock.Lock()
+		}
 		err = helper.Checkout()
 		if err != nil {
 			errch <- err
-			colock.Unlock()
+			if helper.Type == "git" {
+				colock.Unlock()
+			}
 			fmt.Printf("%s: checkout package [%s]... [err]\n", n, pkguri)
 			return
 		}
-		colock.Unlock()
+		if helper.Type == "git" {
+			colock.Unlock()
+		}
 
 		dblock.Lock()
 		err = g_ctx.PkgDb.Add(helper.Type, helper.Repo, helper.RepoDir, dir)
