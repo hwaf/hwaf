@@ -795,8 +795,8 @@ def hwaf_find_pkg(self, pkgname, projname=None):
     from pprint import pformat
     errmsg = "hwaf: no such package [%s] in any of the projects: %s" % \
              (pkgname, pformat(self.hwaf_projects().keys()))
-    msg.error(errmsg)
-    raise KeyError("hwaf: no such package [%s]" % pkgname)
+    #msg.error(errmsg)
+    raise KeyError(errmsg)
 
 @waflib.Configure.conf
 def hwaf_pkg_dirs(self, projname=None):
