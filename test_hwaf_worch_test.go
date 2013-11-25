@@ -52,7 +52,8 @@ packages = cjson
 version = master
 source_url = git://github.com/hwaf/hwaf-tests-worch-cjson
 vcs_tag = {version}
-prepare_cmd = cp -r ../../{source_dir}/{source_unpacked}/* . && ./autogen.sh --prefix={install_dir}
+build_dir = {source_dir}/{source_unpacked}
+prepare_cmd = {out}/{source_dir}/{source_unpacked}/autogen.sh --prefix={install_dir}
 prepare_target = config.status
 build_target = src/lib/libcjson.la
 install_target = lib/libcjson.so
