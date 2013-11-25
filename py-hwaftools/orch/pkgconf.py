@@ -9,6 +9,7 @@ from . import deconf
 from .util import check_output, CalledProcessError, update_if, string2list
 from . import features as featmod
 from . import ups
+from . import rootsys
 
 def ncpus():
     try:
@@ -40,6 +41,7 @@ def host_description():
     platform = '{kernelname}-{machine}'.format(**ret)
     ret['platform'] = platform
     ret['ups_flavor'] = ups.flavor()
+    ret['root_config_arch'] = rootsys.arch()
 
     bits = '32'
     libbits = 'lib'
@@ -50,6 +52,7 @@ def host_description():
     ret['libbits'] = libbits
     ret['gcc_dumpversion'] = check_output(['gcc','-dumpversion']).strip()
     ret['gcc_dumpmachine'] = check_output(['gcc','-dumpmachine']).strip()
+
     try:
         ma = check_output(
             ['gcc','-print-multiarch'],    # debian-specific
@@ -60,8 +63,12 @@ def host_description():
     ret['gcc_multiarch'] = ma
     if 'darwin' in ret['kernelname'].lower():
         libc_version = ret['kernelversion'] # FIXME: something better on Mac ?
+        ret['ld_soname_option'] = 'install_name'
+        ret['soext'] = 'dylib'
     else:
         libc_version = check_output(['ldd','--version']).split(b'\n')[0].split()[-1]
+        ret['ld_soname_option'] = 'soname'
+        ret['soext'] = 'so'
     ret['libc_version'] = libc_version
     ret['NCPUS'] = str(ncpus())
         
@@ -84,13 +91,13 @@ class PkgFormatter(object):
             raise
         return ret
 
-def fold_in_feature_requirements(suite, formatter = None, **kwds):
+def fold_in_feature_defaults(suite, formatter = None, **kwds):
     # fold in feature defaults
     for group in suite['groups']:
         new_packages = list()
         for package in group['packages']:
             featlist = string2list(package.get('features'))
-            featcfg = featmod.feature_requirements(featlist)
+            featcfg = featmod.defaults(featlist)
             package = update_if(featcfg, None, **package)            
             new_packages.append(package)
         group['packages'] = new_packages
@@ -115,10 +122,17 @@ def munge_package(package):
 
     version = package.get('version')
     if version:
+        version = version.format(**package)
         package.setdefault('version_2digit', '.'.join(version.split('.')[:2]))
         package.setdefault('version_underscore', version.replace('.','_'))
         package.setdefault('version_dashed', version.replace('.','-'))
         package.setdefault('version_nodots', version.replace('.',''))
+
+
+    for sysdir in 'control urlfile download patch source'.split():
+        package.setdefault('%s_dir' % sysdir, sysdir + 's')
+    package.setdefault('install_dir', '{PREFIX}')
+    package.setdefault('build_dir', 'builds/{package}-{version}')
 
     dest_install_dir = package.get('dest_install_dir') or package.get('install_dir')
     package['dest_install_dir'] = dest_install_dir
@@ -161,9 +175,12 @@ def fold_in_package_vars(suite, formatter, **kwds):
 def load(filename, start='start', formatter = None, **kwds):
 
     # load in initial configuration but delay formatting
-    suite = deconf.load(filename, start=start, formatter=formatter, **kwds)
+    return deconf.load(filename, start=start, formatter=formatter, **kwds)
+
+def fold_in(suite, formatter = None, **kwds):
+
     suite = fold_in_worch_values(suite, formatter, **kwds)
-    suite = fold_in_feature_requirements(suite, formatter, **kwds)
+    suite = fold_in_feature_defaults(suite, formatter, **kwds)
     suite = fold_in_package_vars(suite, formatter, **kwds)
     
     return suite

@@ -1,44 +1,41 @@
 #!/usr/bin/env python
-from .pfi import feature
+'''
+Features to produce a source directory from an online tar/zip archive.
 
-from orch.util import urlopen
+It requires no previous steps.  It provides the 'seturl', 'download' and 'unpack' steps.
+'''
+
+from waflib.TaskGen import feature
+import waflib.Logs as msg
+
+from orch.util import urlopen, get_unpacker
 from orch.wafutil import exec_command
 
-def get_unpacker(filename, dirname):
-    if filename.endswith('.zip'): 
-        return 'unzip -d %s %s' % (dirname, filename)
-    
-    text2flags = {'.tar.gz':'xzf', '.tgz':'xzf', '.tar.bz2':'xjf', '.tar':'xf' }
-    for ext, flags in text2flags.items():
-        if filename.endswith(ext):
-            return 'tar -C %s -%s %s' % (dirname, flags, filename)
-    return 'tar -C %s -xf %s' % (dirname, filename)
+import orch.features
+orch.features.register_defaults(
+    'tarball', 
+    source_urlfile = '{urlfile_dir}/{package}-{version}.url',
+    source_archive_ext = 'tar.gz',
+    source_archive_file = '{source_unpacked}.{source_archive_ext}',
+    source_archive_path = '{download_dir}/{source_archive_file}',
+    source_archive_checksum = '',
+    source_unpacked = '{package}-{version}',
+    source_unpacked_path = '{source_dir}/{source_unpacked}',
+    unpacked_target = 'README-{package}',
+    source_unpacked_target = '{source_unpacked_path}/{unpacked_target}',
+)
 
-requirements = {
-    'source_urlfile': None,
-    'source_url': None,
-    'source_archive_checksum': None, # md5:xxxxx, sha224:xxxx, sha256:xxxx, ...
-    'source_archive_ext': None,
-    'source_archive_file': None,
-    'download_dir': None,
-    'source_download_target': None,
-    'source_dir': None,
-    'source_unpacked': None,
-    'unpacked_target': None,
-}
-
-
-@feature('tarball', **requirements)
-def feature_tarball(info):
+@feature('tarball')
+def feature_tarball(tgen):
     '''
     Handle a tarball source.  Implements steps seturl, download and unpack
     '''
 
     #print ('source_url: "%s" -> urlfile: "%s"' % (info.source_url, info.source_urlfile))
-    info.task('seturl',
-             rule = "echo '%s' > ${TGT}" % info.source_url, 
-             update_outputs = True,
-             target = info.source_urlfile)
+    tgen.step('seturl',
+              rule = "echo '%s' > %s" % (tgen.worch.source_url, tgen.worch.source_urlfile),
+              update_outputs = True,
+              target = tgen.worch.source_urlfile)
 
     def dl_task(task):
         src = task.inputs[0]
@@ -50,10 +47,10 @@ def feature_tarball(info):
         except Exception:
             import traceback
             traceback.print_exc()
-            info.error("[{package}_download] problem downloading [{source_url}]")
+            msg.error(tgen.worch.format("[{package}_download] problem downloading [{source_url}]"))
             raise
 
-        checksum = info.source_archive_checksum
+        checksum = tgen.worch.source_archive_checksum
         if not checksum:
             return
         hasher_name, ref = checksum.split(":")
@@ -63,7 +60,8 @@ def feature_tarball(info):
         hasher.update(tgt.read('rb'))
         data= hasher.hexdigest()
         if data != ref:
-            info.error("[{package}_download] invalid checksum:\nref: %s\nnew: %s" % (ref, data))
+            msg.error(tgen.worch.format("[{package}_download] invalid checksum:\nref: %s\nnew: %s" %\
+                                        (ref, data)))
             try:
                 os.remove(tgt.abspath())
             except IOError: 
@@ -71,20 +69,19 @@ def feature_tarball(info):
             return 1
         return
 
-    info.task('download',
+    tgen.step('download',
               rule = dl_task,
-              source = info.source_urlfile, 
-              target = info.source_archive_file)
+              source = tgen.worch.source_urlfile, 
+              target = tgen.worch.source_archive_path)
 
 
     def unpack_task(task):
-        cmd = get_unpacker(info.source_archive_file.abspath(), 
-                           info.source_dir.abspath())
+        cmd = get_unpacker(task.inputs[0].abspath())
         return exec_command(task, cmd)
 
-    info.task('unpack',
+    tgen.step('unpack',
               rule = unpack_task,
-              source = info.source_archive_file, 
-              target = info.unpacked_target)
+              source = tgen.worch.source_archive_path, 
+              target = tgen.worch.source_unpacked_target)
 
     return

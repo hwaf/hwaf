@@ -1,53 +1,44 @@
 #!/usr/bin/env python
+'''Feature to install a Python package via its setup.py file.
 
-from .pfi import feature
-from orch.wafutil import exec_command, msg
+This feature relies on the "unpack" step to have run.  It is assumed
+the suite is installing Python or that python_install_dir is
+explicitly set.
 
-requirements = {
-    'source_dir': None,
-    'source_unpacked': None,
-    'unpacked_target': 'setup.py',
-    'prepare_target': 'setup.py',
-    'build_cmd': 'python setup.py build',
-    'build_cmd_options': '',
-    'build_target': None,
-    'install_cmd': 'python setup.py install --prefix={python_install_dir}',
-    'install_cmd_options': '',
-    'install_target': None,
-    'build_dir': None,
-    'install_dir': None,        # package config MUST set this to {python_install_dir}
-}
+It produces the "build" and "install" steps.
 
-@feature('pypackage', **requirements)
-def feature_pypackage(info):
+Note, these steps run in the source directory.  A "prepare" step is not required.
 
-    def prepare_task(task):
-        cmd = 'cp -a %s/* %s/' % (info.source_unpacked.abspath(),
-                                  info.build_dir.abspath())
-        #msg.debug('orch: PYPACKAGE cmd: %r' % (cmd,))
-        return exec_command(task, cmd)
-    msg.debug('orch: pypackage: unpacked_target=%s' % info.unpacked_target.abspath())
-    msg.debug('orch: pypackage: prepare_target=%s' % info.prepare_target.abspath())
-    info.task('prepare',
-              rule = prepare_task,
-              source = info.unpacked_target,
-              target = info.prepare_target)
+'''
 
-    def build_task(task):
-        cmd = "%s %s" % (info.build_cmd, info.build_cmd_options)
-        return exec_command(task, cmd)
-    info.task('build',
-              source = info.prepare_target,
-              target = info.build_target,
-              rule = build_task)
+from waflib.TaskGen import feature
 
-    def install_task(task):
-        cmd = "%s %s" % (info.install_cmd, info.install_cmd_options)
-        return exec_command(task, cmd)
-    info.task('install',
-              source = info.build_target,
-              target = info.install_target,
-              rule = install_task)
+import orch.features
+orch.features.register_defaults(
+    'pypackage',
+    build_cmd = 'python setup.py build',
+    build_cmd_options = '',
+    build_target = '',
+    build_target_path = '{source_unpacked_path}/{build_target}',
+    
+    install_cmd = 'python setup.py install --prefix={python_install_dir}',
+    install_cmd_options = '',
+    install_target = '',
+    install_target_path = '{python_install_dir}/{install_target}',
+    
+)
 
+@feature('pypackage')
+def feature_pypackage(tgen):
+    
+    tgen.step('build',
+              rule = tgen.worch.format('{build_cmd} {build_cmd_options}'),
+              source = tgen.control_node('unpack'),
+              target = tgen.worch.build_target_path,
+              cwd = tgen.worch.source_unpacked_path)
 
-    return
+    tgen.step('install',
+              rule = tgen.worch.format('{install_cmd} {install_cmd_options}'),
+              source = [tgen.worch.build_target_path, tgen.control_node('build')],
+              target = tgen.make_node(tgen.worch.install_target_path),
+              cwd = tgen.worch.source_unpacked_path)

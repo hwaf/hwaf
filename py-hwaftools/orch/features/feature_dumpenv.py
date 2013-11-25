@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
-from .pfi import feature
+from waflib.TaskGen import feature
+import waflib.Logs as msg
 
-requirements = {
-    'dumpenv_cmd': None,
-}
+import orch.features
+orch.features.register_defaults('dumpenv', dumpenv_cmd = 'env')
 
-@feature('dumpenv', **requirements)
-def feature_dumpenv(info):
+@feature('dumpenv')
+def feature_dumpenv(tgen):
     '''
     Dump the environment
     '''
-    info.task('dumpenv', rule = info.dumpenv_cmd)
+    msg.debug('orch: dumping environment')
+    tgen.worch_hello()
+    tgen.step('dumpenv', rule = tgen.worch.format("{dumpenv_cmd}|egrep 'PWD|FOO|BAR'"))
+

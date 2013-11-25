@@ -1,154 +1,110 @@
 #!/usr/bin/env python
-'''
-The VCS feature downloads and unpacks a source archive stored in a
-version control system.  It is a drop-in replacement for the "tarball"
-feature.  Its final step is "unpack".
+'''A "tarball"-like feature to which pulls from a VCS instead.  It
+provides the "seturl" and "unpack" steps.  There is no "download" step
+like "tarball" as the checkout/clone is direct to the source
+directory.
 
-Some VCS flavors may place the cloned repository under download_dir
-followed by producing the unpacked source.  Others may directly
-checkout to the unpacked source directory.
 '''
-
 import os.path as osp
-from .pfi import feature
+from waflib.TaskGen import feature
+import waflib.Logs as msg
+
+from orch.util import urlopen, get_unpacker
 from orch.wafutil import exec_command
 
-#from orch.util import urlopen
+import orch.features
+orch.features.register_defaults(
+    'vcs', 
+    source_urlfile = '{urlfile_dir}/{package}-{version}.url',
+    source_unpacked = '{package}-{version}',
+    source_unpacked_path = '{source_dir}/{source_unpacked}',
+    unpacked_target = 'README',
+    source_unpacked_target = '{source_unpacked_path}/{unpacked_target}',
 
-requirements = {
-    'source_urlfile': None,
-    'source_url': None,
-    'source_dir': None,
-    'source_unpacked': None,
-    'unpacked_target': None,
-
-    'vcs_flavor': None,
-    'vcs_tag' : '',
-    'vcs_module': None,
-}
-
-    # def checkout_task(task):
-    #     meth = eval('do_%s' % flavor)
-    #     cmd = meth(info)
-    #     return exec_command(task, cmd)
-    # info.task('unpack',
-    #           rule = checkout_task,
-    #           source = info.source_urlfile,
-    #           target = info.unpacked_target,
+    vcs_flavor = 'git',         # git,hg,svn,cvs 
+    vcs_tag = '',
+    vcs_module = '',            # used by cvs
+)
 
 def single_cmd_rule(func):
-    def rule(info):
+    def rule(tgen):
         def task_func(task):
-            cmd = func(info)
+            cmd = func(tgen)
             return exec_command(task, cmd)
-        info.task('unpack',
+        tgen.step('unpack',
                   rule = task_func,
-                  source = info.source_urlfile,
-                  target = info.unpacked_target)
+                  source = tgen.worch.source_urlfile,
+                  target = tgen.worch.source_unpacked_target)
     return rule
 
 @single_cmd_rule
-def do_cvs(info):
-    tag = getattr(info, 'vcs_tag', '')
+def do_cvs(tgen):
+    tag = tgen.worch.get('vcs_tag', '')
     if tag:
         tag = '-r ' + tag
-    module = getattr(info, 'vcs_module', '')
+    module = tgen.worch.get('vcs_module', '')
     if not module:
-        module = info.package
+        module = tgen.worch.package
     pat = 'cvs -d {source_url} checkout {vcs_tag_opt} -d {source_unpacked} {module}'
-    return info.format(pat, vcs_tag_opt=tag, module=module)
+    return tgen.worch.format(pat, vcs_tag_opt=tag, module=module)
 
 @single_cmd_rule
-def do_svn(info):
-    if getattr(info, 'vcs_tag'):
-        err = info.format('SVN has no concept of tags, can not honor: "{vcs_tag}"')
-        info.error(err)
+def do_svn(tgen):
+    if tgen.worch.get('vcs_tag'):
+        err = tgen.worch.format('SVN has no concept of tags, can not honor: "{vcs_tag}"')
+        msg.error(err)
         raise ValueError(err)
     pat = "svn checkout {source_url} {source_unpacked}"
-    return info.format(pat)
+    return tgen.worch.format(pat)
 
 
 @single_cmd_rule
-def do_hg(info):
-    tag = getattr(info, 'vcs_tag', '')
+def do_hg(tgen):
+    tag = tgen.worch.get('vcs_tag', '')
     if tag:
         tag = '-b ' + tag
     pat = "hg clone {vcs_tag_opt} {source_url} {source_unpacked}"
-    return info.format(pat, vcs_tag_opt=tag)
+    return tgen.worch.format(pat, vcs_tag_opt=tag)
 
 
-def do_git(info):
 
-    # note: it's a slight cheat to not have this in a requirement but
-    # the other do_* functions do not make in intermediate repository
-    git_dir = info.node(info.format('{package}.git'), info.download_dir)
+def do_git(tgen):
 
-    def clone_or_update(task):
-        if osp.exists(git_dir.abspath()):
-            cmd = 'git --git-dir={git_dir} fetch --all --tags'
-        else:
-            cmd = 'git clone --bare {source_url} {git_dir}'
-        cmd = info.format(cmd , git_dir=git_dir.abspath())
-        return exec_command(task, cmd)
-    info.task('download',
+    git_dir = tgen.make_node(tgen.worch.format('{download_dir}/{package}.git'))
+
+    if osp.exists(git_dir.abspath()):
+        clone_or_update = 'git --git-dir={git_dir} fetch --all --tags'
+    else:
+        clone_or_update = 'git clone --bare {source_url} {git_dir}'
+    clone_or_update = tgen.worch.format(clone_or_update , git_dir=git_dir.abspath())
+    tgen.step('download',
               rule = clone_or_update,
-              source = info.source_urlfile,
+              source = tgen.worch.source_urlfile,
               target = git_dir)
 
-    def checkout(task):
-        pat = 'git --git-dir={git_dir} archive'
-        pat += ' --format=tar --prefix={package}-{version}/ '
-        pat += ' ' + getattr(info, 'vcs_tag', 'HEAD') # git tag, branch or hash
-        pat += ' | tar -xvf -'
-        cmd = info.format(pat, git_dir=git_dir.abspath())
-        return exec_command(task, cmd)
-    info.task('unpack',
+    checkout = 'git --git-dir={git_dir} archive'
+    checkout += ' --format=tar --prefix={package}-{version}/ '
+    checkout += ' ' + getattr(tgen.worch, 'vcs_tag', 'HEAD') # git tag, branch or hash
+    checkout += ' | tar -xvf -'
+    checkout = tgen.worch.format(checkout, git_dir=git_dir.abspath())
+    tgen.step('unpack',
               rule = checkout,
-              source = git_dir,
-              target = info.unpacked_target)
+              source = tgen.control_node('download'),
+              target = tgen.worch.source_unpacked_target)
     
 
-@feature('vcs', **requirements)
-def feature_vcs(info):
-    '''
-    Handle source in a version controlled system.  
 
-    This feature implements steps seturl, download and unpack with a
-    result compatible with the "tarball" feature.
-    '''
+@feature('vcs')
+def feature_vcs(tgen):
 
-    flavor = info.vcs_flavor
-    if not flavor:
-        msg = info.format('VCS feature requested but no VCS flavor given for package {package}')
-        info.error(msg)
-        raise ValueError(msg)
-
-    # make a file holding the repository URL.  This is just to prime
-    # the dependency chain.
-    info.debug('VCS: urlfile: %s %s --> %s' % (info.package, info.source_url, info.source_urlfile))
-    def create_urlfile(task):
-        tgt = task.outputs[0]
-        tgt.write(info.format('{source_url}'))
-        return 0
-    info.task('seturl',
-              rule = create_urlfile,
+    tgen.step('seturl', 
+              rule = "echo '%s' > %s" % (tgen.worch.source_url, tgen.worch.source_urlfile),
               update_outputs = True,
-              target = info.source_urlfile,)
+              target = tgen.worch.source_urlfile)
 
-    # do checkout/clone into download area
-    # def checkout_task(task):
-    #     meth = eval('do_%s' % flavor)
-    #     cmd = meth(info)
-    #     return exec_command(task, cmd)
-    # rule = rule_maker(info)
-    # info.task('unpack',
-    #           rule = rule,
-    #           source = info.source_urlfile,
-    #           target = info.unpacked_target,
-    #           )
-    
-
+    flavor = tgen.worch.vcs_flavor
     doer = eval('do_%s' % flavor)
-    doer(info)
+    doer(tgen)
     return
-
+    
+    

@@ -1,35 +1,39 @@
 #!/usr/bin/env python
-from .pfi import feature
-from orch.util import urlopen
+'''
+Features to apply a patch to an unpacked source directory.
 
+It requires the 'unpack' step and provides the 'patch' step.
+'''
+from waflib.TaskGen import feature
+import waflib.Logs as msg
+
+from orch.util import urlopen, get_unpacker
 from orch.wafutil import exec_command
 
-requirements = {
-    'unpacked_target': None,
-    'patch_urlfile': None,
-    'patch_url': None,
-    'patch_file': None,
-    'patch_cmd': 'patch -i',    # append abspath to patch file
-    'patch_cmd_options': '',    # appends to patch_cmd
-    'patch_target': None,
-}
+import orch.features
+orch.features.register_defaults(
+    'patch',
+    patch_urlfile = '{urlfile_dir}/{package}-{version}.patch.url',
+    patch_file = '{package}-{version}.patch',
+    patch_file_path = '{patch_dir}/{patch_file}',
+    patch_checksum = '',
+    patch_cmd = 'patch -i',
+    patch_cmd_std_opts = '',
+    patch_cmd_options = '',
+    )
 
-
-@feature('patch', **requirements)
-def feature_patch(info):
+@feature('patch')
+def feature_patch(tgen):
     '''
-    Apply a patch on the unpacked sources.
+    Apply a patch
     '''
-    if not info.patch_url:
-        return
-
-    info.task('urlpatch',
-              rule = "echo %s > ${TGT}" % info.patch_url,
+    tgen.step('urlpatch',
+              rule = "echo '%s' > %s" % (tgen.worch.patch_url, tgen.worch.patch_urlfile),
               update_outputs = True,
-              source = info.unpacked_target,
-              target = info.patch_urlfile,
-              depends_on = info.format('{package}_unpack'))
+              target = tgen.worch.patch_urlfile)
 
+    # fixme: this is mostly a cut-and-paste from feature_tarball.
+    # Both should be factored out to common spot....
     def dl_task(task):
         src = task.inputs[0]
         tgt = task.outputs[0]
@@ -40,17 +44,36 @@ def feature_patch(info):
         except Exception:
             import traceback
             traceback.print_exc()
-            info.ctx.fatal("[%s] problem downloading [%s]" % (info.format('{package}_dlpatch'), url))
+            msg.error(tgen.worch.format("[{package}_dlpatch] problem downloading [{patch_urlfile}]"))
+            raise
 
-    info.task('dlpatch',
-             rule = dl_task,
-             source = info.patch_urlfile,
-             target = info.patch_file)
+        checksum = tgen.worch.patch_checksum
+        if not checksum:
+            return
+        hasher_name, ref = checksum.split(":")
+        import hashlib, os
+        # FIXME: check the hasher method exists. check for typos.
+        hasher = getattr(hashlib, hasher_name)()
+        hasher.update(tgt.read('rb'))
+        data= hasher.hexdigest()
+        if data != ref:
+            msg.error(tgen.worch.format("[{package}_dlpatch] invalid checksum:\nref: %s\nnew: %s" %\
+                                        (ref, data)))
+            try:
+                os.remove(tgt.abspath())
+            except IOError: 
+                pass
+            return 1
+        return
+    tgen.step('dlpatch',
+              rule = dl_task,
+              source = tgen.worch.patch_urlfile,
+              target = tgen.worch.patch_file)
 
     def apply_patch(task):
         src = task.inputs[0].abspath()
         tgt = task.outputs[0].abspath()
-        cmd = "%s %s %s" % ( info.patch_cmd, src, info.patch_cmd_options )
+        cmd = "%s %s %s" % ( tgen.worch.patch_cmd, src, tgen.worch.patch_cmd_options )
         ret = exec_command(task, cmd)
         if ret != 0:
             return ret
@@ -58,12 +81,13 @@ def feature_patch(info):
         ret = task.exec_command(cmd)
         return ret
 
-    info.task('patch',
-             rule = apply_patch,
-             source = info.patch_file,
-             target = info.patch_target)
+    after =  tgen.worch.package + '_unpack'
+    before = tgen.worch.package + '_prepare'
 
+    tgen.step('patch',
+              rule = apply_patch,
+              source = [tgen.worch.patch_file, tgen.control_node('unpack')],
+              depends_on = [after],
+              after = [after], before = [before])
 
-    info.dependency(info.format('{package}_patch'),
-                    info.format('{package}_prepare'))
-    return
+    

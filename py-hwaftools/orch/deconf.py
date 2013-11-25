@@ -94,7 +94,7 @@ def to_list(lst):
 def get_first_typed_section(cfg, typ, name):
     target = '%s %s' % (typ, name)
     for sec in cfg.sections():
-        if sec.startswith(target):
+        if sec == target:
             return sec
     raise ValueError('No section: <%s> %s' % (typ,name))
 

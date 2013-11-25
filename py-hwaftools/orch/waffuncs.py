@@ -16,18 +16,18 @@ import waflib.Logs as msg
 import waflib.Context as context
 
 # NOT from the waf book.  The waf book example for depends_on doesn't work
-from waflib import TaskGen
-@TaskGen.feature('*') 
-@TaskGen.before_method('process_rule')
-def post_the_other(self):
-    deps = getattr(self, 'depends_on', []) 
-    for name in self.to_list(deps):
-        msg.debug('orch: DEPENDS_ON: %s %s' % ( self.name, name ))
-        other = self.bld.get_tgen_by_name(name) 
-        other.post()
-        for ot in other.tasks:
-            msg.debug('orch: OTHER TASK: %s before: %s' % (ot, ot.before))
-            ot.before.append(self.name)
+# from waflib import TaskGen
+# @TaskGen.feature('*') 
+# @TaskGen.before_method('process_rule')
+# def post_the_other(self):
+#     deps = getattr(self, 'depends_on', []) 
+#     for name in self.to_list(deps):
+#         msg.debug('orch: DEPENDS_ON: %s %s' % ( self.name, name ))
+#         other = self.bld.get_tgen_by_name(name) 
+#         other.post()
+#         for ot in other.tasks:
+#             msg.debug('orch: OTHER TASK: %s before: %s' % (ot, ot.before))
+#             ot.before.append(self.name)
 
 
 # waf entries

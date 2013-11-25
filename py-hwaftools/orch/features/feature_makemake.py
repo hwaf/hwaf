@@ -1,55 +1,47 @@
 #!/usr/bin/env python
 '''
-A feature that does a double-pump make.  Once to build and once to install
+Features to do a "make" double-pump.
+
+This feature rely on the "prepare" step to have run.  It produces "build" and "install" steps.
+
 '''
-from .pfi import feature
+
+from waflib.TaskGen import feature
+import waflib.Logs as msg
+
 from orch.wafutil import exec_command
+import orch.features
 
-requirements = {
-    'prepare_target': None,
+orch.features.register_defaults(
+    'makemake',
+    build_cmd = 'make',
+    build_cmd_options = '',
+    build_target = '',
+    build_target_path = '{build_dir}/{build_target}',
+    
+    install_cmd = 'make install',
+    install_cmd_options = '',   # please don't set DESTDIR implicitly
+    install_target = '',
+    install_target_path = '{install_dir}/{install_target}',
+)
 
-    'build_dir' : None,
-    'build_cmd' : 'make',
-    'build_cmd_options' : '',
-    'build_target': None,
+@feature('makemake')
+def feature_makemake(tgen):
 
-    'install_cmd' : 'make install',
-    'install_cmd_options' : 'DESTDIR={DESTDIR}',
-    'install_target': None,
-
-}
-
-def build(info):
-
-    def build_task(task):
-        cmd = "%s %s" % ( info.build_cmd, info.build_cmd_options )
+    def build(task):
+        cmdstr = '{build_cmd} {build_cmd_options}'
+        cmd = tgen.worch.format(cmdstr)
         return exec_command(task, cmd)
-        
-    info.task('build',
-              rule = build_task,
-              source = info.prepare_target,
-              target = info.build_target,
-              cwd = info.build_dir.abspath())
-    return
+    tgen.step('build',
+              rule = build,
+              source = tgen.control_node('prepare'),
+              target = tgen.worch.build_target_path)
 
-def install(info):
-
-
-    def install_task(task):
-        cmd = "%s %s" % ( info.install_cmd, info.install_cmd_options )
+    def install(task):
+        cmdstr = '{install_cmd} {install_cmd_options}'
+        cmd = tgen.worch.format(cmdstr)
         return exec_command(task, cmd)
-        
-    info.task('install',
-              rule = install_task,
-              source = info.build_target,
-              target = info.install_target)
-
-    return
-
-@feature('makemake', **requirements)
-def feature_makemake(info):
-    build(info)
-    install(info)
-    return
-
-
+    tgen.step('install',
+              rule = install,
+              source = tgen.control_node('build'),
+              target = tgen.make_node(tgen.worch.install_target_path))
