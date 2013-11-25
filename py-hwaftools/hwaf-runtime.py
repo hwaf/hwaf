@@ -214,6 +214,8 @@ def _hwaf_get_runtime_env(ctx):
     
     for k in ctx.env.keys():
         v = ctx.env[k]
+        if not k in ctx.env.HWAF_RUNTIME_ENVVARS:
+            continue
         if k in ctx.env.HWAF_RUNTIME_ENVVARS:
             if isinstance(v, (list,tuple)):
                 if len(v) == 1: v = v[0]
