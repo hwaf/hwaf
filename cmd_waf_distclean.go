@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"os/exec"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
@@ -33,7 +32,7 @@ func hwaf_run_cmd_waf_distclean(cmd *commander.Command, args []string) {
 	handle_err(err)
 
 	subargs := append([]string{"distclean"}, args...)
-	sub := exec.Command(waf, subargs...)
+	sub := g_ctx.Command(waf, subargs...)
 	sub.Stdout = os.Stdout
 	sub.Stderr = os.Stderr
 	err = sub.Run()
