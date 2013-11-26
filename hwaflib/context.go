@@ -41,6 +41,7 @@ type Context struct {
 	gcfg     *gocfg.Config // the global configuration (user>global)
 	lcfg     *gocfg.Config // the local config of a local workarea
 	PkgDb    *PackageDb    // a naive database of locally checked out packages
+	subcmds  []*exec.Cmd   // list of subcommands launched by hwaf
 	atexit   []func()      // list of functions to run at-exit
 }
 
@@ -56,6 +57,7 @@ func NewContext() (*Context, error) {
 		gcfg:     nil,
 		lcfg:     nil,
 		PkgDb:    nil,
+		subcmds:  make([]*exec.Cmd, 0),
 		atexit:   make([]func(), 0),
 	}
 
@@ -81,6 +83,7 @@ func NewContextFrom(workarea string) (*Context, error) {
 		gcfg:     nil,
 		lcfg:     nil,
 		PkgDb:    nil,
+		subcmds:  make([]*exec.Cmd, 0),
 		atexit:   make([]func(), 0),
 	}
 
@@ -358,9 +361,66 @@ func (ctx *Context) init() error {
 	// initialize signal handler
 	go func() {
 		ch := make(chan os.Signal)
-		signal.Notify(ch, os.Interrupt)
-		<-ch
-		ctx.Exit(1)
+		signal.Notify(ch, os.Interrupt, os.Kill)
+		for {
+			select {
+			case sig := <-ch:
+				// fmt.Fprintf(os.Stderr, "\n>>>>>>>>>\ncaught %#v\n", sig)
+				// fmt.Fprintf(os.Stderr, "subcmds: %d %#v\n", len(ctx.subcmds), ctx.subcmds)
+				for _, cmd := range ctx.subcmds {
+					// fmt.Fprintf(os.Stderr, ">>> icmd %d...\n", icmd)
+					if cmd == nil {
+						// fmt.Fprintf(os.Stderr, ">>> cmd nil\n")
+						continue
+					}
+					// fmt.Fprintf(os.Stderr, ">>> sync-ing\n")
+					if stdout, ok := cmd.Stdout.(interface {
+						Sync() error
+					}); ok {
+						stdout.Sync()
+					}
+					if stderr, ok := cmd.Stderr.(interface {
+						Sync() error
+					}); ok {
+						stderr.Sync()
+					}
+					proc := cmd.Process
+					if proc == nil {
+						continue
+					}
+					// fmt.Fprintf(os.Stderr, ">>> signaling...\n")
+					_ = proc.Signal(sig)
+					// fmt.Fprintf(os.Stderr, ">>> signaling... [done]\n")
+					ps, pserr := proc.Wait()
+					if pserr != nil {
+						// fmt.Fprintf(os.Stderr, "waited and got: %#v\n", pserr)
+					} else {
+						if !ps.Exited() {
+							// fmt.Fprintf(os.Stderr, ">>> killing...\n")
+							proc.Kill()
+							// fmt.Fprintf(os.Stderr, ">>> killing... [done]\n")
+						}
+					}
+					if stdout, ok := cmd.Stdout.(interface {
+						Sync() error
+					}); ok {
+						stdout.Sync()
+					}
+					if stderr, ok := cmd.Stderr.(interface {
+						Sync() error
+					}); ok {
+						stderr.Sync()
+					}
+					// fmt.Fprintf(os.Stderr, ">>> re-sync-ing... [done]\n")
+				}
+				// fmt.Fprintf(os.Stderr, "flushing\n")
+				_ = os.Stderr.Sync()
+				_ = os.Stdout.Sync()
+				// fmt.Fprintf(os.Stderr, "flushed\n")
+				ctx.Exit(1)
+				return
+			}
+		}
 	}()
 
 	ctx.gcfg, err = ctx.GlobalCfg()
@@ -572,6 +632,14 @@ func (ctx *Context) Info(format string, args ...interface{}) (n int, err error) 
 
 func (ctx *Context) Warn(format string, args ...interface{}) (n int, err error) {
 	return fmt.Fprintf(os.Stderr, "hwaf: "+format, args...)
+}
+
+// Command returns the os/exec.Cmd struct with some valid defaults
+func (ctx *Context) Command(name string, arg ...string) *exec.Cmd {
+	// fmt.Printf(">>>> command [%s]... %#v\n", name, arg)
+	cmd := exec.Command(name, arg...)
+	ctx.subcmds = append(ctx.subcmds, cmd)
+	return cmd
 }
 
 // EOF
