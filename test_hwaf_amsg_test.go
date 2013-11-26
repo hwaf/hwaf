@@ -30,6 +30,7 @@ func TestAmsgBuildLcg(t *testing.T) {
 
 	err = hwaf.Run("git", "clone", "git://github.com/mana-fwk/amsg-build")
 	if err != nil {
+		hwaf.Display()
 		t.Fatalf(err.Error())
 	}
 
@@ -40,6 +41,7 @@ func TestAmsgBuildLcg(t *testing.T) {
 
 	err = hwaf.Run("/bin/sh", "build.sh", "lcg")
 	if err != nil {
+		hwaf.Display()
 		t.Fatalf(err.Error())
 	}
 }
@@ -66,6 +68,7 @@ func TestAmsgBuildStandalone(t *testing.T) {
 
 	err = hwaf.Run("git", "clone", "git://github.com/mana-fwk/amsg-build")
 	if err != nil {
+		hwaf.Display()
 		t.Fatalf(err.Error())
 	}
 
@@ -76,6 +79,7 @@ func TestAmsgBuildStandalone(t *testing.T) {
 
 	err = hwaf.Run("/bin/sh", "build.sh", "standalone")
 	if err != nil {
+		hwaf.Display()
 		t.Fatalf(err.Error())
 	}
 }
