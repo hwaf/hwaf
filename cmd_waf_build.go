@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"os/exec"
 
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
@@ -47,7 +46,7 @@ func hwaf_run_cmd_waf_build(cmd *commander.Command, args []string) {
 		subargs = append(subargs[:1], append([]string{"--notests"}, subargs[1:]...)...)
 	}
 
-	sub := exec.Command(waf, subargs...)
+	sub := g_ctx.Command(waf, subargs...)
 	sub.Stdout = os.Stdout
 	sub.Stderr = os.Stderr
 	err = sub.Run()
