@@ -459,14 +459,23 @@ func (ctx *Context) init() error {
 		}
 		// add hepwaf-tools to the python environment
 		pypath := os.Getenv("PYTHONPATH")
+		pyhwafdir := ""
 		hwaftools := ""
 		if topdir == ctx.Root {
-			hwaftools = filepath.Join(topdir, "share", "hwaf", "tools")
+			pyhwafdir = filepath.Join(topdir, "share", "hwaf", "tools")
+			hwaftools = strings.Join(
+				[]string{pyhwafdir, filepath.Join(pyhwafdir, "orch")},
+				string(os.PathListSeparator),
+			)
 		} else {
-			hwaftools = filepath.Join(topdir, "py-hwaftools")
+			pyhwafdir = filepath.Join(topdir, "py-hwaftools")
+			hwaftools = strings.Join(
+				[]string{pyhwafdir, filepath.Join(pyhwafdir, "orch")},
+				string(os.PathListSeparator),
+			)
 		}
-		if !path_exists(hwaftools) {
-			return fmt.Errorf("hwaf: no such directory [%s]", hwaftools)
+		if !path_exists(pyhwafdir) {
+			return fmt.Errorf("hwaf: no such directory [%s]", pyhwafdir)
 		}
 		if pypath == "" {
 			pypath = hwaftools

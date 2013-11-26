@@ -220,6 +220,7 @@ def build(ctx):
     ctx.load('hwaf-spy-env', tooldir=_heptooldir)
 
     ctx.load('hwaf-cmtcompat', tooldir=_heptooldir)
+    ctx.load('hwaf-orch', tooldir=_heptooldir)
     
     ctx._hwaf_create_project_hwaf_module()
     ctx._hwaf_load_project_hwaf_module(do_export=False)

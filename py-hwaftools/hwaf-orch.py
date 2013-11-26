@@ -44,10 +44,6 @@ def hwaf_load_orch(ctx):
     if orch_cfg and osp.exists(orch_cfg):
         ctx.options.orch_config = ctx.options.hwaf_worch_config
         ctx.options.orch_start = ctx.options.hwaf_worch_start
-        ## add orch dir for extra tools' benefit
-        import sys
-        worch_dir = osp.join(osp.dirname(__file__), "orch")
-        sys.path = [worch_dir] + sys.path[:]
         ctx.load('orch.tools')
     return
 
