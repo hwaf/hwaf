@@ -17,6 +17,9 @@ func TestAmsgBuildLcg(t *testing.T) {
 	defer os.RemoveAll(workdir)
 	//fmt.Printf(">>> test: %s\n", workdir)
 
+	// prevent (some of the) parent environment to leak in
+	os.Setenv("COMPILER_PATH", "")
+
 	err = os.Chdir(workdir)
 	if err != nil {
 		t.Fatalf(err.Error())
