@@ -57,6 +57,9 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	}
 	handle_err(err)
 
+	pinfos, err := g_ctx.ProjectInfos()
+	handle_err(err)
+
 	if bdist_name == "" {
 		bdist_name = workdir
 		bdist_name = filepath.Base(bdist_name)
@@ -65,9 +68,7 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 		bdist_vers = time.Now().Format("20060102")
 	}
 	if bdist_variant == "" {
-		pinfo, err := g_ctx.ProjectInfos()
-		handle_err(err)
-		bdist_variant, err = pinfo.Get("HWAF_VARIANT")
+		bdist_variant, err = pinfos.Get("HWAF_VARIANT")
 		handle_err(err)
 	}
 	fname := bdist_name + "-" + bdist_vers + "-" + bdist_variant + ".tar.gz"
@@ -75,8 +76,12 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	//fmt.Printf(">> fname=[%s]\n", fname)
 	fname = filepath.Join(workdir, fname)
 
-	// FIXME: get actual value from waf, somehow
-	install_area := filepath.Join(workdir, "install-area")
+	// first try destdir
+	install_area, err := pinfos.Get("DESTDIR")
+	if err != nil {
+		install_area, err = pinfos.Get("PREFIX")
+	}
+	handle_err(err)
 	if !path_exists(install_area) {
 		err = fmt.Errorf(
 			"no such directory [%s]. did you run \"hwaf install\" ?",
