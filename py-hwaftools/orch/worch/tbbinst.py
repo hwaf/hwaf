@@ -14,7 +14,7 @@ def configure(cfg):
         unpacked_target = 'Makefile',
         # Non standard location to build - must match source unpacked
         build_target = 'crappy-build-system',
-        install_target = 'lib/libtbb.so',
+        install_target = '{install_dir}/lib/libtbb.so',
     )
     return
 
@@ -32,7 +32,7 @@ def feature_tbbinst(tgen):
               target = flag)
 
     instarg = tgen.make_node(tgen.worch.install_target)
-    libdir = instarg.parent.abspath()
+    libdir  = instarg.parent.abspath()
     install_rule = 'mkdir -p %s && cp build/*_release/libtbb* %s/'
     install_rule = install_rule % (libdir,libdir)
     tgen.step('install',
