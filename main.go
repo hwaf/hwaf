@@ -63,6 +63,7 @@ func init() {
 			hwaf_make_cmd_waf_sdist(),
 			hwaf_make_cmd_waf_bdist(),
 			hwaf_make_cmd_waf_bdist_deb(),
+			hwaf_make_cmd_waf_bdist_dmg(),
 			hwaf_make_cmd_waf_bdist_rpm(),
 
 			hwaf_make_cmd_dump_env(),
