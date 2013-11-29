@@ -75,10 +75,6 @@ def feature_patch(tgen):
         tgt = task.outputs[0].abspath()
         cmd = "%s %s %s" % ( tgen.worch.patch_cmd, src, tgen.worch.patch_cmd_options )
         ret = exec_command(task, cmd)
-        if ret != 0:
-            return ret
-        cmd = "touch %s" % tgt
-        ret = task.exec_command(cmd)
         return ret
 
     after =  tgen.worch.package + '_unpack'
@@ -87,6 +83,7 @@ def feature_patch(tgen):
     tgen.step('patch',
               rule = apply_patch,
               source = [tgen.worch.patch_file, tgen.control_node('unpack')],
+              target = [tgen.control_node('patch')],
               depends_on = [after],
               after = [after], before = [before])
 

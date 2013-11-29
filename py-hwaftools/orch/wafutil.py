@@ -72,7 +72,7 @@ def exec_command(task, cmd, **kw):
         pass
     if ret == 0:
         return 0
-    msg.error('command failed with code %d, log in %s' % (ret, flog.name))
+    msg.error('command failed with code %s, log in %s' % (ret, flog.name))
     repo = osp.join(cwd, "worch_%s.repo.sh" % task.name)
     with open(repo, 'w') as fp:
         fp.write('#!/bin/bash\n')
