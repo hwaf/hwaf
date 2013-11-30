@@ -21,7 +21,7 @@ func path_exists(name string) bool {
 
 func handle_err(err error) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "**error**: %v\n", err.Error())
+		g_ctx.Errorf("%v\n", err.Error())
 		//panic(err.Error())
 
 		if g_ctx != nil {

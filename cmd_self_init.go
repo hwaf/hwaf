@@ -47,9 +47,9 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 	hwaf_root := os.Getenv("HWAF_ROOT")
 	for _, dir := range []string{g_ctx.Root, hwaf_root} {
 		if dir != "" {
-			g_ctx.Warn("you are trying to 'hwaf self init' while running a HWAF_ROOT-based installation\n")
-			g_ctx.Warn("this is like crossing the streams in Ghostbusters (ie: it's bad.)\n")
-			g_ctx.Warn("if you think you know what you are doing, unset HWAF_ROOT and re-run 'hwaf self init'\n")
+			g_ctx.Warnf("you are trying to 'hwaf self init' while running a HWAF_ROOT-based installation\n")
+			g_ctx.Warnf("this is like crossing the streams in Ghostbusters (ie: it's bad.)\n")
+			g_ctx.Warnf("if you think you know what you are doing, unset HWAF_ROOT and re-run 'hwaf self init'\n")
 			err = fmt.Errorf("${HWAF_ROOT} was set (%s)", dir)
 			handle_err(err)
 		}

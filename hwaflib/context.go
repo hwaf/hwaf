@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	gocfg "github.com/gonuts/config"
+	"github.com/gonuts/logger"
 	"github.com/hwaf/gas"
 	"github.com/hwaf/hwaf/platform"
 )
@@ -34,15 +35,16 @@ func path_exists(name string) bool {
 
 // Context holds the necessary context informations for a hwaf installation
 type Context struct {
-	Root     string        // top-level directory of the hwaf installation
-	sitedir  string        // top-level directory for s/w installation
-	variant  string        // current Variant
-	workarea *string       // work directory for a local checkout
-	gcfg     *gocfg.Config // the global configuration (user>global)
-	lcfg     *gocfg.Config // the local config of a local workarea
-	PkgDb    *PackageDb    // a naive database of locally checked out packages
-	subcmds  []*exec.Cmd   // list of subcommands launched by hwaf
-	atexit   []func()      // list of functions to run at-exit
+	Root     string         // top-level directory of the hwaf installation
+	sitedir  string         // top-level directory for s/w installation
+	variant  string         // current Variant
+	workarea *string        // work directory for a local checkout
+	gcfg     *gocfg.Config  // the global configuration (user>global)
+	lcfg     *gocfg.Config  // the local config of a local workarea
+	PkgDb    *PackageDb     // a naive database of locally checked out packages
+	msg      *logger.Logger // for messaging
+	subcmds  []*exec.Cmd    // list of subcommands launched by hwaf
+	atexit   []func()       // list of functions to run at-exit
 }
 
 func NewContext() (*Context, error) {
@@ -57,6 +59,7 @@ func NewContext() (*Context, error) {
 		gcfg:     nil,
 		lcfg:     nil,
 		PkgDb:    nil,
+		msg:      logger.New("hwaf"),
 		subcmds:  make([]*exec.Cmd, 0),
 		atexit:   make([]func(), 0),
 	}
@@ -83,6 +86,7 @@ func NewContextFrom(workarea string) (*Context, error) {
 		gcfg:     nil,
 		lcfg:     nil,
 		PkgDb:    nil,
+		msg:      logger.New("hwaf"),
 		subcmds:  make([]*exec.Cmd, 0),
 		atexit:   make([]func(), 0),
 	}
@@ -112,7 +116,7 @@ func (ctx *Context) WafBin() (string, error) {
 	if path_exists(waf) {
 		err = ctx.init_waf_ctx()
 		if err != nil {
-			ctx.Warn("problem initializing waf: %v\n", err)
+			ctx.Warnf("problem initializing waf: %v\n", err)
 			return "", err
 		}
 		return waf, nil
@@ -123,7 +127,7 @@ func (ctx *Context) WafBin() (string, error) {
 	if path_exists(waf) {
 		err = ctx.init_waf_ctx()
 		if err != nil {
-			ctx.Warn("problem initializing waf: %v\n", err)
+			ctx.Warnf("problem initializing waf: %v\n", err)
 			return "", err
 		}
 		return waf, nil
@@ -255,7 +259,7 @@ func (ctx *Context) infer_variant(pinfos platform.Platform, hwaf_arch, hwaf_os, 
 			hwaf_os = "archlinux"
 
 		default:
-			ctx.Warn("hwaf: unhandled distribution [%s]\n", pinfos.DistId())
+			ctx.Warnf("hwaf: unhandled distribution [%s]\n", pinfos.DistId())
 			hwaf_os = "linux"
 			hwaf_comp = "gcc"
 		}
@@ -337,14 +341,14 @@ func (ctx *Context) load_env_from_cfg(cfg *gocfg.Config) error {
 		if vv != "" && vv != v {
 			// we don't override parent environment!
 			// would be too confusing
-			ctx.Warn(
+			ctx.Warnf(
 				"configuration tries to override env.var [%s] with [%s] (current=%s)\n",
 				k, v, vv,
 			)
 		}
 		err = os.Setenv(k, v)
 		if err != nil {
-			ctx.Warn("problem setting env. var [%s]: %v\n", k, err)
+			ctx.Warnf("problem setting env. var [%s]: %v\n", k, err)
 		}
 	}
 	return nil
@@ -633,12 +637,24 @@ func (ctx *Context) ProjectInfos() (*ProjectInfos, error) {
 	return NewProjectInfos(pinfo_name)
 }
 
-func (ctx *Context) Info(format string, args ...interface{}) (n int, err error) {
-	return fmt.Fprintf(os.Stdout, "hwaf: "+format, args...)
+func (ctx *Context) SetMsgLevel(lvl logger.Level) {
+	ctx.msg.SetLevel(lvl)
 }
 
-func (ctx *Context) Warn(format string, args ...interface{}) (n int, err error) {
-	return fmt.Fprintf(os.Stderr, "hwaf: "+format, args...)
+func (ctx *Context) Debugf(format string, args ...interface{}) (n int, err error) {
+	return ctx.msg.Debugf(format, args...)
+}
+
+func (ctx *Context) Infof(format string, args ...interface{}) (n int, err error) {
+	return ctx.msg.Infof(format, args...)
+}
+
+func (ctx *Context) Warnf(format string, args ...interface{}) (n int, err error) {
+	return ctx.msg.Warnf(format, args...)
+}
+
+func (ctx *Context) Errorf(format string, args ...interface{}) (n int, err error) {
+	return ctx.msg.Errorf(format, args...)
 }
 
 // Command returns the os/exec.Cmd struct with some valid defaults

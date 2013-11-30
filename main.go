@@ -85,7 +85,7 @@ func main() {
 		if path_exists("wscript") {
 			os.Args = append(os.Args, "waf", "build+install")
 		} else {
-			g_ctx.Warn("'hwaf' needs a command to run. see 'hwaf help' for informations\n")
+			g_ctx.Warnf("'hwaf' needs a command to run. see 'hwaf help' for informations\n")
 			os.Exit(1)
 		}
 	}

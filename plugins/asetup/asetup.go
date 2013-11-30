@@ -66,13 +66,13 @@ func (a *asetup_t) run() error {
 
 	if len(a.args) == 0 {
 		if a.verbose {
-			a.ctx.Info("re-using previously asetup'ed workarea...\n")
+			a.ctx.Infof("re-using previously asetup'ed workarea...\n")
 		}
 		// case where we reuse a previously already asetup'ed workarea
 		_, err = a.ctx.LocalCfg()
 		if err == nil {
 			if a.verbose {
-				a.ctx.Info("re-using previously asetup'ed workarea... [done]\n")
+				a.ctx.Infof("re-using previously asetup'ed workarea... [done]\n")
 			}
 			return nil
 		}
@@ -303,11 +303,11 @@ func (a *asetup_t) process(args []string) error {
 	sitedir := a.ctx.Sitedir()
 	if sitedir == "" {
 		sitedir = filepath.Join("", "opt", "sw", "atlas")
-		a.ctx.Warn("no $HWAF_SITEDIR env. variable. will use [%s]\n", sitedir)
+		a.ctx.Warnf("no $HWAF_SITEDIR env. variable. will use [%s]\n", sitedir)
 	}
 
 	if a.verbose {
-		a.ctx.Info("using sitedir: [%s]\n", sitedir)
+		a.ctx.Infof("using sitedir: [%s]\n", sitedir)
 	}
 
 	if !path_exists(sitedir) {
@@ -323,7 +323,7 @@ func (a *asetup_t) process(args []string) error {
 	}
 
 	if a.verbose {
-		a.ctx.Info("using project root [%s]\n", proj_root)
+		a.ctx.Infof("using project root [%s]\n", proj_root)
 	}
 
 	if version == "" {
@@ -345,7 +345,7 @@ func (a *asetup_t) process(args []string) error {
 	}
 
 	if a.verbose {
-		a.ctx.Info("using project dir [%s]\n", opts.projdir)
+		a.ctx.Infof("using project dir [%s]\n", opts.projdir)
 	}
 
 	// dft_variant is a variation on DefaultVariant.
