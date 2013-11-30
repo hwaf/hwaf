@@ -120,11 +120,6 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 
 	for _, gopkg := range []string{
 		"github.com/hwaf/hwaf",
-		"github.com/hwaf/git-tools/git-archive-all",
-		"github.com/hwaf/git-tools/git-rm-submodule",
-		"github.com/hwaf/git-tools/git-check-clean",
-		"github.com/hwaf/git-tools/git-check-non-tracking",
-		"github.com/hwaf/git-tools/git-check-unpushed",
 	} {
 		goget := exec.Command("go", "get", "-v", gopkg)
 		goget.Dir = gopath

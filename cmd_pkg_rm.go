@@ -9,7 +9,6 @@ import (
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
 	//gocfg "github.com/gonuts/config"
-	_ "github.com/hwaf/git-tools/utils"
 )
 
 func hwaf_make_cmd_pkg_rm() *commander.Command {
