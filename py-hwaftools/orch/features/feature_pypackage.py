@@ -31,9 +31,15 @@ orch.features.register_defaults(
 @feature('pypackage')
 def feature_pypackage(tgen):
     
+    # dummy prepare step, for feature_patch's benefit and "depends = prepare:xxx_install"
+    tgen.step('prepare',
+              rule = "/bin/true",
+              source = tgen.control_node('unpack'),
+              target = tgen.control_node('prepare'))
+
     tgen.step('build',
               rule = tgen.worch.format('{build_cmd} {build_cmd_options}'),
-              source = tgen.control_node('unpack'),
+              source = tgen.control_node('prepare'),
               target = tgen.worch.build_target_path,
               cwd = tgen.worch.source_unpacked_path)
 
