@@ -153,10 +153,27 @@ def find_python(ctx, **kwargs):
         o = str(o)
         ctx.parse_flags(o, 'python')
     pylibdir = waflib.Utils.to_list(ctx.env['LIBPATH_python'])[:]
-    
+
     # rename the uselib variables from PYEMBED to python
     ctx.copy_uselib_defs(dst='python', src='PYEMBED')
-
+    
+    ## the / in PYTHONARCHDIR and PYTHONDIR can confuse some clever software (rootcint)
+    ## remove them from the DEFINES list, keep them in DEFINES_PYEMBED and DEFINES_PYEXT
+    defines = [x for x in ctx.env["DEFINES"]
+               if not (x.startswith("PYTHONARCHDIR=") or
+                       x.startswith("PYTHONDIR"))]
+    ctx.env["DEFINES"] = defines
+    ctx.env["define_key"] = [
+        k for k in ctx.env["define_key"]
+        if not (x in ("PYTHONARCHDIR", "PYTHONDIR"))
+        ]
+    for py in ("PYEXT", "PYEMBED"):
+        for k in ("PYTHONARCHDIR", "PYTHONDIR"):
+            ctx.env.append_unique("DEFINES_%s" % py, "%s=%s" % (k, ctx.env.get_flat(k)))
+            pass
+        pass
+    ####
+    
     # FIXME: hack for python-lcg.
     # python-config --ldflags returns the wrong directory .../config...
     if pylibdir and \
