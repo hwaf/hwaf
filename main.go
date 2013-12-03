@@ -30,6 +30,7 @@ hwaf manages hep-waf based applications and libraries.
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -85,7 +86,7 @@ func main() {
 		if path_exists("wscript") {
 			os.Args = append(os.Args, "waf", "build+install")
 		} else {
-			g_ctx.Warnf("'hwaf' needs a command to run. see 'hwaf help' for informations\n")
+			fmt.Fprintf(os.Stderr, "'hwaf' needs a command to run. see 'hwaf help' for informations\n")
 			os.Exit(1)
 		}
 	}
