@@ -575,7 +575,7 @@ def hwaf_copy_uselib_defs(ctx, dst, src):
               'DEFINES',
               'FRAMEWORK', 'FRAMEWORKPATH',
               'ARCH'):
-        ctx.env['%s_%s' % (n,dst)] = ctx.env['%s_%s' % (n,src)]
+        ctx.env['%s_%s' % (n,dst)] = ctx.env['%s_%s' % (n,src)][:]
     ctx.env.append_unique('DEFINES', 'HAVE_%s=1' % dst.upper().replace('-','_'))
     return
 
