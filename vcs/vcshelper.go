@@ -174,7 +174,7 @@ func NewHelper(pkguri, pkgname, pkgid, pkgdir string) (*Helper, error) {
 		} else {
 			rev = filepath.Base(n) + "-" + rev
 		}
-		err = ioutil.WriteFile(filepath.Join(tmpdir, "version.hwaf"), []byte(n+"-"+rev+"\n"), 0666)
+		err = ioutil.WriteFile(filepath.Join(tmpdir, "version.hwaf"), []byte(rev+"\n"), 0666)
 		if err != nil {
 			return nil, err
 		}
