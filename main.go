@@ -30,7 +30,6 @@ hwaf manages hep-waf based applications and libraries.
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -82,34 +81,27 @@ func init() {
 
 func main() {
 
-	if len(os.Args) == 1 {
-		if path_exists("wscript") {
-			os.Args = append(os.Args, "waf", "build+install")
-		} else {
-			fmt.Fprintf(os.Stderr, "'hwaf' needs a command to run. see 'hwaf help' for informations\n")
-			os.Exit(1)
-		}
-	}
-
 	var err error
 	pwd, err := os.Getwd()
 	handle_err(err)
 
 	wdir := pwd
-	switch os.Args[1] {
-	case "init", "setup", "asetup":
-		// these are supposed to *create* the .hwaf directory...
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "init", "setup", "asetup":
+			// these are supposed to *create* the .hwaf directory...
 
-	default:
-		wdir = func() string {
-			// try to find a workarea in a parent dir:
-			for dir := wdir; dir != "/"; dir = filepath.Dir(dir) {
-				if path_exists(filepath.Join(dir, ".hwaf")) {
-					return dir
+		default:
+			wdir = func() string {
+				// try to find a workarea in a parent dir:
+				for dir := wdir; dir != "/"; dir = filepath.Dir(dir) {
+					if path_exists(filepath.Join(dir, ".hwaf")) {
+						return dir
+					}
 				}
-			}
-			return ""
-		}()
+				return ""
+			}()
+		}
 	}
 
 	switch wdir {
@@ -119,6 +111,16 @@ func main() {
 	default:
 		g_ctx, err = hwaflib.NewContextFrom(wdir)
 		handle_err(err)
+	}
+
+	if len(os.Args) == 1 {
+		if path_exists("wscript") {
+			os.Args = append(os.Args, "waf", "build+install")
+		} else {
+			g_ctx.Errorf("'hwaf' needs a command to run (or be executed from a directory containing a wscript file.)\n")
+			g_ctx.Errorf("run 'hwaf help' for informations\n")
+			os.Exit(1)
+		}
 	}
 
 	err = g_cmd.Flag.Parse(os.Args[1:])
