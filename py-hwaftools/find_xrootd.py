@@ -36,6 +36,15 @@ def find_xrootd(ctx, **kwargs):
         pass
 
 
+    # find xrootd
+    extra_paths = waflib.Utils.to_list(kwargs.get('extra_paths', []))
+    if getattr(ctx.options, 'with_xrootd', None):
+        topdir = ctx.options.with_xrootd
+        topdir = ctx.hwaf_subst_vars(topdir)
+        extra_paths.append(topdir)
+        pass
+    kwargs['extra_paths']=extra_paths
+
     ctx.check_with(
         ctx.check,
         "xrootd",
@@ -45,14 +54,10 @@ def find_xrootd(ctx, **kwargs):
         **kwargs
         )
 
-    bindir = osp.join(ctx.env.XROOTD_HOME, 'bin')
-    libdir = osp.join(ctx.env.XROOTD_HOME, kwargs.get('libdir_name','lib'))
-    incdir = osp.join(ctx.env.XROOTD_HOME, 'include')
+    bindir = osp.join(ctx.env.get_flat('XROOTD_HOME'), 'bin')
+    libdir = osp.join(ctx.env.get_flat('XROOTD_HOME'), kwargs.get('libdir_name','lib'))
+    incdir = osp.join(ctx.env.get_flat('XROOTD_HOME'), 'include')
 
-    path_list = waflib.Utils.to_list(kwargs.get('path_list', []))
-    path_list.append(bindir)
-    kwargs['path_list'] = path_list
-    
     ctx.hwaf_define_uselib(
         name="xrootd-posix", 
         libpath=libdir,
