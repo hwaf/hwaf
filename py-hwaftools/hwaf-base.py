@@ -690,7 +690,22 @@ def hwaf_macro_prepend(self, name, value):
 @conf
 def hwaf_macro_append(self, name, value):
     '''
-    hwaf_macro_append appends a value `value` to a macro named `name`
+    hwaf_macro_append appends a value `value` to a macro named `name`,
+    only if it is not already present
+    @param name: a string
+    @param value: a string or a list of 1-dict {hwaf-tag:"value"}
+           hwaf-tag can be a simple string or a tuple of strings.
+    '''
+    value = self._hwaf_select_value(value)
+    if value:
+        self.env.append_unique(name, value)
+    return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_macro_append_value(self, name, value):
+    '''
+    hwaf_macro_append_value appends a value `value` to a macro named `name`
     @param name: a string
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
