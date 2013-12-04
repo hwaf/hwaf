@@ -113,10 +113,7 @@ def find_posixlibs(ctx, **kwargs):
         pass
 
     # find bfd
-    bfd_mandatory = kwargs.get('bfd_mandatory', True)
-    if ctx.is_darwin():
-        bfd_mandatory = kwargs.get('bfd_mandatory', False)
-        pass
+    bfd_mandatory = kwargs.get('bfd_mandatory', False)
     bfd_kwargs = dict(kwargs)
     bfd_kwargs['mandatory'] = bfd_mandatory
     bfd_kwargs['extra_paths'] = extra_paths
