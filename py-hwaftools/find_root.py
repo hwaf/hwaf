@@ -657,7 +657,7 @@ def gen_rootcint_hook(self, node):
 class gen_rootcint(waflib.Task.Task):
     vars = ['ROOTCINT', 'ROOTCINT_LINKDEF', 'DEFINES', 'CPPFLAGS', 'INCLUDES']
     color= 'BLUE'
-    run_str = '${ROOTCINT} -f ${TGT} -c ${ROOTCINTINCPATHS} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} ${SRC} ${ROOTCINT_LINKDEF}'
+    run_str = '${ROOTCINT} -f ${TGT} -c -p ${ROOTCINTINCPATHS} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} ${SRC} ${ROOTCINT_LINKDEF}'
     ext_in = ['.h']
     ext_out= ['.cxx']
     reentrant = True
