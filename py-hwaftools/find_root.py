@@ -665,7 +665,7 @@ class gen_rootcint(waflib.Task.Task):
     #shell = True
     #after = ['apply_incpaths',]
     
-    def scan_(self):
+    def scan(self):
         c_nodes, c_names = c_preproc.scan(self)
         linkdef = self.env['ROOTCINT_LINKDEF']
         linkdef_node = self.generator.bld.root.find_resource(linkdef)
