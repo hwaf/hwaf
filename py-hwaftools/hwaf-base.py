@@ -676,7 +676,24 @@ def hwaf_declare_macro(self, name, value, override=False):
 @conf
 def hwaf_macro_prepend(self, name, value):
     '''
-    hwaf_macro_prepend prepends a value `value` to a macro named `name`
+    hwaf_macro_prepend prepends a value `value` to a macro named `name`,
+    only if it is not already present.
+    @param name: a string
+    @param value: a string or a list of 1-dict {hwaf-tag:"value"}
+           hwaf-tag can be a simple string or a tuple of strings.
+    '''
+    value = self._hwaf_select_value(value)
+    if value:
+        values = waflib.Utils.to_list(self.env[name])
+        if not (value in values):
+            self.env.prepend_value(name, value)
+    return
+
+### ------------------------------------------------------------------------
+@conf
+def hwaf_macro_prepend_value(self, name, value):
+    '''
+    hwaf_macro_prepend prepends a value `value` to a macro named `name`.
     @param name: a string
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
