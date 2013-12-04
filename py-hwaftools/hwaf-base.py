@@ -741,7 +741,9 @@ def hwaf_macro_remove(self, name, value):
     @param value: a string or a list of 1-dict {hwaf-tag:"value"}
            hwaf-tag can be a simple string or a tuple of strings.
     '''
-    ## FIXME
+    values = [v for v in waflib.Utils.to_list(self.env[name])
+              if v != value]
+    self.env[name] = values
     return
 
 ### ------------------------------------------------------------------------
