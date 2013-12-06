@@ -121,6 +121,7 @@ func hwaf_run_cmd_self_bdist(cmd *commander.Command, args []string) {
 	for _, gopkg := range []string{
 		"github.com/hwaf/hwaf",
 		"github.com/hwaf/hwaf-cmt2yml",
+		"github.com/hwaf/hwaf-gen-extpackdist",
 		"github.com/hwaf/hwaf-rcore2yml",
 	} {
 		goget := exec.Command("go", "get", "-v", gopkg)
