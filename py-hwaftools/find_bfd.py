@@ -99,7 +99,7 @@ def find_bfd(ctx, **kwargs):
         }
         ''',
         use=['z', 'bfd', 'iberty', 'dl'],
-        mandatory= kwargs['mandatory'],
+        mandatory= kwargs.get('mandatory', False),
         )
 
     ctx.env.HWAF_FOUND_BFD = 1
