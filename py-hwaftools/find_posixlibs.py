@@ -14,12 +14,22 @@ _heptooldir = osp.dirname(osp.abspath(__file__))
 
 def options(ctx):
     ctx.load('hwaf-base', tooldir=_heptooldir)
+    ctx.load('find_pthread', tooldir=_heptooldir)
+    ctx.load('find_m', tooldir=_heptooldir)
+    ctx.load('find_dl', tooldir=_heptooldir)
     ctx.load('find_gdb', tooldir=_heptooldir)
+    ctx.load('find_z', tooldir=_heptooldir)
+    ctx.load('find_rt', tooldir=_heptooldir)
     return
 
 def configure(ctx):
     ctx.load('hwaf-base', tooldir=_heptooldir)
+    ctx.load('find_pthread', tooldir=_heptooldir)
+    ctx.load('find_m', tooldir=_heptooldir)
+    ctx.load('find_dl', tooldir=_heptooldir)
     ctx.load('find_gdb', tooldir=_heptooldir)
+    ctx.load('find_z', tooldir=_heptooldir)
+    ctx.load('find_rt', tooldir=_heptooldir)
     return
 
 @conf
@@ -31,55 +41,35 @@ def find_posixlibs(ctx, **kwargs):
         ctx.fatal('load a C compiler first')
         pass
 
-    if not ctx.env.HWAF_FOUND_CXX_COMPILER:
-        ctx.fatal('load a C++ compiler first')
-        pass
-
     if not ctx.env.HWAF_FOUND_GDB:
         # gdb might have installed interesting libs (iberty, bfd)
         ctx.find_gdb(mandatory=False)
         pass
     
     # find libm
-    ctx.check_with(
-        ctx.check,
-        "m",
-        features='c cprogram',
-        lib='m',
-        uselib_store='m',
-        **kwargs
-        )
-
+    libm_kw = dict(kwargs)
+    libm_kw['mandatory'] = libm_kw.get('m_mandatory', False)
+    ctx.find_m(**libm_kw)
+    
     # find dl
-    ctx.check_with(
-        ctx.check,
-        "dl",
-        features='c cprogram',
-        lib='dl',
-        uselib_store='dl',
-        **kwargs
-        )
+    dl_kw = dict(kwargs)
+    dl_kw['mandatory'] = dl_kw.get('dl_mandatory', False)
+    ctx.find_dl(**dl_kw)
 
     # find pthread
-    ctx.check_with(
-        ctx.check,
-        "pthread",
-        features='c cprogram',
-        lib='pthread',
-        uselib_store='pthread',
-        **kwargs
-        )
+    pthread_kw = dict(kwargs)
+    pthread_kw['mandatory'] = pthread_kw.get('pthread_mandatory', False)
+    ctx.find_pthread(**pthread_kw)
 
     # find libz
-    ctx.check_with(
-        ctx.check,
-        "zlib",
-        features='c cprogram',
-        header_name="zlib.h",
-        lib='z',
-        uselib_store='z',
-        **kwargs
-        )
+    libz_kw = dict(kwargs)
+    libz_kw['mandatory'] = libz_kw.get('z_mandatory', False)
+    ctx.find_z(**libz_kw)
+
+    # find rt
+    librt_kw = dict(kwargs)
+    librt_kw['mandatory'] = librt_kw.get('rt_mandatory', False)
+    ctx.find_rt(**librt_kw)
 
     extra_paths = waflib.Utils.to_list(kwargs.get('extra_paths',[]))
     if ctx.env.GDB_HOME:
@@ -131,18 +121,6 @@ def find_posixlibs(ctx, **kwargs):
         )
     ctx.env.DEFINES_bfd = []
     
-    # find rt
-    if not ctx.is_darwin():
-        ctx.check_with(
-            ctx.check,
-            "rt",
-            features='c cprogram',
-            lib='rt',
-            uselib_store='rt',
-            **kwargs
-            )
-        pass
-
     # test bfd
     ctx.check_cc(
         msg="Checking bfd_init",
