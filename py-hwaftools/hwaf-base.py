@@ -885,6 +885,8 @@ def hwaf_declare_path(self, name, value=None):
     self.hwaf_declare_runtime_env(name)
     self.env.append_unique('HWAF_PATH_VARS', name)
     if value is None:
+        value = os.getenv(name, None)
+    if value is None:
         return
     value = self._hwaf_select_value(value)
     if self.env[name]:
@@ -895,6 +897,9 @@ def hwaf_declare_path(self, name, value=None):
                 "package [%s] re-declares pre-existing path [%s]\n old-value=%r\n new-value=%r"
                 % (self.hwaf_pkg_name(), name, old_value, new_value)
                 )
+    if isinstance(value, type("")):
+        value = value.split(os.pathsep)
+        pass
     self.env[name] = value
     return
 
