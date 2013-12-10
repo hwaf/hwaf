@@ -152,7 +152,7 @@ func waf_get_yaml_map(data interface{}) map[string]interface{} {
 
 func waf_validate_sections(data map[string]interface{}, sections ...string) error {
 	not_valid := make([]string, 0)
-	for k, _ := range data {
+	for k := range data {
 		found := false
 		for _, ref := range sections {
 			if ref == k {
@@ -544,7 +544,7 @@ func waf_get_wscript(data map[string]interface{}) (*hlib.Wscript_t, error) {
 		//  handle 'tag' section
 
 		tgt_names := make([]string, 0, len(bld))
-		for k, _ := range bld {
+		for k := range bld {
 			if k != "hwaf-call" && k != "tools" && k != "env" {
 				tgt_names = append(tgt_names, k)
 			}

@@ -103,7 +103,7 @@ func (db *PackageDb) Pkgs() []string {
 	}
 
 	pkgs := make([]string, 0, len(db.db))
-	for k, _ := range db.db {
+	for k := range db.db {
 		pkgs = append(pkgs, k)
 	}
 	sort.Strings(pkgs)

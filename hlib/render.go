@@ -354,7 +354,7 @@ func gen_wscript_env(env Env_t) string {
 	var str []string
 
 	//str = append(str, "## environment -- begin")
-	for k, _ := range env {
+	for k := range env {
 		str = append(str, fmt.Sprintf("ctx.hwaf_declare_runtime_env(%q)", k))
 		// 	switch len(values) {
 		// 	case 0:

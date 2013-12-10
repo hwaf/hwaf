@@ -412,7 +412,7 @@ func git_add_sparse_checkout(h *Helper) error {
 	paths[pkgname] = struct{}{}
 
 	pkgs := make([]string, 0, len(paths))
-	for pkg, _ := range paths {
+	for pkg := range paths {
 		pkgs = append(pkgs, pkg)
 	}
 	sort.Strings(pkgs)
