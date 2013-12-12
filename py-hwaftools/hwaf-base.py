@@ -647,7 +647,7 @@ def hwaf_declare_runtime_alias(self, dst, src):
             k,v = alias
             if k == dst:
                 raise KeyError("the alias [%s] was already defined (to=%r)" % (k,v))
-    self.env.append_unique('HWAF_RUNTIME_ALIASES', [(dst, src)])
+    self.env.append_unique('HWAF_RUNTIME_ALIASES', [[dst, src]])
     return
 
 ### ------------------------------------------------------------------------
