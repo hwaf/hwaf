@@ -109,7 +109,7 @@ def envvars(envtext):
 
         # we have a multi-lined shell function, slurp until we get an ending '}'
         val = [val]
-        for line in lines.next():
+        for line in next(lines):
             val.append(line)
             if line.endswith('}'):
                 break

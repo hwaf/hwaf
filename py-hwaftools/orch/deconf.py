@@ -140,11 +140,11 @@ def add_includes(cfg, sec):
     to_check += os.environ.get('DECONF_INCLUDE_PATH','').split(':')
 
     for fname in inc_list:
-        fpath = find_file(fname, other_dirs)
+        fpath = find_file(fname, to_check)
         if not fpath:
             raise ValueError(
                 'Failed to locate file: %s (%s)' % 
-                (fname, ':'.join(other_dirs))
+                (fname, ':'.join(to_check))
                 )
         cfg.read(fpath)
         if hasattr(cfg, 'files'):

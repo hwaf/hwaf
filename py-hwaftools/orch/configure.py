@@ -1,4 +1,4 @@
-#!/usr/bin/env pytyhon
+#!/usr/bin/env python
 '''
 Configure waf for worch.
 
@@ -8,25 +8,40 @@ import os
 from glob import glob
 
 import waflib.Logs as msg
+from waflib import Context
+
 from . import util
 from . import pkgconf
 from . import envmunge
 
+def locate_config_files(pat):
+    if os.path.exists(pat):
+        return [pat]
+    if pat.startswith('/'):
+        return glob(pat)
+
+    for cdir in os.environ.get('WORCH_CONFIG_PATH','').split(':') + [Context.waf_dir]:
+        maybe = os.path.join(cdir,pat)
+        got = glob(maybe)
+        if got: return got
+
+    return None
+    
+
 def get_orch_config_files(cfg):
     if not cfg.options.orch_config:
         raise RuntimeError('No Orchestration configuration file given (--orch-config)')
-    orch_config = []
-    for lst in util.string2list(cfg.options.orch_config):
-        lst = lst.strip()
-        orch_config += glob(lst)
+    orch_config = [] 
     okay = True
-    for maybe in orch_config:
-        if os.path.exists(maybe):
+    for pat in util.string2list(cfg.options.orch_config):
+        got = locate_config_files(pat)
+        if got:
+            orch_config += got
             continue
-        msg.error('No such file: %s' % maybe)
+        msg.error('File not found: "%s"' % pat)
         okay = False
-    if not okay or not orch_config:
-        raise ValueError('missing configuration files')
+    if not okay:
+        raise ValueError('no configuration files')
     return orch_config
 
 def configure(cfg):
