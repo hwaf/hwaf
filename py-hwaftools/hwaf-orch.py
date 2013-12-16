@@ -44,6 +44,7 @@ def hwaf_load_orch(ctx):
     if orch_cfg and osp.exists(orch_cfg):
         ctx.options.orch_config = ctx.options.hwaf_worch_config
         ctx.options.orch_start = ctx.options.hwaf_worch_start
+        ctx.env.env = ctx._hwaf_get_runtime_env()
         ctx.load('orch.tools')
     return
 

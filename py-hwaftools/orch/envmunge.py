@@ -122,7 +122,8 @@ def decompose(cfg, suite):
     for pkg_name, pkg in pd.items():
 
         mlist = make_envmungers(pkg, pd)
-        menv = mungers.apply(mlist)
+        environ = cfg.env.env or dict()
+        menv = mungers.apply(mlist, **environ)
 
         new_env = base_env.derive()
         new_env.munged_env = menv
