@@ -25,12 +25,14 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf(cmd *commander.Command, args []string) error {
 	var err error
 	//n := "hwaf-" + cmd.Name()
 
 	waf, err := g_ctx.WafBin()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if len(args) == 1 && args[0] == "build+install" {
 		sub := g_ctx.Command(waf, "build", "--notests")
@@ -38,24 +40,30 @@ func hwaf_run_cmd_waf(cmd *commander.Command, args []string) {
 		sub.Stdout = os.Stdout
 		sub.Stderr = os.Stderr
 		err = sub.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		sub = g_ctx.Command(waf, "install")
 		sub.Stdin = os.Stdin
 		sub.Stdout = os.Stdout
 		sub.Stderr = os.Stderr
 		err = sub.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
-		return
+		return err
 	}
 	subargs := append([]string{}, args...)
 	sub := g_ctx.Command(waf, subargs...)
 	sub.Stdin = os.Stdin
 	sub.Stdout = os.Stdout
 	sub.Stderr = os.Stderr
+
 	err = sub.Run()
-	handle_err(err)
+
+	return err
 }
 
 // EOF

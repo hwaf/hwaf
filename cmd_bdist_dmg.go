@@ -33,15 +33,14 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_bdist_dmg(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_bdist_dmg(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
 	switch len(args) {
 	case 0:
 	default:
-		err = fmt.Errorf("%s: too many arguments (%s)", n, len(args))
-		handle_err(err)
+		return fmt.Errorf("%s: too many arguments (%s)", n, len(args))
 	}
 
 	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
@@ -55,10 +54,14 @@ func hwaf_run_cmd_waf_bdist_dmg(cmd *commander.Command, args []string) {
 		// not a git repo... assume we are at the root, then...
 		workdir, err = os.Getwd()
 	}
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	pinfos, err := g_ctx.ProjectInfos()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if bdist_name == "" {
 		bdist_name = workdir
@@ -69,7 +72,9 @@ func hwaf_run_cmd_waf_bdist_dmg(cmd *commander.Command, args []string) {
 	}
 	if bdist_variant == "" {
 		bdist_variant, err = pinfos.Get("HWAF_VARIANT")
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	bdist_fname := bdist_name + "-" + bdist_vers + "-" + bdist_variant + ".dmg"
@@ -79,13 +84,14 @@ func hwaf_run_cmd_waf_bdist_dmg(cmd *commander.Command, args []string) {
 	if err != nil {
 		install_area, err = pinfos.Get("PREFIX")
 	}
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	if !path_exists(install_area) {
-		err = fmt.Errorf(
+		return fmt.Errorf(
 			"no such directory [%s]. did you run \"hwaf install\" ?",
 			install_area,
 		)
-		handle_err(err)
 	}
 
 	if verbose {
@@ -93,7 +99,9 @@ func hwaf_run_cmd_waf_bdist_dmg(cmd *commander.Command, args []string) {
 	}
 
 	hdiutil, err := exec.LookPath("hdiutil")
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	dmg := exec.Command(hdiutil,
 		"create",
@@ -111,11 +119,15 @@ func hwaf_run_cmd_waf_bdist_dmg(cmd *commander.Command, args []string) {
 		dmg.Stderr = os.Stderr
 	}
 	err = dmg.Run()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		fmt.Printf("%s: building DMG [%s]...[ok]\n", n, bdist_fname)
 	}
+
+	return nil
 }
 
 // EOF

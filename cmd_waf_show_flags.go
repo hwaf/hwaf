@@ -26,11 +26,13 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_show_flags(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_show_flags(cmd *commander.Command, args []string) error {
 	var err error
 
 	pinfos, err := g_ctx.ProjectInfos()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	switch len(args) {
 	case 0:
@@ -53,8 +55,11 @@ func hwaf_run_cmd_waf_show_flags(cmd *commander.Command, args []string) {
 		for _, err := range err_stack {
 			fmt.Printf("**error: %v\n", err)
 		}
-		handle_err(err)
+		// TODO(sbinet) define and use an ErrorStack
+		return err_stack[0]
 	}
+
+	return nil
 }
 
 // EOF

@@ -41,15 +41,14 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_bdist_rpm(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_bdist_rpm(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
 	switch len(args) {
 	case 0:
 	default:
-		err = fmt.Errorf("%s: too many arguments (%s)", n, len(args))
-		handle_err(err)
+		return fmt.Errorf("%s: too many arguments (%s)", n, len(args))
 	}
 
 	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
@@ -79,7 +78,9 @@ func hwaf_run_cmd_waf_bdist_rpm(cmd *commander.Command, args []string) {
 		// not a git repo... assume we are at the root, then...
 		workdir, err = os.Getwd()
 	}
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if bdist_name == "" {
 		bdist_name = workdir
@@ -90,23 +91,33 @@ func hwaf_run_cmd_waf_bdist_rpm(cmd *commander.Command, args []string) {
 	}
 	if bdist_variant == "" {
 		pinfo, err := g_ctx.ProjectInfos()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		bdist_variant, err = pinfo.Get("HWAF_VARIANT")
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 	fname := bdist_name + "-" + bdist_vers + "-" + bdist_variant
 	rpmbldroot, err := ioutil.TempDir("", "hwaf-rpm-buildroot-")
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	defer os.RemoveAll(rpmbldroot)
 	for _, dir := range []string{
 		"RPMS", "SRPMS", "BUILD", "SOURCES", "SPECS", "tmp",
 	} {
 		err = os.MkdirAll(filepath.Join(rpmbldroot, dir), 0700)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	specfile, err := os.Create(filepath.Join(rpmbldroot, "SPECS", bdist_name+".spec"))
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	rpminfos := RpmInfo{
 		Name:      bdist_name,
@@ -120,38 +131,50 @@ func hwaf_run_cmd_waf_bdist_rpm(cmd *commander.Command, args []string) {
 	// get tarball from 'hwaf bdist'...
 	bdist_fname := strings.Replace(fname, ".rpm", "", 1) + ".tar.gz"
 	if !path_exists(bdist_fname) {
-		err = fmt.Errorf("no such file [%s]. did you run \"hwaf bdist\" ?", bdist_fname)
-		handle_err(err)
+		return fmt.Errorf("no such file [%s]. did you run \"hwaf bdist\" ?", bdist_fname)
 	}
 	bdist_fname, err = filepath.Abs(bdist_fname)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	{
 		// first, massage the tar ball to something rpmbuild expects...
 
 		// ok, now we're done.
 		dst, err := os.Create(filepath.Join(rpmbldroot, "SOURCES", filepath.Base(bdist_fname)))
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		src, err := os.Open(bdist_fname)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		_, err = io.Copy(dst, src)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	if bdist_spec != "" {
 		bdist_spec = os.ExpandEnv(bdist_spec)
 		bdist_spec, err = filepath.Abs(bdist_spec)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		if !path_exists(bdist_spec) {
-			err = fmt.Errorf("no such file [%s]", bdist_spec)
-			handle_err(err)
+			return fmt.Errorf("no such file [%s]", bdist_spec)
 		}
 		user_spec, err := os.Open(bdist_spec)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		defer user_spec.Close()
 
 		_, err = io.Copy(specfile, user_spec)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	} else {
 		bdist_spec = specfile.Name()
 
@@ -200,16 +223,24 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 /*
 `) // */ for emacs...
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		err = spec_tmpl.Execute(specfile, rpminfos)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = specfile.Sync()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	err = specfile.Close()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if !strings.HasSuffix(fname, ".rpm") {
 		fname = fname + ".rpm"
@@ -220,7 +251,9 @@ rm -rf %{buildroot}
 	}
 
 	rpmbld, err := exec.LookPath("rpmbuild")
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	rpm := exec.Command(rpmbld,
 		"-bb",
@@ -233,10 +266,14 @@ rm -rf %{buildroot}
 		rpm.Stderr = os.Stderr
 	}
 	err = rpm.Run()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	dst, err := os.Create(fname)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	defer dst.Close()
 
 	rpmarch := ""
@@ -246,8 +283,7 @@ rm -rf %{buildroot}
 	case "386":
 		rpmarch = "i386"
 	default:
-		err = fmt.Errorf("unhandled GOARCH [%s]", runtime.GOARCH)
-		handle_err(err)
+		return fmt.Errorf("unhandled GOARCH [%s]", runtime.GOARCH)
 	}
 	srcname := fmt.Sprintf(
 		"%s-%s-%s.%s.rpm",
@@ -257,17 +293,25 @@ rm -rf %{buildroot}
 		rpmarch)
 
 	src, err := os.Open(filepath.Join(rpmbldroot, "RPMS", rpmarch, srcname))
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	defer src.Close()
 
 	_, err = io.Copy(dst, src)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	err = dst.Sync()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		fmt.Printf("%s: building RPM [%s]...[ok]\n", n, fname)
 	}
+
+	return nil
 }
 
 // EOF

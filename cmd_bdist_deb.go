@@ -41,15 +41,14 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
 	switch len(args) {
 	case 0:
 	default:
-		err = fmt.Errorf("%s: too many arguments (%s)", n, len(args))
-		handle_err(err)
+		return fmt.Errorf("%s: too many arguments (%s)", n, len(args))
 	}
 
 	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
@@ -80,7 +79,9 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 		// not a git repo... assume we are at the root, then...
 		workdir, err = os.Getwd()
 	}
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if bdist_name == "" {
 		bdist_name = workdir
@@ -91,28 +92,40 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 	}
 	if bdist_variant == "" {
 		pinfo, err := g_ctx.ProjectInfos()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		bdist_variant, err = pinfo.Get("HWAF_VARIANT")
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 	fname := bdist_name + "-" + bdist_vers + "-" + bdist_variant
 	debtopdir, err := ioutil.TempDir("", "hwaf-deb-buildroot-")
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	defer os.RemoveAll(debtopdir)
 
 	debbldroot := filepath.Join(debtopdir, "debian")
 	err = os.MkdirAll(debbldroot, 0755)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	for _, dir := range []string{
 		"DEBIAN",
 	} {
 		err = os.MkdirAll(filepath.Join(debbldroot, dir), 0755)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	specfile, err := os.Create(filepath.Join(debbldroot, "DEBIAN", "control"))
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	debarch := ""
 	switch runtime.GOARCH {
@@ -121,8 +134,7 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 	case "386":
 		debarch = "i386"
 	default:
-		err = fmt.Errorf("unhandled GOARCH [%s]", runtime.GOARCH)
-		handle_err(err)
+		return fmt.Errorf("unhandled GOARCH [%s]", runtime.GOARCH)
 	}
 
 	debinfos := DebInfo{
@@ -139,10 +151,14 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 	bdist_fname := strings.Replace(fname, ".deb", "", 1) + ".tar.gz"
 	if !path_exists(bdist_fname) {
 		err = fmt.Errorf("no such file [%s]. did you run \"hwaf bdist\" ?", bdist_fname)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 	bdist_fname, err = filepath.Abs(bdist_fname)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	{
 		untar := exec.Command("tar", "-zxf", bdist_fname, "--strip", "1")
 		untar.Dir = debbldroot
@@ -150,24 +166,34 @@ func hwaf_run_cmd_waf_bdist_deb(cmd *commander.Command, args []string) {
 		untar.Stdout = os.Stdout
 		untar.Stderr = os.Stderr
 		err = untar.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	if bdist_spec != "" {
 		bdist_spec = os.ExpandEnv(bdist_spec)
 		bdist_spec, err = filepath.Abs(bdist_spec)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		if !path_exists(bdist_spec) {
 			err = fmt.Errorf("no such file [%s]", bdist_spec)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 		user_spec, err := os.Open(bdist_spec)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		defer user_spec.Close()
 
 		_, err = io.Copy(specfile, user_spec)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	} else {
 		bdist_spec = specfile.Name()
 
@@ -182,16 +208,24 @@ Depends: coreutils
 Maintainer: hwaf
 Description: hwaf generated DEB for {{.Name}}
 `) // */ for emacs...
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		err = spec_tmpl.Execute(specfile, debinfos)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = specfile.Sync()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	err = specfile.Close()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if !strings.HasSuffix(fname, ".deb") {
 		fname = fname + ".deb"
@@ -202,7 +236,9 @@ Description: hwaf generated DEB for {{.Name}}
 	}
 
 	debbld, err := exec.LookPath("dpkg-deb")
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	//dpkg-deb --build debian
 	deb := exec.Command(debbld,
 		"--build",
@@ -215,24 +251,36 @@ Description: hwaf generated DEB for {{.Name}}
 		deb.Stderr = os.Stderr
 	}
 	err = deb.Run()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	dst, err := os.Create(fname)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	defer dst.Close()
 
 	src, err := os.Open(filepath.Join(debtopdir, "debian.deb"))
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	defer src.Close()
 
 	_, err = io.Copy(dst, src)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	err = dst.Sync()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		fmt.Printf("%s: building DEB [%s]...[ok]\n", n, fname)
 	}
+
+	return nil
 }
 
 // EOF

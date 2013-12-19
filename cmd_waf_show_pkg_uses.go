@@ -24,19 +24,20 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_show_pkg_uses(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_show_pkg_uses(cmd *commander.Command, args []string) error {
 	var err error
 	//n := "hwaf-" + cmd.Name()
 
 	waf, err := g_ctx.WafBin()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	subargs := append([]string{"show-pkg-uses"}, args...)
 	sub := g_ctx.Command(waf, subargs...)
 	sub.Stdout = os.Stdout
 	sub.Stderr = os.Stderr
-	err = sub.Run()
-	handle_err(err)
+	return sub.Run()
 }
 
 // EOF

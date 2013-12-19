@@ -25,14 +25,18 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_show_platform(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_show_platform(cmd *commander.Command, args []string) error {
 	var err error
 	//n := "hwaf-" + cmd.Name()
 
 	pinfos, err := platform.Infos()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	fmt.Printf("%s\ndefault variant: %s\n", pinfos, g_ctx.DefaultVariant())
+
+	return err
 }
 
 // EOF

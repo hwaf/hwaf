@@ -6,17 +6,16 @@ import (
 	//gocfg "github.com/gonuts/config"
 )
 
-func hwaf_make_cmd_pkg() *commander.Commander {
-	cmd := &commander.Commander{
-		Name:  "pkg",
+func hwaf_make_cmd_pkg() *commander.Command {
+	cmd := &commander.Command{
 		Short: "add, remove or inspect sub-packages",
-		Commands: []*commander.Command{
+		Subcommands: []*commander.Command{
 			hwaf_make_cmd_pkg_add(),
 			hwaf_make_cmd_pkg_create(),
 			hwaf_make_cmd_pkg_ls(),
 			hwaf_make_cmd_pkg_rm(),
 		},
-		Flag: flag.NewFlagSet("hwaf-pkg", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-pkg", flag.ExitOnError),
 	}
 	return cmd
 }

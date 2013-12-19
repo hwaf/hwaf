@@ -24,8 +24,9 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_show_default_variant(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_show_default_variant(cmd *commander.Command, args []string) error {
 	fmt.Printf("%s\n", g_ctx.DefaultVariant())
+	return nil
 }
 
 // EOF

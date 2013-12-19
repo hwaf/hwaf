@@ -27,7 +27,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_pkg_ls(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_pkg_ls(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-pkg-" + cmd.Name()
 	pat := ".*?"
@@ -37,8 +37,7 @@ func hwaf_run_cmd_pkg_ls(cmd *commander.Command, args []string) {
 	case 1:
 		pat = args[0]
 	default:
-		err = fmt.Errorf("%s: you need to give a package pattern to list", n)
-		handle_err(err)
+		return fmt.Errorf("%s: you need to give a package pattern to list", n)
 	}
 
 	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
@@ -48,13 +47,17 @@ func hwaf_run_cmd_pkg_ls(cmd *commander.Command, args []string) {
 	}
 
 	re_pkg, err := regexp.Compile(pat)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	pkgs := g_ctx.PkgDb.Pkgs()
 	for _, v := range pkgs {
 		if re_pkg.MatchString(v) {
 			pkg, err := g_ctx.PkgDb.GetPkg(v)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 			fmt.Printf("%s (%s)\n", pkg.Path, pkg.Type)
 		}
 	}
@@ -62,6 +65,8 @@ func hwaf_run_cmd_pkg_ls(cmd *commander.Command, args []string) {
 	if verbose {
 		fmt.Printf("%s: listing packages [%s]... [ok]\n", n, pat)
 	}
+
+	return err
 }
 
 // EOF

@@ -33,7 +33,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_dump_env(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_dump_env(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
@@ -41,8 +41,7 @@ func hwaf_run_cmd_dump_env(cmd *commander.Command, args []string) {
 	case 0:
 		// ok
 	default:
-		err = fmt.Errorf("%s: does not take any argument\n", n)
-		handle_err(err)
+		return fmt.Errorf("%s: does not take any argument\n", n)
 	}
 
 	var export_var func(k string) string
@@ -55,8 +54,7 @@ func hwaf_run_cmd_dump_env(cmd *commander.Command, args []string) {
 
 	switch shell {
 	default:
-		err = fmt.Errorf("%s: shell of type [%s] is unknown", n, shell)
-		handle_err(err)
+		return fmt.Errorf("%s: shell of type [%s] is unknown", n, shell)
 
 	case "sh":
 		export_var = func(k string) string { return fmt.Sprintf("export %s=", k) }
@@ -70,7 +68,9 @@ func hwaf_run_cmd_dump_env(cmd *commander.Command, args []string) {
 	}
 
 	bin, err := exec.LookPath(os.Args[0])
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	buf := new(bytes.Buffer)
 	waf := exec.Command(
@@ -81,11 +81,15 @@ func hwaf_run_cmd_dump_env(cmd *commander.Command, args []string) {
 	waf.Stderr = os.Stderr
 
 	err = waf.Run()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	env := make(map[string]string)
 	err = json.Unmarshal(buf.Bytes(), &env)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	//fmt.Printf("%v\n", env)
 	for k, v := range env {
@@ -94,7 +98,8 @@ func hwaf_run_cmd_dump_env(cmd *commander.Command, args []string) {
 		}
 		fmt.Printf("%s%q\n", export_var(k), v)
 	}
-	return
+
+	return nil
 }
 
 // EOF

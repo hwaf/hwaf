@@ -42,7 +42,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_setup(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-" + cmd.Name()
 	dirname := "."
@@ -52,8 +52,7 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	case 1:
 		dirname = args[0]
 	default:
-		err = fmt.Errorf("%s: you need to give a directory name", n)
-		handle_err(err)
+		return fmt.Errorf("%s: you need to give a directory name", n)
 	}
 
 	dirname = os.ExpandEnv(dirname)
@@ -85,28 +84,38 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 
 	if cfg_fname != "" && !path_exists(cfg_fname) {
 		err = fmt.Errorf("configuration file [%s] does not exist (or is not readable)", cfg_fname)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, projdir := range projdirs {
 		if !path_exists(projdir) {
 			err = fmt.Errorf("no such directory: [%s]", projdir)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 
 		pinfo := filepath.Join(projdir, "project.info")
 		if !path_exists(pinfo) {
 			err = fmt.Errorf("no such file: [%s]", pinfo)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	pwd, err := os.Getwd()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	defer os.Chdir(pwd)
 
 	err = os.Chdir(dirname)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		fmt.Printf("%s: create local config...\n", n)
@@ -118,11 +127,15 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	// if the user provided a configuration file use that as a default
 	if cfg_fname != "" && path_exists(cfg_fname) {
 		lcfg, err = gocfg.ReadDefault(cfg_fname)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	} else {
 		if path_exists(lcfg_fname) {
 			lcfg, err = gocfg.ReadDefault(lcfg_fname)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		} else {
 			lcfg = gocfg.NewDefault()
 		}
@@ -130,9 +143,8 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 
 	section := "hwaf-cfg"
 	if !lcfg.HasSection(section) && !lcfg.AddSection(section) {
-		err = fmt.Errorf("%s: could not create section [%s] in file [%s]",
+		return fmt.Errorf("%s: could not create section [%s] in file [%s]",
 			n, section, lcfg_fname)
-		handle_err(err)
 	}
 
 	// fetch a few informations from the first project.info
@@ -140,9 +152,13 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 	//projvers := time.Now().Format("20060102")
 	if len(projdirs) > 0 {
 		pinfo, err := hwaflib.NewProjectInfos(filepath.Join(projdirs[0], "project.info"))
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		proj_variant, err = pinfo.Get("HWAF_VARIANT")
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	if variant != "" {
@@ -164,19 +180,22 @@ func hwaf_run_cmd_setup(cmd *commander.Command, args []string) {
 			lcfg.RemoveOption(section, k)
 		}
 		if !lcfg.AddOption(section, k, v) {
-			err := fmt.Errorf("%s: could not add option [%s] to section [%s]",
+			return fmt.Errorf("%s: could not add option [%s] to section [%s]",
 				n, k, section,
 			)
-			handle_err(err)
 		}
 	}
 
 	err = lcfg.WriteFile(lcfg_fname, 0600, "")
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		fmt.Printf("%s: setup workarea [%s]... [ok]\n", n, dirname)
 	}
+
+	return err
 }
 
 // EOF

@@ -29,7 +29,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_sdist(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_sdist(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
@@ -40,13 +40,13 @@ func hwaf_run_cmd_waf_sdist(cmd *commander.Command, args []string) {
 	case 1:
 		fname = args[0]
 	default:
-		err = fmt.Errorf("%s: too many arguments (%d)", n, len(args))
-		handle_err(err)
+		return fmt.Errorf("%s: too many arguments (%d)", n, len(args))
 	}
 
 	if fname == "" {
 	}
 
+	return err
 }
 
 // EOF

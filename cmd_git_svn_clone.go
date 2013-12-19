@@ -43,7 +43,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_git_svn_clone(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_git_svn_clone(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
@@ -107,7 +107,9 @@ func hwaf_run_cmd_git_svn_clone(cmd *commander.Command, args []string) {
 			if len(out) != 0 {
 				fmt.Printf("%s: you have pending changes. The working tree must be clean in order to continue.\n", n)
 			}
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		ok := true
@@ -130,7 +132,8 @@ func hwaf_run_cmd_git_svn_clone(cmd *commander.Command, args []string) {
 	}
 
 	err = ctx.Run()
-	handle_err(err)
+
+	return err
 }
 
 // EOF

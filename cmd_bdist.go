@@ -35,15 +35,14 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
 	switch len(args) {
 	case 0:
 	default:
-		err = fmt.Errorf("%s: too many arguments (%d)", n, len(args))
-		handle_err(err)
+		return fmt.Errorf("%s: too many arguments (%d)", n, len(args))
 	}
 
 	bdist_name := cmd.Flag.Lookup("name").Value.Get().(string)
@@ -55,10 +54,14 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 		// not a git repo... assume we are at the root, then...
 		workdir, err = os.Getwd()
 	}
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	pinfos, err := g_ctx.ProjectInfos()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if bdist_name == "" {
 		bdist_name = workdir
@@ -69,7 +72,9 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	}
 	if bdist_variant == "" {
 		bdist_variant, err = pinfos.Get("HWAF_VARIANT")
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 	fname := bdist_name + "-" + bdist_vers + "-" + bdist_variant + ".tar.gz"
 
@@ -81,13 +86,17 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	if err != nil {
 		install_area, err = pinfos.Get("PREFIX")
 	}
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	if !path_exists(install_area) {
 		err = fmt.Errorf(
 			"no such directory [%s]. did you run \"hwaf install\" ?",
 			install_area,
 		)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 	// the prefix to prepend inside the tar-ball
 	prefix := bdist_name + "-" + bdist_vers //+ "-" + bdist_variant
@@ -96,20 +105,28 @@ func hwaf_run_cmd_waf_bdist(cmd *commander.Command, args []string) {
 	bdist_dir := filepath.Join(workdir, ".hwaf-bdist-install-area-"+bdist_variant)
 	_ = os.RemoveAll(bdist_dir)
 	err = os.MkdirAll(bdist_dir, 0700)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	// move the install-area...
 	err = os.Rename(install_area, filepath.Join(bdist_dir, prefix))
-	handle_err(err)
-	defer func() {
+	if err != nil {
+		return err
+	}
+	defer func() error {
 		err = os.Rename(filepath.Join(bdist_dir, prefix), install_area)
-		handle_err(err)
-		err = os.RemoveAll(bdist_dir)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
+		return os.RemoveAll(bdist_dir)
 	}()
 
 	err = _tar_gz(fname, bdist_dir)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
+	return err
 }
 
 // EOF

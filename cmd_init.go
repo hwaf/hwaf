@@ -33,7 +33,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_init(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-" + cmd.Name()
 	dirname := ""
@@ -44,8 +44,7 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	case 1:
 		dirname = args[0]
 	default:
-		err = fmt.Errorf("%s: you need to give a directory name", n)
-		handle_err(err)
+		return fmt.Errorf("%s: you need to give a directory name", n)
 	}
 
 	dirname = os.ExpandEnv(dirname)
@@ -55,7 +54,9 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 	proj_name := dirname
 	if proj_name == "." {
 		pwd, err := os.Getwd()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		proj_name = filepath.Base(pwd)
 	} else {
 		proj_name = filepath.Base(dirname)
@@ -67,15 +68,21 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 
 	if !path_exists(dirname) {
 		err = os.MkdirAll(dirname, 0700)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	pwd, err := os.Getwd()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	defer os.Chdir(pwd)
 
 	err = os.Chdir(dirname)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	// setup hep-waf-tools
 	if verbose {
@@ -87,7 +94,9 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		hwaf_tools_dir = filepath.Join(g_ctx.Root, "share", "hwaf", "tools")
 	case "":
 		hwaf_tools_dir, err = gas.Abs("github.com/hwaf/hwaf/py-hwaftools")
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	hwaf_tools_dir = os.ExpandEnv(hwaf_tools_dir)
@@ -95,12 +104,13 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		fmt.Printf("%s: using hwaf/tools from [%s]...\n", n, hwaf_tools_dir)
 	}
 	if !path_exists(hwaf_tools_dir) {
-		err = fmt.Errorf("no such directory [%s]", hwaf_tools_dir)
-		handle_err(err)
+		return fmt.Errorf("no such directory [%s]", hwaf_tools_dir)
 	}
 	if !path_exists(".hwaf") {
 		err = os.MkdirAll(".hwaf", 0700)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	// add waf-bin
@@ -114,7 +124,9 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 			hwaf_bin_dir = filepath.Join(g_ctx.Root, "bin")
 		case "":
 			hwaf_bin_dir, err = gas.Abs("github.com/hwaf/hwaf")
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 		hwaf_bin_dir = os.ExpandEnv(hwaf_bin_dir)
 		if verbose {
@@ -122,31 +134,45 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		}
 		if !path_exists(hwaf_bin_dir) {
 			err = fmt.Errorf("no such hwaf-bin dir [%s]", hwaf_bin_dir)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 		src_waf, err := os.Open(filepath.Join(hwaf_bin_dir, "waf"))
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		defer src_waf.Close()
 
 		if !path_exists(".hwaf/bin") {
 			err = os.MkdirAll(".hwaf/bin", 0700)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 
 		waf_bin, err := os.Create(filepath.Join(".hwaf", "bin", "waf"))
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		defer waf_bin.Close()
 
 		if runtime.GOOS != "windows" {
 			err = waf_bin.Chmod(0755)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 
 		_, err = io.Copy(waf_bin, src_waf)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		err = waf_bin.Sync()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	// add pkgdb
@@ -155,7 +181,9 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 		[]byte("{}\n"),
 		0755,
 	)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	// add template wscript
 	if verbose {
@@ -164,11 +192,15 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 
 	if !path_exists("wscript") {
 		wscript_tmpl, err := os.Open(filepath.Join(hwaf_tools_dir, "hwaf-wscript"))
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		defer wscript_tmpl.Close()
 
 		wscript_b, err := ioutil.ReadAll(wscript_tmpl)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		// replace 'hwaf-workarea' with workarea name
 		wscript_s := strings.Replace(
@@ -178,24 +210,38 @@ func hwaf_run_cmd_init(cmd *commander.Command, args []string) {
 			-1)
 
 		wscript, err := os.Create("wscript")
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		defer wscript.Close()
 
 		_, err = io.WriteString(wscript, wscript_s)
-		handle_err(err)
-		handle_err(wscript.Sync())
-		handle_err(wscript.Close())
+		if err != nil {
+			return err
+		}
+		err = wscript.Sync()
+		if err != nil {
+			return err
+		}
+		err = wscript.Close()
+		if err != nil {
+			return err
+		}
 	}
 
 	// create 'src' directory
 	if !path_exists("src") {
 		err = os.MkdirAll("src", 0700)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	if verbose {
 		fmt.Printf("%s: creating workarea [%s]... [ok]\n", n, dirname)
 	}
+
+	return err
 }
 
 // EOF

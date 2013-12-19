@@ -24,26 +24,31 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_run(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_run(cmd *commander.Command, args []string) error {
 	var err error
 	//n := "hwaf-" + cmd.Name()
 
 	waf, err := g_ctx.WafBin()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	pwd, err := os.Getwd()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	err = os.Setenv("HWAF_WAF_SHELL_CWD", pwd)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	subargs := append([]string{"run", "--"}, args...)
 	sub := g_ctx.Command(waf, subargs...)
 	sub.Stdin = os.Stdin
 	sub.Stdout = os.Stdout
 	sub.Stderr = os.Stderr
-	err = sub.Run()
-	handle_err(err)
+	return sub.Run()
 }
 
 // EOF

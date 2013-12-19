@@ -26,10 +26,11 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_version(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_version(cmd *commander.Command, args []string) error {
 	vers := g_ctx.Version()
 	rev := g_ctx.Revision()
 	fmt.Printf("hwaf-%s (%s)\n", vers, rev)
+	return nil
 }
 
 // EOF

@@ -26,7 +26,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-self-" + cmd.Name()
 
@@ -34,8 +34,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 	case 0:
 		// ok
 	default:
-		err = fmt.Errorf("%s: does NOT take any argument", n)
-		handle_err(err)
+		return fmt.Errorf("%s: does NOT take any argument", n)
 	}
 
 	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
@@ -50,8 +49,7 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 			g_ctx.Warnf("you are trying to 'hwaf self init' while running a HWAF_ROOT-based installation\n")
 			g_ctx.Warnf("this is like crossing the streams in Ghostbusters (ie: it's bad.)\n")
 			g_ctx.Warnf("if you think you know what you are doing, unset HWAF_ROOT and re-run 'hwaf self init'\n")
-			err = fmt.Errorf("${HWAF_ROOT} was set (%s)", dir)
-			handle_err(err)
+			return fmt.Errorf("${HWAF_ROOT} was set (%s)", dir)
 		}
 	}
 
@@ -60,6 +58,8 @@ func hwaf_run_cmd_self_init(cmd *commander.Command, args []string) {
 	if verbose {
 		fmt.Printf("%s... [ok]\n", n)
 	}
+
+	return err
 }
 
 // EOF

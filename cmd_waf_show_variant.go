@@ -24,16 +24,22 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_show_variant(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_show_variant(cmd *commander.Command, args []string) error {
 	var err error
 	//n := "hwaf-" + cmd.Name()
 
 	pinfo, err := g_ctx.ProjectInfos()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	variant, err := pinfo.Get("HWAF_VARIANT")
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	fmt.Printf("%s\n", variant)
+
+	return err
 }
 
 // EOF

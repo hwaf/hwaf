@@ -33,7 +33,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-pkg-" + cmd.Name()
 	pkgpath := ""
@@ -41,8 +41,7 @@ func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
 	case 1:
 		pkgpath = args[0]
 	default:
-		err = fmt.Errorf("%s: you need to give a package (full) path", n)
-		handle_err(err)
+		return fmt.Errorf("%s: you need to give a package (full) path", n)
 	}
 
 	script := cmd.Flag.Lookup("script").Value.Get().(string)
@@ -50,8 +49,7 @@ func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
 	case "yml", "py":
 		// ok
 	default:
-		err = fmt.Errorf("%s: script type is either 'yml' or 'py' (got: %q)", n, script)
-		handle_err(err)
+		return fmt.Errorf("%s: script type is either 'yml' or 'py' (got: %q)", n, script)
 	}
 
 	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
@@ -70,7 +68,9 @@ func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
 
 	if len(authors) == 0 {
 		usr, err := user.Current()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		//fmt.Printf(">>>>> %v\n", usr)
 		usrname := usr.Name
 		if usrname == "" {
@@ -84,26 +84,33 @@ func hwaf_run_cmd_pkg_create(cmd *commander.Command, args []string) {
 	}
 
 	cfg, err := g_ctx.LocalCfg()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	pkgdir := "src"
 	if cfg.HasOption("hwaf-cfg", "pkgdir") {
 		pkgdir, err = cfg.String("hwaf-cfg", "pkgdir")
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	dir := filepath.Join(pkgdir, pkgpath)
 	if path_exists(dir) {
 		err = fmt.Errorf("%s: directory [%s] already exists on filesystem", n, dir)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = os.MkdirAll(dir, 0755)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if g_ctx.PkgDb.HasPkg(dir) {
-		err = fmt.Errorf("%s: a package with name [%s] already exists", n, dir)
-		handle_err(err)
+		return fmt.Errorf("%s: a package with name [%s] already exists", n, dir)
 	}
 
 	pkgname := filepath.Base(pkgpath)
@@ -198,17 +205,22 @@ build: {
 		"src",
 	} {
 		err = os.MkdirAll(filepath.Join(dir, d), 0755)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	wscript, err := os.Create(filepath.Join(dir, fname))
-	handle_err(err)
-	defer func() {
-		err = wscript.Sync()
-		handle_err(err)
-		err = wscript.Close()
-		handle_err(err)
-	}()
+	if err != nil {
+		return err
+	}
+	defer func(err *error) {
+		*err = wscript.Sync()
+		if *err != nil {
+			return
+		}
+		*err = wscript.Close()
+	}(&err)
 
 	/* fill the template */
 	pkg := struct {
@@ -238,16 +250,24 @@ build: {
 		},
 	})
 	tmpl, err = tmpl.Parse(txt)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	err = tmpl.Execute(wscript, &pkg)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	err = g_ctx.PkgDb.Add("local", "", pkgdir, dir)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		fmt.Printf("%s: create package [%s]... [ok]\n", n, pkgpath)
 	}
+
+	return err
 }
 
 // EOF

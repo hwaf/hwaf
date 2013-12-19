@@ -33,25 +33,28 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-pkg-" + cmd.Name()
 	switch len(args) {
 	case 0:
-		err = fmt.Errorf("%s: you need to give (at least) one package name to remove", n)
-		handle_err(err)
+		return fmt.Errorf("%s: you need to give (at least) one package name to remove", n)
 	}
 
 	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
 	force := cmd.Flag.Lookup("f").Value.Get().(bool)
 
 	cfg, err := g_ctx.LocalCfg()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	srcdir := "src"
 	if cfg.HasOption("hwaf-cfg", "cmtpkgs") {
 		srcdir, err = cfg.String("hwaf-cfg", "cmtpkgs")
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	do_rm := func(pkgname string) error {
@@ -180,13 +183,13 @@ func hwaf_run_cmd_pkg_rm(cmd *commander.Command, args []string) {
 		for i, s := range args {
 			sargs[i] = fmt.Sprintf("%q", s)
 		}
-		handle_err(
-			fmt.Errorf(
-				"removing package%s %s failed.",
-				npkgs, strings.Join(sargs, ", "),
-			),
+		return fmt.Errorf(
+			"removing package%s %s failed.",
+			npkgs, strings.Join(sargs, ", "),
 		)
 	}
+
+	return err
 }
 
 // EOF

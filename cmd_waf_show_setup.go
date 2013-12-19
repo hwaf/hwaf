@@ -23,7 +23,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_show_setup(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_show_setup(cmd *commander.Command, args []string) error {
 	var err error
 	//n := "hwaf-" + cmd.Name()
 
@@ -34,9 +34,7 @@ func hwaf_run_cmd_waf_show_setup(cmd *commander.Command, args []string) {
 	fmt.Printf("workarea=%s\n", workdir)
 	lconf, err := g_ctx.LocalCfg()
 	if err != nil {
-		handle_err(
-			fmt.Errorf("%v\ndid you forget to run 'hwaf setup' ?", err),
-		)
+		return fmt.Errorf("%v\ndid you forget to run 'hwaf setup' ?", err)
 	}
 
 	for _, k := range [][]string{
@@ -49,9 +47,12 @@ func hwaf_run_cmd_waf_show_setup(cmd *commander.Command, args []string) {
 		v, err = lconf.String(section, option)
 		if err != nil {
 			v = "<N/A>"
+			err = nil
 		}
 		fmt.Printf("%s=%s\n", option, v)
 	}
+
+	return err
 }
 
 // EOF

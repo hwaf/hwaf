@@ -32,21 +32,23 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_waf_show_aliases(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_waf_show_aliases(cmd *commander.Command, args []string) error {
 	var err error
 
 	pinfo, err := g_ctx.ProjectInfos()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	val, err := pinfo.Get("HWAF_RUNTIME_ALIASES")
 	if err != nil {
 		if _, ok := err.(gocfg.OptionError); ok {
 			// no alias defined
-			g_ctx.Errorf("no runtime alias defined\n")
-			g_ctx.Exit(1)
-			return
+			return fmt.Errorf("no runtime alias defined")
 		}
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	tmp := make([][2]string, 0)
@@ -56,7 +58,9 @@ func hwaf_run_cmd_waf_show_aliases(cmd *commander.Command, args []string) {
 
 	buf := bytes.NewReader([]byte(val))
 	err = json.NewDecoder(buf).Decode(&tmp)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	aliases := make(map[string]string, len(tmp))
 	for _, alias := range tmp {
@@ -81,9 +85,12 @@ func hwaf_run_cmd_waf_show_aliases(cmd *commander.Command, args []string) {
 			fmt.Printf("%s=%q\n", dst, src)
 		}
 		if !all_good {
-			g_ctx.Exit(1)
+			// TODO(sbinet) define and use an ErrorStack
+			err = fmt.Errorf("problem while running show alias")
 		}
 	}
+
+	return err
 }
 
 // EOF

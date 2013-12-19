@@ -29,7 +29,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_git_rm_submodule(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_git_rm_submodule(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-" + cmd.Name()
 
@@ -40,8 +40,7 @@ func hwaf_run_cmd_git_rm_submodule(cmd *commander.Command, args []string) {
 		pkgdir = args[0]
 		pkgname = args[0]
 	default:
-		err = fmt.Errorf("%s: needs a submodule name to remove", n)
-		handle_err(err)
+		return fmt.Errorf("%s: needs a submodule name to remove", n)
 	}
 
 	nocommit := cmd.Flag.Lookup("no-commit").Value.Get().(bool)
@@ -50,10 +49,14 @@ func hwaf_run_cmd_git_rm_submodule(cmd *commander.Command, args []string) {
 
 	if !path_exists(pkgdir) {
 		cfg, err := g_ctx.LocalCfg()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		if cfg.HasOption("hwaf-cfg", "cmtpkgs") {
 			cmtpkgdir, err = cfg.String("hwaf-cfg", "cmtpkgs")
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 		if path_exists(filepath.Join(cmtpkgdir, pkgdir)) {
 			pkgdir = filepath.Join(cmtpkgdir, pkgdir)
@@ -65,23 +68,29 @@ func hwaf_run_cmd_git_rm_submodule(cmd *commander.Command, args []string) {
 
 	if !path_exists(pkgdir) {
 		err = fmt.Errorf("no such directory [%s]", pkgdir)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	if !nocommit {
 		git := exec.Command("git", "add", ".gitmodules")
 		err = git.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		git = exec.Command(
 			"git", "commit", "-m",
 			fmt.Sprintf("removed submodule [%s]", pkgname),
 		)
 		err = git.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
-	handle_err(err)
+	return err
 }
 
 // EOF

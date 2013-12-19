@@ -3,14 +3,12 @@ package main
 import (
 	"github.com/gonuts/commander"
 	"github.com/gonuts/flag"
-	//gocfg "github.com/gonuts/config"
 )
 
-func hwaf_make_cmd_waf_show() *commander.Commander {
-	cmd := &commander.Commander{
-		Name:  "show",
+func hwaf_make_cmd_waf_show() *commander.Command {
+	cmd := &commander.Command{
 		Short: "show informations about packages and projects",
-		Commands: []*commander.Command{
+		Subcommands: []*commander.Command{
 			hwaf_make_cmd_waf_show_active_tags(),
 			hwaf_make_cmd_waf_show_aliases(),
 			hwaf_make_cmd_waf_show_constituents(),
@@ -25,7 +23,7 @@ func hwaf_make_cmd_waf_show() *commander.Commander {
 			hwaf_make_cmd_waf_show_setup(),
 			hwaf_make_cmd_waf_show_variant(),
 		},
-		Flag: flag.NewFlagSet("hwaf-show", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-show", flag.ExitOnError),
 	}
 	return cmd
 }

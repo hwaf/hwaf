@@ -29,7 +29,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_self_bdist_upload(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_self_bdist_upload(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-self-" + cmd.Name()
 
@@ -42,8 +42,7 @@ func hwaf_run_cmd_self_bdist_upload(cmd *commander.Command, args []string) {
 	case 1:
 		fname = args[0]
 	default:
-		err = fmt.Errorf("%s: takes a path to a file to upload", n)
-		handle_err(err)
+		return fmt.Errorf("%s: takes a path to a file to upload", n)
 	}
 
 	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
@@ -55,8 +54,7 @@ func hwaf_run_cmd_self_bdist_upload(cmd *commander.Command, args []string) {
 	if !path_exists(fname) {
 		fname = os.ExpandEnv(fname)
 		if !path_exists(fname) {
-			err = fmt.Errorf("no such file [%s]", fname)
-			handle_err(err)
+			return fmt.Errorf("no such file [%s]", fname)
 		}
 	}
 
@@ -67,11 +65,15 @@ func hwaf_run_cmd_self_bdist_upload(cmd *commander.Command, args []string) {
 	scp.Stdout = os.Stdout
 	scp.Stderr = os.Stderr
 	err = scp.Run()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		fmt.Printf("%s [%s]... [ok]\n", n, fname)
 	}
+
+	return err
 }
 
 // EOF

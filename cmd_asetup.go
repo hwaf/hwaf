@@ -40,10 +40,8 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) {
-	var err error
-	err = asetup.Run(g_ctx, cmd, args)
-	handle_err(err)
+func hwaf_run_cmd_asetup(cmd *commander.Command, args []string) error {
+	return asetup.Run(g_ctx, cmd, args)
 }
 
 // EOF

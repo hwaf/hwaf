@@ -6,15 +6,14 @@ import (
 	//gocfg "github.com/gonuts/config"
 )
 
-func hwaf_make_cmd_git() *commander.Commander {
-	cmd := &commander.Commander{
-		Name:  "git",
+func hwaf_make_cmd_git() *commander.Command {
+	cmd := &commander.Command{
 		Short: "hwaf related git tools",
-		Commands: []*commander.Command{
+		Subcommands: []*commander.Command{
 			hwaf_make_cmd_git_rm_submodule(),
 			hwaf_make_cmd_git_svn_clone(),
 		},
-		Flag: flag.NewFlagSet("hwaf-git", flag.ExitOnError),
+		Flag: *flag.NewFlagSet("hwaf-git", flag.ExitOnError),
 	}
 	return cmd
 }

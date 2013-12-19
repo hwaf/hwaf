@@ -33,7 +33,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_pmgr_get(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_pmgr_get(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-pmgr-" + cmd.Name()
 	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
@@ -43,8 +43,7 @@ func hwaf_run_cmd_pmgr_get(cmd *commander.Command, args []string) {
 	case 1:
 		pkguri = args[0]
 	default:
-		err = fmt.Errorf("%s: you need to give a package URI to install", n)
-		handle_err(err)
+		return fmt.Errorf("%s: you need to give a package URI to install", n)
 	}
 
 	pkguri = strings.Replace(pkguri, "http://", "", 1)
@@ -59,6 +58,8 @@ func hwaf_run_cmd_pmgr_get(cmd *commander.Command, args []string) {
 	if verbose {
 		fmt.Printf("%s: get [%s]... [ok]\n", n, pkguri)
 	}
+
+	return err
 }
 
 // EOF

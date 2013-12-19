@@ -38,13 +38,13 @@ import (
 	"github.com/hwaf/hwaf/hwaflib"
 )
 
-var g_cmd *commander.Commander
+var g_cmd *commander.Command
 var g_ctx *hwaflib.Context
 
 func init() {
-	g_cmd = &commander.Commander{
-		Name: os.Args[0],
-		Commands: []*commander.Command{
+	g_cmd = &commander.Command{
+		UsageLine: "hwaf",
+		Subcommands: []*commander.Command{
 			hwaf_make_cmd_asetup(),
 			hwaf_make_cmd_init(),
 			hwaf_make_cmd_setup(),
@@ -67,15 +67,14 @@ func init() {
 			hwaf_make_cmd_waf_bdist_rpm(),
 
 			hwaf_make_cmd_dump_env(),
-		},
-		Flag: flag.NewFlagSet("hwaf", flag.ExitOnError),
-		Commanders: []*commander.Commander{
+
 			hwaf_make_cmd_git(),
 			hwaf_make_cmd_pkg(),
 			hwaf_make_cmd_waf_show(),
 			hwaf_make_cmd_pmgr(),
 			hwaf_make_cmd_self(),
 		},
+		Flag: *flag.NewFlagSet("hwaf", flag.ExitOnError),
 	}
 }
 
@@ -127,7 +126,7 @@ func main() {
 	handle_err(err)
 
 	args := g_cmd.Flag.Args()
-	err = g_cmd.Run(args)
+	err = g_cmd.Dispatch(args)
 	handle_err(err)
 
 	g_ctx.Exit(0)

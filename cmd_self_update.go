@@ -33,7 +33,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-self-" + cmd.Name()
 
@@ -41,8 +41,7 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	case 0:
 		// ok
 	default:
-		err = fmt.Errorf("%s: does NOT take any argument", n)
-		handle_err(err)
+		return fmt.Errorf("%s: does NOT take any argument", n)
 	}
 
 	verbose := cmd.Flag.Lookup("v").Value.Get().(bool)
@@ -52,13 +51,17 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	}
 
 	old, err := exec.LookPath(os.Args[0])
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if os.Getenv("GOPATH") != "" {
 		// use go get...
 		pwd := ""
 		pwd, err = os.Getwd()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		gopaths := strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator))
 		gopath := ""
 		hwafpkg := filepath.Join("github.com", "hwaf", "hwaf")
@@ -74,10 +77,14 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 			gosrc := filepath.Join(gopath, "src")
 			if !path_exists(gosrc) {
 				err = os.MkdirAll(gosrc, 0700)
-				handle_err(err)
+				if err != nil {
+					return err
+				}
 			}
 			err = os.Chdir(gosrc)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 			// first try r/w repository
 			git := exec.Command(
 				"git", "clone", "git@github.com:hwaf/hwaf",
@@ -100,14 +107,20 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 					git.Stderr = os.Stderr
 				}
 				err = git.Run()
-				handle_err(err)
+				if err != nil {
+					return err
+				}
 			}
 			err = os.Chdir(pwd)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 		gosrc := filepath.Join(gopath, "src", hwafpkg)
 		err = os.Chdir(gosrc)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		// fetch...
 		git := exec.Command("git", "fetch", "--all")
@@ -116,7 +129,9 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 			git.Stderr = os.Stderr
 		}
 		err = git.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		// update...
 		git = exec.Command("git", "checkout", "master")
@@ -125,14 +140,18 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 			git.Stderr = os.Stderr
 		}
 		err = git.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 		git = exec.Command("git", "pull", "origin", "master")
 		if verbose {
 			git.Stdout = os.Stdout
 			git.Stderr = os.Stderr
 		}
 		err = git.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		// make sure we have all deps
 		goget := exec.Command("go", "get", "-d", ".")
@@ -141,7 +160,9 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 			goget.Stderr = os.Stderr
 		}
 		err = goget.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		// rebuild
 		goget = exec.Command("go", "build", ".")
@@ -150,7 +171,9 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 			goget.Stderr = os.Stderr
 		}
 		err = goget.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		// self init
 		bin := filepath.Join(gosrc, "hwaf")
@@ -158,19 +181,23 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 		hwaf.Stderr = os.Stderr
 		hwaf.Stdout = os.Stdout
 		err = hwaf.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		// replace current binary
 		mv := exec.Command("/bin/mv", "-f", bin, old)
 		mv.Stderr = os.Stderr
 		mv.Stdout = os.Stdout
 		err = mv.Run()
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 
 		if verbose {
 			fmt.Printf("%s... [ok]\n", n)
 		}
-		return
+		return err
 	}
 
 	url := fmt.Sprintf(
@@ -178,36 +205,52 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 		runtime.GOOS, runtime.GOARCH,
 	)
 	tmp, err := ioutil.TempFile("", "hwaf-self-update-")
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	defer tmp.Close()
 
 	// make it executable
 	err = tmp.Chmod(0777)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	// download new file
 	resp, err := http.Get(url)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		err = fmt.Errorf("could not d/l [%s] (reason: %q)\n", url, resp.Status)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	nbytes, err := io.Copy(tmp, resp.Body)
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if nbytes <= 0 {
 		err = fmt.Errorf("could not copy hwaf from [%s]", url)
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = tmp.Sync()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	err = tmp.Close()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	// self-init
 	hwaf := exec.Command(
@@ -217,19 +260,25 @@ func hwaf_run_cmd_self_update(cmd *commander.Command, args []string) {
 	hwaf.Stderr = os.Stderr
 	hwaf.Stdout = os.Stdout
 	err = hwaf.Run()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	// replace current binary
 	mv := exec.Command("/bin/mv", "-f", tmp.Name(), old)
 	mv.Stderr = os.Stderr
 	mv.Stdout = os.Stdout
 	err = mv.Run()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		fmt.Printf("%s: [%s] updated\n", n, old)
 		fmt.Printf("%s... [ok]\n", n)
 	}
+
+	return err
 }
 
 // EOF

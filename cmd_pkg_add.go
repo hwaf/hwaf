@@ -41,7 +41,7 @@ ex:
 	return cmd
 }
 
-func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
+func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) error {
 	var err error
 	n := "hwaf-pkg-" + cmd.Name()
 
@@ -58,8 +58,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 
 	switch len(args) {
 	default:
-		err = fmt.Errorf("%s: expects 0, 1 or 2 arguments (got %d: %v)", n, len(args), args)
-		handle_err(err)
+		return fmt.Errorf("%s: expects 0, 1 or 2 arguments (got %d: %v)", n, len(args), args)
 	case 2:
 		pkguri := args[0]
 		pkgname := args[1]
@@ -84,11 +83,15 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		fname := cmd.Flag.Lookup("f").Value.Get().(string)
 		if fname == "" {
 			err = fmt.Errorf("%s: you need to give a package URL", n)
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 		f, err := os.Open(fname)
 		if err != nil {
-			handle_err(err)
+			if err != nil {
+				return err
+			}
 		}
 		pkgs := [][]string{}
 		scnr := bufio.NewScanner(f)
@@ -111,7 +114,7 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 		}
 		err = scnr.Err()
 		if err != nil && err != io.EOF {
-			handle_err(err)
+			return err
 		}
 		for _, pkg := range pkgs {
 			switch len(pkg) {
@@ -134,19 +137,22 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 					pkgtag:  pkg[1],
 				})
 			default:
-				err := fmt.Errorf("%s: invalid number of pkg-co arguments (expected [1-3], got=%d) args=%v", n, len(pkg), pkg)
-				handle_err(err)
+				return fmt.Errorf("%s: invalid number of pkg-co arguments (expected [1-3], got=%d) args=%v", n, len(pkg), pkg)
 			}
 		}
 	}
 
 	cfg, err := g_ctx.LocalCfg()
-	handle_err(err)
+	if err != nil {
+		return err
+	}
 
 	pkgdir := "src"
 	if cfg.HasOption("hwaf-cfg", "pkgdir") {
 		pkgdir, err = cfg.String("hwaf-cfg", "pkgdir")
-		handle_err(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	throttle := make(chan struct{}, 1)
@@ -246,8 +252,10 @@ func hwaf_run_cmd_pkg_add(cmd *commander.Command, args []string) {
 	}
 
 	if len(errs) != 0 {
-		os.Exit(1)
+		return errs[0] // TODO(sbinet) create an ErrorStack type and return that
 	}
+
+	return nil
 }
 
 // EOF
