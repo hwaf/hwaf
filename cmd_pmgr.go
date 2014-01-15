@@ -7,6 +7,7 @@ import (
 
 func hwaf_make_cmd_pmgr() *commander.Command {
 	cmd := &commander.Command{
+		UsageLine: "pmgr [options]",
 		Short: "query, download and install projects",
 		Subcommands: []*commander.Command{
 			hwaf_make_cmd_pmgr_get(),

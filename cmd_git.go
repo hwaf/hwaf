@@ -8,6 +8,7 @@ import (
 
 func hwaf_make_cmd_git() *commander.Command {
 	cmd := &commander.Command{
+		UsageLine: "git [options]",
 		Short: "hwaf related git tools",
 		Subcommands: []*commander.Command{
 			hwaf_make_cmd_git_rm_submodule(),

@@ -7,6 +7,7 @@ import (
 
 func hwaf_make_cmd_self() *commander.Command {
 	cmd := &commander.Command{
+		UsageLine: "self [options]",
 		Short: "modify hwaf internal state",
 		Subcommands: []*commander.Command{
 			hwaf_make_cmd_self_init(),

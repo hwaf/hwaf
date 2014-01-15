@@ -7,6 +7,7 @@ import (
 
 func hwaf_make_cmd_waf_show() *commander.Command {
 	cmd := &commander.Command{
+		UsageLine: "show [options]",
 		Short: "show informations about packages and projects",
 		Subcommands: []*commander.Command{
 			hwaf_make_cmd_waf_show_active_tags(),

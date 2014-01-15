@@ -8,6 +8,7 @@ import (
 
 func hwaf_make_cmd_pkg() *commander.Command {
 	cmd := &commander.Command{
+		UsageLine: "pkg [options]",
 		Short: "add, remove or inspect sub-packages",
 		Subcommands: []*commander.Command{
 			hwaf_make_cmd_pkg_add(),
