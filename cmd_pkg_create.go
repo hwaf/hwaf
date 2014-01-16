@@ -138,14 +138,24 @@ def configure(ctx):
 def build(ctx):
     # build artifacts
     # e.g.:
-    # ctx.build_complib(
+    # ctx(
+    #    features = 'atlas_component',
     #    name = '{{.Name}}',
     #    source = 'src/*.cxx src/components/*.cxx',
     #    use = ['lib1', 'lib2', 'ROOT', 'boost', ...],
     # )
-    # ctx.install_headers()
-    # ctx.build_pymodule(source=['python/*.py'])
-    # ctx.install_joboptions(source=['share/*.py'])
+    # ctx(
+    #    features = 'atlas_install_headers',
+    #    name = '{{.Name}}-install-headers',
+    # )
+    # ctx(
+    #    features = 'atlas_install_python_modules',
+    #    name = '{{.Name}}-install-py-modules',
+    # )
+    # ctx(
+    #    features = 'atlas_install_joboptions',
+    #    name = '{{.Name}}-install-jobos',
+    # )
     return
 `
 
@@ -179,8 +189,9 @@ build: {
   # build artifacts
   # e.g.:
   # {{.Name}}: {
-  #    source: "src/*.cxx src/components/*.cxx",
-  #    use: ["lib1", "lib2", "ROOT", "boost", ...],
+  #    features: "atlas_component",
+  #    source:   "src/*.cxx src/components/*.cxx",
+  #    use:      ["lib1", "lib2", "ROOT", "boost", ...],
   # }
 }
 
