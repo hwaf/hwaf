@@ -1,4 +1,4 @@
-.PHONY: release dist gen-version clean install
+.PHONY: release dist gen-version clean install build
 
 export HWAF_VERSION=`date +%Y%m%d`
 export HWAF_REVISION=`git rev-parse --short HEAD`
@@ -8,6 +8,9 @@ INSTALL=/afs/cern.ch/atlas/project/hwaf/sw/install
 VAULT=/afs/cern.ch/atlas/project/hwaf/www/downloads/tar
 
 OUT=$(INSTALL)/hwaf-${HWAF_VERSION}
+
+build: gen-version
+	go get -v ./...
 
 gen-version:
 	echo "HWAF_VERSION=${HWAF_VERSION}"

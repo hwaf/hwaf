@@ -117,7 +117,7 @@ func waf_gen_wscript_from_yml(fname string) error {
 	}
 
 	data := make(map[string]interface{})
-	err = goyaml.Unmarshal(buf, data)
+	err = yaml.Unmarshal(buf, data)
 	if err != nil {
 		return fmt.Errorf("error decoding file [%s]: %v", hscript, err)
 	}
