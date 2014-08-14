@@ -58,15 +58,16 @@ func copytree(dstdir, srcdir string) error {
 		} else if fmode.IsRegular() {
 			dst, err := os.OpenFile(out, os.O_CREATE|os.O_RDWR, fmode.Perm())
 			if err != nil {
-				return nil
+				return err
 			}
+			defer func() { err = dst.Close() }()
 			src, err := os.Open(path)
 			if err != nil {
-				return nil
+				return err
 			}
 			_, err = io.Copy(dst, src)
 			if err != nil {
-				return nil
+				return err
 			}
 		} else if (fmode & os.ModeSymlink) != 0 {
 			rlink, err := os.Readlink(path)
